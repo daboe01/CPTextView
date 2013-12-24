@@ -6,8 +6,8 @@
  * Copyright 2010, Emmanuel Maillard.
  */
  
-@import <AppKit/CPFontPanel.j>
-@import <AppKit/CPTextView.j>
+@import <TextView/CPTextView.j>
+
 
 @implementation AppController : CPObject
 {
@@ -59,9 +59,9 @@
         [self updateSelectionRange];
     [_textView setDelegate:self];
     */
-    
+   
     /* build our menu */
-    var mainMenu = [CPApp mainMenu];
+/*    var mainMenu = [CPApp mainMenu];
     while ([mainMenu numberOfItems] > 0)
         [mainMenu removeItemAtIndex:0];
 
@@ -74,9 +74,8 @@
     [mainMenu setSubmenu:editMenu forItem:item];
 
     item = [mainMenu insertItemWithTitle:@"Font" action:nil keyEquivalent:nil atIndex:1];    
-    [mainMenu setSubmenu:[[CPFontManager sharedFontManager] fontMenu:YES] forItem:item];
-    
-    
+   */ 
+    /*
     [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
@@ -95,8 +94,8 @@
     [_textView insertText:[[CPAttributedString alloc] initWithString:@" integer quam facilisi a adipiscing posuere."
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:10.0],[CPColor grayColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
-    
+    */
     [theWindow orderFront:self];
-    [CPMenu setMenuBarVisible:YES];
+ //   [CPMenu setMenuBarVisible:YES];
 }
 @end

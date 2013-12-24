@@ -24,7 +24,11 @@
 @import "CPTextStorage.j"
 @import "CPTextContainer.j"
 @import "CPLayoutManager.j"
-@import "CPFontManager.j"
+@import <AppKit/CPFontManager.j>
+
+CPCopyRange=function(_3){
+return {location:_3.location,length:_3.length};
+};
 
 function MakeRangeFromAbs( a1, a2)
 {	if(a1< a2)	return CPMakeRange(a1,a2-a1);	
@@ -143,7 +147,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _isVerticallyResizable = YES;
         _isHorizontallyResizable = NO;
         
-        _carretRect = CPRectMake(0,0,1,12);
+        _carretRect = CPRectMake(0,0,1,11);
     }
     return self;
 }

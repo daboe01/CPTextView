@@ -23,7 +23,7 @@
 @import "CPTextStorage.j"
 @import "CPTextContainer.j"
 @import "CPTypesetter.j"
-
+@import <CoreText/CoreText.j>
 
 // CGContextCanvas additions
 function CGContextSetFont(aContext, aFont)
@@ -31,26 +31,15 @@ function CGContextSetFont(aContext, aFont)
     aContext.font = [aFont cssString];
 }
 
-function CGContextSelectFont(aContext, fontName, size, ignored)
-{
-    aContext.font = [[CPFont fontWithName:fontName size:size] cssString];
-}
-
-function CGContextShowTextAtPoint(aContext, x, y, aString,/* unused */ aStringLength)
-{
-    aContext.fillText(aString, x, y);
-}
-
-
 @implementation CPArray(SortedSearching)
+
 - (unsigned)indexOfObject:(id)anObject sortedByFunction:(Function)aFunction context:(id)aContext
-{
-    var result = [self _indexOfObject:anObject sortedByFunction:aFunction context:aContext];
-    return result >= 0 ? result : CPNotFound;
+{	var result = [self _indexOfObject:anObject sortedByFunction:aFunction context:aContext];
+    return (result >= 0) ? result : CPNotFound;
 }
 
 - (unsigned)_indexOfObject:(id)anObject sortedByFunction:(Function)aFunction context:(id)aContext
-{
+{	var length= [self count];
     if (!aFunction)
         return CPNotFound;
 
@@ -310,7 +299,6 @@ var _objectsInRange = function(aList, aRange)
         orig = CPPointMake(_location.x + _fragmentRect.origin.x, _location.y + _fragmentRect.origin.y);
     orig.x += aPoint.x;
     orig.y += aPoint.y;
-
 	for (var i = 0; i < c; i++)
     {
         var run = runs[i];
@@ -586,7 +574,7 @@ var _objectsInRange = function(aList, aRange)
 	if (!startIndex)   // We erased all lines 
 		[self setExtraLineFragmentRect: CPRectMake(0,0) usedRect:CPRectMake(0,0) textContainer:nil];
 
-	document.title=startIndex;
+	//document.title=startIndex;
 	[_typesetter layoutGlyphsInLayoutManager: self startingAtGlyphIndex: startIndex maxNumberOfLineFragments:-1 nextGlyphIndex:nil];
 
     _isValidatingLayoutAndGlyphs = NO;
@@ -784,7 +772,7 @@ var _objectsInRange = function(aList, aRange)
 
 - (void)drawGlyphsForGlyphRange:(CPRange)aRange atPoint:(CPPoint)aPoint
 {
-    [self _validateLayoutAndGlyphs];
+ //   [self _validateLayoutAndGlyphs];
     var lineFragments = _objectsInRange(_lineFragments, aRange);
     if (!lineFragments.length)
         return;
@@ -1170,7 +1158,7 @@ alert("came here to wild guess");
 - (CPRect)lineFragmentRectForGlyphAtIndex:(unsigned)glyphIndex effectiveRange:(CPRangePointer)effectiveGlyphRange
 {
     [self _validateLayoutAndGlyphs];
-    
+debugger;
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphIndex);
     if (!lineFragment)
         return CPRectMakeZero();
