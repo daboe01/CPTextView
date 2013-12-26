@@ -1025,20 +1025,11 @@ if(!_carretDOM)
 
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
 {
-    if (_selectionRange.location == [_textStorage length])	// cursor is "behind" the last chacacter
-    {
-        if ([_layoutManager extraLineFragmentTextContainer] === _textContainer)
-        {
-          _carretRect = [_layoutManager extraLineFragmentUsedRect];
-            if ([[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')
-                _carretRect.origin.y += _carretRect.size.height;
-        }
-        else
-        {
-            _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(_selectionRange.location - 1, 1) inTextContainer:_textContainer];
+    if (_selectionRange.location >= [_textStorage length])	// cursor is "behind" the last chacacter
+    {	 _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
             _carretRect.origin.x += _carretRect.size.width;
-        }
-    }
+// document.title= _carretRect.origin.x;
+   }
     else
         _carretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 

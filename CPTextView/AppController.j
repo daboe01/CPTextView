@@ -1,8 +1,8 @@
 /*
  * AppController.j
  * fixmes:
- *  fix crash when inserting into non-empty
- *  test multiple font support
+ *  typesetter needs to be aware of runs for correctly calculating advancements
+ *  fix second line is not displayed
  *  fix cursor up/ down navigation
  */
  
@@ -79,11 +79,11 @@
 
     item = [mainMenu insertItemWithTitle:@"Font" action:nil keyEquivalent:nil atIndex:1];    
 
- /*    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce" 
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
                 
-      [_textView insertText:[[CPAttributedString alloc] initWithString:@" lectus" 
+  /*     [_textView insertText:[[CPAttributedString alloc] initWithString:@" lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:18.0],[CPColor blueColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
 

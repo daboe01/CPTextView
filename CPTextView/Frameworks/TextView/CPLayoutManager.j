@@ -2,7 +2,10 @@
  *  CPLayoutManager.j
  *  AppKit
  *
- *  Created by Emmanuel Maillard on 27/02/2010.
+ *  Created by Daniel Boehringer on 27/12/2013.
+ *  All modifications copyright Daniel Boehringer 2013.
+ *  Based on original work by
+ *  Emmanuel Maillard on 27/02/2010.
  *  Copyright Emmanuel Maillard 2010.
  *
  * This library is free software; you can redistribute it and/or
@@ -134,9 +137,8 @@ var _objectsInRange = function(aList, aRange)
     CPArray _glyphsFrames;
 }
 - createDOMElementWithText: aString andFont: aFont
-{    var style;
-
-    DOMFlexibleWidthSpanElement = document.createElement("span");
+{	var style;
+	var DOMFlexibleWidthSpanElement = document.createElement("span");
     style = DOMFlexibleWidthSpanElement.style;
     style.position = "absolute";
     style.visibility = "visible";
@@ -188,9 +190,9 @@ var _objectsInRange = function(aList, aRange)
 }
 -(void) setAdvancements: someAdvancements
 {   _glyphsFrames = [];
-	var runsCount = someAdvancements.length,
-            origin = CPPointMake(_fragmentRect.origin.x, _fragmentRect.origin.y);
-	for (var i = 0; i < runsCount; i++)
+	var count = someAdvancements.length,
+        origin = CPPointMake(_fragmentRect.origin.x, _fragmentRect.origin.y);
+	for (var i = 0; i < count; i++)
 	{	_glyphsFrames.push(CPRectMake(origin.x, origin.y, someAdvancements[i], _usedRect.size.height));
 		origin.x += someAdvancements[i];
 	}
@@ -216,6 +218,7 @@ var _objectsInRange = function(aList, aRange)
 {
 // <!> FIXME
 }
+
 - (void)invalidate
 {	_isInvalid=YES;
 	var i,l = _runs.length;
@@ -230,28 +233,20 @@ var _objectsInRange = function(aList, aRange)
 {
     var runs = _objectsInRange(_runs, aRange),
         c = runs.length,
-        rangeLength = 0,
-        rangeStart = CPNotFound,
-        start = 0,
         orig = CPPointMake(_location.x + _fragmentRect.origin.x, _location.y + _fragmentRect.origin.y);
-    orig.x += aPoint.x;
     orig.y += aPoint.y;
 	for (var i = 0; i < c; i++)
-    {
-        var run = runs[i];
-
+    {	 var run = runs[i];
+		orig.x=_glyphsFrames[run._range.location].origin.x+ aPoint.x;
 		run.elem.style.left=(orig.x)+"px";
 		run.elem.style.top= (orig.y-_usedRect.size.height)+"px";
-		orig.x+= run.elem.clientWidth;
-		_textContainer._textView._DOMElement.appendChild(run.elem);
+		if(!run.DOMactive) _textContainer._textView._DOMElement.appendChild(run.elem);
 		run.DOMactive=YES;
-
         if (run.underline)
         {
+			// <!> FIXME
         }
     }
-    aRange.location = rangeStart;
-    aRange.length = rangeLength;
 }
 
 - (void)backgroundColorForGlyphAtIndex:(unsigned)index
@@ -386,8 +381,6 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRect)boundingRectForGlyphRange:(CPRange)aRange inTextContainer:(CPTextContainer)container
 {
-    [self _validateLayoutAndGlyphs];
-
     var fragments = _objectsInRange(_lineFragments, aRange),
         rect = nil,
         c = [fragments count];
@@ -396,8 +389,9 @@ var _objectsInRange = function(aList, aRange)
         var fragment = fragments[i];
         if (fragment._textContainer === container)
         {
-            var frames = [fragment glyphFrames];
-            for (var j = 0; j < frames.length; j++)
+            var frames = [fragment glyphFrames],
+				l= frames.length;
+            for (var j = 0; j < l; j++)
             {
                 if (CPLocationInRange(fragment._range.location + j, aRange))
                 {
