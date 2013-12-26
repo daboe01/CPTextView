@@ -509,7 +509,7 @@
 	var startingIndex = [self _indexOfEntryWithIndex: aRange.location];
 	if(startingIndex<0) startingIndex=MAX(_rangeEntries.length-1,0);
 	var     startingRangeEntry = _rangeEntries[startingIndex];
-	var    endingIndex = [self _indexOfEntryWithIndex: MAX(CPMaxRange(aRange) - 1, 0)];
+	var    endingIndex = [self _indexOfEntryWithIndex: CPMaxRange(aRange) ];
 	if(endingIndex<0) endingIndex=MAX(_rangeEntries.length-1,0);
 
 	var     endingRangeEntry = _rangeEntries[endingIndex];

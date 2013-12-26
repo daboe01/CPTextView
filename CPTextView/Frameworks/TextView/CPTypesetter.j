@@ -78,41 +78,6 @@ var CPSystemTypesetterFactory = Nil;
 }
 @end
 
-
-/*
- *  CPSimpleTypesetter.j
- *  AppKit
- *
- *  Created by Emmanuel Maillard on 17/03/2010.
- *  Copyright Emmanuel Maillard 2010.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- */
-
-@import "CPTypesetter.j"
-@import "CPText.j"
-
-@implementation CPFont(FakeMetrics)
-
-- (float)ascender
-{
-    return 10; /* FIXME: Fake value rather correct for Arial (normal) */
-}
-
-@end
-
 var _sharedSimpleTypesetter = nil;
 
 @implementation CPSimpleTypesetter:CPTypesetter
@@ -171,10 +136,11 @@ var _sharedSimpleTypesetter = nil;
         lineOrigin,
         ascent, descent;
 
+	var advancements=[],
+		prevRangeWidth=0;
+
 	if (glyphIndex > 0)
-    {
 	    lineOrigin = CPPointCreateCopy([_layoutManager lineFragmentRectForGlyphAtIndex: glyphIndex effectiveRange:nil].origin);
-	}
 	else if ([_layoutManager extraLineFragmentTextContainer])
         lineOrigin = CPPointMake(0, [_layoutManager extraLineFragmentUsedRect].origin.y);
     else lineOrigin = CPPointMake(0,0);
@@ -191,16 +157,16 @@ var _sharedSimpleTypesetter = nil;
 				_currentFont = [_currentAttributes objectForKey:CPFontAttributeName];
 				if(!_currentFont)
 					_currentFont = [_textStorage font];
-					
+
 				ascent = 13;	//[_currentFont ascender];	//FIXME
 				descent = 0;	//[_currentFont descender];	//FIXME
 				leading = (ascent - descent) * 0.2; // FAKE leading
 			}
-			var currentChar = [theString characterAtIndex: glyphIndex],
-				glyphSize = [[theString substringWithRange: CPMakeRange(glyphIndex,1)] sizeWithFont:_currentFont];
-
 			lineRange.length++;
-
+			var currentChar = [theString characterAtIndex: glyphIndex],
+				rangeWidth = [[theString substringWithRange: lineRange] sizeWithFont:_currentFont];
+			advancements.push(rangeWidth.width-prevRangeWidth);
+			prevRangeWidth= rangeWidth.width;
 			if (currentChar == ' ')
 			{
 				wrapRange = CPCopyRange(lineRange);
@@ -211,7 +177,7 @@ var _sharedSimpleTypesetter = nil;
 				isNewline = YES;
 			}
 
-			if (lineOrigin.x + lineWidth + glyphSize.width > containerSize.width)
+			if (lineOrigin.x + rangeWidth.width > containerSize.width)
 			{
 				if (wrapWidth)
 				{
@@ -222,24 +188,27 @@ var _sharedSimpleTypesetter = nil;
 				isWordWrapped = YES;
 				glyphIndex = CPMaxRange(lineRange) - 1;
 			}
-			lineWidth += glyphSize.width;
+			lineWidth = rangeWidth.width;
 			_lineHeight = Math.max(_lineHeight, ascent - descent + leading);
 			_lineBase = Math.max(_lineBase, ascent);
 			if (isNewline)
 			{
 				[_layoutManager setTextContainer: _currentTextContainer forGlyphRange:lineRange];	// creates a new lineFragment
-
 				var rect = CPRectMake(lineOrigin.x, lineOrigin.y, lineWidth, _lineHeight);
 				// FIXME: handle line fragment padding
 				[_layoutManager setLineFragmentRect: rect forGlyphRange:lineRange usedRect:rect];
 				[_layoutManager setLocation:CPMakePoint(0, _lineBase) forStartOfGlyphRange:lineRange];
+				[_layoutManager _setAdvancements: advancements forGlyphRange: lineRange];
+				advancements= [];
+				prevRangeWidth=0;
 
 				lineOrigin.x = 0;
 				
-				if (glyphIndex + 1 == [_textStorage length])
+				if (glyphIndex >= [_textStorage length] -1)
 				{
 					rect = CPRectMake(lineOrigin.x, lineOrigin.y, containerSize.width, _lineHeight);
 					[_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
+					return;
 				}
 				else
 				{
@@ -270,9 +239,11 @@ var _sharedSimpleTypesetter = nil;
         var rect = CPRectMake(lineOrigin.x, lineOrigin.y, lineWidth, _lineHeight);
         // FIXME: handle line fragment padding
         [_layoutManager setLineFragmentRect:rect forGlyphRange:lineRange usedRect:rect];
+		[_layoutManager _setAdvancements: advancements forGlyphRange: lineRange];
         [_layoutManager setLocation:CPMakePoint(0, _lineBase) forStartOfGlyphRange:lineRange];
         
         rect = CPRectMake(lineOrigin.x + lineWidth, lineOrigin.y, containerSize.width - lineWidth, _lineHeight);
+
         [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
     }
 }

@@ -26,9 +26,7 @@
 @import "CPLayoutManager.j"
 @import <AppKit/CPFontManager.j>
 
-CPCopyRange=function(_3){
-return {location:_3.location,length:_3.length};
-};
+CPCopyRange=function(_3){ return {location:_3.location,length:_3.length}; };
 
 function MakeRangeFromAbs( a1, a2)
 {	if(a1< a2)	return CPMakeRange(a1,a2-a1);	
@@ -112,6 +110,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     BOOL _allowsUndo;
     BOOL _isHorizontallyResizable;
     BOOL _isVerticallyResizable;
+
+	var _carretDOM;
 }
 -(id) initWithFrame:(CPRect)aFrame textContainer:(CPTextContainer)aContainer
 {
@@ -134,7 +134,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
         _insertionPointColor = [CPColor blackColor];
         _textColor = [CPColor blackColor];
-        _font = [CPFont fontWithName:@"Helvetica" size:12.0];
+        _font = [CPFont systemFontOfSize:12.0];
+		[self setFont: _font];
         
         _typingAttributes = [[CPDictionary alloc] initWithObjects:[_font, _textColor] forKeys:[CPFontAttributeName, CPForegroundColorAttributeName]];
         
@@ -320,6 +321,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)insertText:(id)aString
 {
 
+debugger;
     var isAttributed = [aString isKindOfClass:CPAttributedString],
         string = (isAttributed)?[aString string]:aString;
 
@@ -327,8 +329,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         return;
 
     if (isAttributed)
-        [_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withAttributedString:aString];
-    else
+    {
+		[_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withAttributedString:aString];
+    }
+	else
     {	[_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withString: aString];
 	}
     [self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
@@ -1000,30 +1004,38 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)drawInsertionPointInRect:(CPRect)aRect color:(CPColor)aColor turnedOn:(BOOL)flag
 {
-    if (flag)
-    {
-        var ctx = [[CPGraphicsContext currentContext] graphicsPort];
-        CGContextSaveGState(ctx);
-        CGContextSetLineWidth(ctx, 1);
-        CGContextSetFillColor(ctx, aColor);
-        CGContextFillRect(ctx, aRect);
-        CGContextRestoreGState(ctx);
-    }
+if(!_carretDOM)
+	{
+    _carretDOM = document.createElement("span");
+    style = _carretDOM.style;
+    style.position = "absolute";
+    style.visibility = "visible";
+    style.padding = "0px";
+    style.margin = "0px";
+    style.whiteSpace = "pre";
+	style.backgroundColor = "black";
+	self._DOMElement.appendChild(_carretDOM);
+	_carretDOM.style.width= "1px";
+	_carretDOM.style.height= (aRect.size.height)+"px";
+	}
+	_carretDOM.style.left=(aRect.origin.x)+"px";
+	_carretDOM.style.top= (aRect.origin.y)+"px";
+    style.visibility = flag? "visible":"hidden";
 }
 
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
 {
-    if (_selectionRange.location == [_textStorage length])
+    if (_selectionRange.location == [_textStorage length])	// cursor is "behind" the last chacacter
     {
         if ([_layoutManager extraLineFragmentTextContainer] === _textContainer)
         {
-            _carretRect = [_layoutManager extraLineFragmentUsedRect];
+          _carretRect = [_layoutManager extraLineFragmentUsedRect];
             if ([[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')
                 _carretRect.origin.y += _carretRect.size.height;
         }
         else
         {
-            _carretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location - 1, 1) inTextContainer:_textContainer];
+            _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(_selectionRange.location - 1, 1) inTextContainer:_textContainer];
             _carretRect.origin.x += _carretRect.size.width;
         }
     }

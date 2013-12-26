@@ -1,9 +1,9 @@
 /*
  * AppController.j
- * CPTextViewTest
- *
- * Created by Emmanuel Maillard on February 27, 2010.
- * Copyright 2010, Emmanuel Maillard.
+ * fixmes:
+ *  fix crash when inserting into non-empty
+ *  test multiple font support
+ *  fix cursor up/ down navigation
  */
  
 @import <TextView/CPTextView.j>
@@ -61,26 +61,29 @@
     */
    
     /* build our menu */
-/*    var mainMenu = [CPApp mainMenu];
+    var mainMenu = [CPApp mainMenu];
     while ([mainMenu numberOfItems] > 0)
         [mainMenu removeItemAtIndex:0];
 
     var item = [mainMenu insertItemWithTitle:@"Edit" action:nil keyEquivalent:nil atIndex:0],
         editMenu = [[CPMenu alloc] initWithTitle:@"Edit Menu"];
         
+    [editMenu addItemWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"];
+    [editMenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"];
+    [editMenu addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"];
     [editMenu addItemWithTitle:@"Delete" action:@selector(delete:) keyEquivalent:@""];
     [editMenu addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
+    [editMenu addItemWithTitle:@"Bold" action:@selector(addFontTrait:) keyEquivalent:@"b"];
     
     [mainMenu setSubmenu:editMenu forItem:item];
 
     item = [mainMenu insertItemWithTitle:@"Font" action:nil keyEquivalent:nil atIndex:1];    
-   */ 
-    /*
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce" 
-                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
+
+ /*    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce" 
+                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
                 
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@" lectus" 
+      [_textView insertText:[[CPAttributedString alloc] initWithString:@" lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:18.0],[CPColor blueColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
 
@@ -94,8 +97,8 @@
     [_textView insertText:[[CPAttributedString alloc] initWithString:@" integer quam facilisi a adipiscing posuere."
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:10.0],[CPColor grayColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
-    */
+ */
     [theWindow orderFront:self];
- //   [CPMenu setMenuBarVisible:YES];
+  [CPMenu setMenuBarVisible:YES];
 }
 @end

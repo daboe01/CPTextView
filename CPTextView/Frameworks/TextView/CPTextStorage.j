@@ -245,6 +245,7 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
 
 - (void)replaceCharactersInRange:(CPRange)aRange withAttributedString:(CPAttributedString)aString
 {   [self beginEditing];
+debugger;
     [super replaceCharactersInRange: aRange withAttributedString:aString];
     
     [self edited:(CPTextStorageEditedAttributes | CPTextStorageEditedCharacters) range:aRange changeInLength:([aString length] - aRange.length)];
