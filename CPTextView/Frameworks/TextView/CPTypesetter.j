@@ -2,7 +2,10 @@
  *  CPTypesetter.j
  *  AppKit
  *
- *  Created by Emmanuel Maillard on 17/03/2010.
+ *  Created by Daniel Boehringer on 27/12/2013.
+ *  All modifications copyright Daniel Boehringer 2013.
+ *  Based on original work by
+ *  Emmanuel Maillard on 27/02/2010.
  *  Copyright Emmanuel Maillard 2010.
  *
  * This library is free software; you can redistribute it and/or
@@ -137,7 +140,10 @@ var _sharedSimpleTypesetter = nil;
         ascent, descent;
 
 	var advancements=[],
-		prevRangeWidth=0;
+		prevRangeWidth=0,
+        measuringRange = CPMakeRange(glyphIndex, 0),
+		currentAnchor=0,
+		_previousFont=nil;
 
 	if (glyphIndex > 0)
 	    lineOrigin = CPPointCreateCopy([_layoutManager lineFragmentRectForGlyphAtIndex: glyphIndex effectiveRange:nil].origin);
@@ -150,7 +156,6 @@ var _sharedSimpleTypesetter = nil;
     [_layoutManager setExtraLineFragmentRect:CPRectMake(0,0) usedRect:CPRectMake(0,0) textContainer:nil];
 
     do {
-		{
 			if (!CPLocationInRange(glyphIndex, _attributesRange))
 			{
 				_currentAttributes = [_textStorage attributesAtIndex:glyphIndex effectiveRange:_attributesRange];
@@ -162,11 +167,17 @@ var _sharedSimpleTypesetter = nil;
 				descent = 0;	//[_currentFont descender];	//FIXME
 				leading = (ascent - descent) * 0.2; // FAKE leading
 			}
+			if(_previousFont !== _currentFont)
+			{	measuringRange= CPMakeRange(glyphIndex, 0);
+				currentAnchor+= prevRangeWidth;
+				_previousFont= _currentFont;
+			}
 			lineRange.length++;
+			measuringRange.length++;
 			var currentChar = [theString characterAtIndex: glyphIndex],
-				rangeWidth = [[theString substringWithRange: lineRange] sizeWithFont:_currentFont];
-			advancements.push(rangeWidth.width-prevRangeWidth);
-			prevRangeWidth= rangeWidth.width;
+				rangeWidth = [[theString substringWithRange: measuringRange] sizeWithFont:_currentFont].width+ currentAnchor;
+			advancements.push(rangeWidth-prevRangeWidth);
+			prevRangeWidth= rangeWidth;
 			if (currentChar == ' ')
 			{
 				wrapRange = CPCopyRange(lineRange);
@@ -176,8 +187,8 @@ var _sharedSimpleTypesetter = nil;
 			{
 				isNewline = YES;
 			}
-
-			if (lineOrigin.x + rangeWidth.width > containerSize.width)
+			lineWidth = rangeWidth;
+			if (lineOrigin.x + rangeWidth > containerSize.width)
 			{
 				if (wrapWidth)
 				{
@@ -188,19 +199,15 @@ var _sharedSimpleTypesetter = nil;
 				isWordWrapped = YES;
 				glyphIndex = CPMaxRange(lineRange) - 1;
 			}
-			lineWidth = rangeWidth.width;
-			_lineHeight = Math.max(_lineHeight, ascent - descent + leading);
-			_lineBase = Math.max(_lineBase, ascent);
+			_lineHeight = MAX(_lineHeight, ascent - descent + leading);
+			_lineBase = MAX(_lineBase, ascent);
 			if (isNewline)
 			{
 				[_layoutManager setTextContainer: _currentTextContainer forGlyphRange:lineRange];	// creates a new lineFragment
 				var rect = CPRectMake(lineOrigin.x, lineOrigin.y, lineWidth, _lineHeight);
-				// FIXME: handle line fragment padding
 				[_layoutManager setLineFragmentRect: rect forGlyphRange:lineRange usedRect:rect];
 				[_layoutManager setLocation:CPMakePoint(0, _lineBase) forStartOfGlyphRange:lineRange];
 				[_layoutManager _setAdvancements: advancements forGlyphRange: lineRange];
-				advancements= [];
-				prevRangeWidth=0;
 
 				lineOrigin.x = 0;
 				
@@ -220,6 +227,10 @@ var _sharedSimpleTypesetter = nil;
 				lineWidth = 0;
 				_lineBase = 0;
 				numLines++;
+				advancements= [];
+				prevRangeWidth=0;
+				currentAnchor=0;
+				_previousFont=nil;
 				
 				lineRange = CPMakeRange(glyphIndex+1, 0);
 				wrapRange = CPMakeRange(0, 0);
@@ -227,9 +238,7 @@ var _sharedSimpleTypesetter = nil;
 				isNewline = NO;
 				isWordWrapped = NO;
 			}
-		}
 		glyphIndex++;
-			
     } while (numLines != maxNumLines && glyphIndex < [_textStorage length]);
 
     if (lineRange.length)

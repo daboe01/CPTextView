@@ -147,7 +147,8 @@ var _objectsInRange = function(aList, aRange)
     style.whiteSpace = "pre";
 	style.backgroundColor = "transparent";
 	style.font=[aFont cssString];
-    DOMFlexibleWidthSpanElement.innerHTML = aString;
+    DOMFlexibleWidthSpanElement.innerText = aString;
+
 	return DOMFlexibleWidthSpanElement;
 }
 
@@ -172,12 +173,9 @@ var _objectsInRange = function(aList, aRange)
             effectiveRange.length = MIN(CPMaxRange(effectiveRange) - effectiveRange.location, CPMaxRange(aRange) - aRange.location);
             effectiveRange.location = location;
 			var string= [textStorage._string substringWithRange:effectiveRange]
-			var font;
+			var font= [textStorage font] || [CPFont systemFontOfSize:12.0];
             if ([attributes containsKey:CPFontAttributeName])
                  font = [attributes objectForKey:CPFontAttributeName];
-            else if ([textStorage font])
-                 font = [textStorage font];
-            else font = [CPFont systemFontOfSize:12.0];
 			var elem=[self createDOMElementWithText: string andFont: font];
             var run = { _range:CPCopyRange(effectiveRange), elem: elem, string: string };
 
@@ -237,7 +235,7 @@ var _objectsInRange = function(aList, aRange)
     orig.y += aPoint.y;
 	for (var i = 0; i < c; i++)
     {	 var run = runs[i];
-		orig.x=_glyphsFrames[run._range.location].origin.x+ aPoint.x;
+		orig.x=(i&& _glyphsFrames[run._range.location]? _glyphsFrames[run._range.location].origin.x:0)+ aPoint.x;
 		run.elem.style.left=(orig.x)+"px";
 		run.elem.style.top= (orig.y-_usedRect.size.height)+"px";
 		if(!run.DOMactive) _textContainer._textView._DOMElement.appendChild(run.elem);
@@ -470,7 +468,7 @@ var _objectsInRange = function(aList, aRange)
 	if (!startIndex)   // We erased all lines 
 		[self setExtraLineFragmentRect: CPRectMake(0,0) usedRect:CPRectMake(0,0) textContainer:nil];
 
-	//document.title=startIndex;
+	document.title=startIndex;
 	[_typesetter layoutGlyphsInLayoutManager: self startingAtGlyphIndex: startIndex maxNumberOfLineFragments:-1 nextGlyphIndex:nil];
 
     _isValidatingLayoutAndGlyphs = NO;
@@ -500,7 +498,7 @@ var _objectsInRange = function(aList, aRange)
             }
             return;
         }
-    }
+    } else firstFragmentIndex = firstFragmentIndex+ (firstFragmentIndex? -1:0);
     var fragment = _lineFragments[firstFragmentIndex],
         range = CPCopyRange(fragment._range);
 
@@ -598,19 +596,13 @@ var _objectsInRange = function(aList, aRange)
     var ctx = [[CPGraphicsContext currentContext] graphicsPort],
         paintedRange = CPCopyRange(aRange),
         lineFragmentIndex = 0,
-        currentFragment = lineFragments[lineFragmentIndex];
+        currentFragment = lineFragments[lineFragmentIndex],
+		l= lineFragments.length;
 
-    do
-    {
-        paintedRange.length = aRange.length;
-
-        [currentFragment drawInContext: ctx atPoint: aPoint forRange:paintedRange];
-        lineFragmentIndex++;
-        if (lineFragmentIndex < lineFragments.length)
-            currentFragment = lineFragments[lineFragmentIndex];
-        else
-            break;
-    } while (CPMaxRange(paintedRange) != CPMaxRange(aRange));
+    for(;lineFragmentIndex <l; lineFragmentIndex++)
+    {	currentFragment = lineFragments[lineFragmentIndex];
+		[currentFragment drawInContext: ctx atPoint: aPoint forRange:paintedRange];
+    }
 }
 
 - (unsigned)glyphIndexForPoint:(CPPoint)point inTextContainer:(CPTextContainer)container fractionOfDistanceThroughGlyph:(FloatArray)partialFraction

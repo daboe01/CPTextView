@@ -321,7 +321,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)insertText:(id)aString
 {
 
-debugger;
     var isAttributed = [aString isKindOfClass:CPAttributedString],
         string = (isAttributed)?[aString string]:aString;
 
@@ -1004,27 +1003,28 @@ debugger;
 
 - (void)drawInsertionPointInRect:(CPRect)aRect color:(CPColor)aColor turnedOn:(BOOL)flag
 {
-if(!_carretDOM)
+	if(!_carretDOM)
 	{
-    _carretDOM = document.createElement("span");
-    style = _carretDOM.style;
-    style.position = "absolute";
-    style.visibility = "visible";
-    style.padding = "0px";
-    style.margin = "0px";
-    style.whiteSpace = "pre";
-	style.backgroundColor = "black";
-	self._DOMElement.appendChild(_carretDOM);
-	_carretDOM.style.width= "1px";
-	_carretDOM.style.height= (aRect.size.height)+"px";
+		_carretDOM = document.createElement("span");
+		style = _carretDOM.style;
+		style.position = "absolute";
+		style.visibility = "visible";
+		style.padding = "0px";
+		style.margin = "0px";
+		style.whiteSpace = "pre";
+		style.backgroundColor = "black";
+		self._DOMElement.appendChild(_carretDOM);
+		_carretDOM.style.width= "1px";
+		_carretDOM.style.height= (aRect.size.height)+"px";
 	}
 	_carretDOM.style.left=(aRect.origin.x)+"px";
 	_carretDOM.style.top= (aRect.origin.y)+"px";
-    style.visibility = flag? "visible":"hidden";
+    style.visibility = flag ? "visible":"hidden";
 }
 
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
-{
+{	if(	_carretDOM && _selectionRange.length) _carretDOM.style.visibility ="hidden";
+
     if (_selectionRange.location >= [_textStorage length])	// cursor is "behind" the last chacacter
     {	 _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
             _carretRect.origin.x += _carretRect.size.width;
