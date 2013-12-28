@@ -1046,8 +1046,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     _carretRect.origin.x += _textContainerOrigin.x;
     _carretRect.origin.y += _textContainerOrigin.y;            
     _carretRect.size.width = 1;
-    if (_carretRect.size.height == 0)
-        _carretRect.size.height = [[self font] size];
 
     if (flag)
     {

@@ -1,9 +1,9 @@
 /*
  * AppController.j
  * fixmes:
- *  baseline-alignment
- *  clicking in "empty" lines does not work
- *  fix cursor up/ down navigation
+ *  baseline-alignment (hint: collect heights in the same way as the advancements)
+ *  clicking on "empty" space in the textless part of a line does not work
+ *  fix cursor up/ down navigation (make it stable)
  */
  
 @import <TextView/CPTextView.j>

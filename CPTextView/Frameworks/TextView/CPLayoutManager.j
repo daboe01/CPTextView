@@ -237,7 +237,7 @@ var _objectsInRange = function(aList, aRange)
     {	 var run = runs[i];
 		orig.x=(i&& _glyphsFrames[run._range.location]? _glyphsFrames[run._range.location].origin.x:0)+ aPoint.x;
 		run.elem.style.left=(orig.x)+"px";
-		run.elem.style.top= (orig.y-_usedRect.size.height)+"px";
+		run.elem.style.top= (orig.y-_usedRect.size.height+4)+"px";
 		if(!run.DOMactive) _textContainer._textView._DOMElement.appendChild(run.elem);
 		run.DOMactive=YES;
         if (run.underline)

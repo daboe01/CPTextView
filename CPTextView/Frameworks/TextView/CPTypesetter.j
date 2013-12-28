@@ -162,9 +162,8 @@ var _sharedSimpleTypesetter = nil;
 				_currentFont = [_currentAttributes objectForKey:CPFontAttributeName];
 				if(!_currentFont)
 					_currentFont = [_textStorage font];
-
-				ascent = 13;	//[_currentFont ascender];	//FIXME
-				descent = 0;	//[_currentFont descender];	//FIXME
+				ascent = ["A" sizeWithFont:_currentFont].height-1;
+				descent = 0;	//FIXME
 				leading = (ascent - descent) * 0.2; // FAKE leading
 			}
 			if(_previousFont !== _currentFont)
@@ -191,8 +190,7 @@ var _sharedSimpleTypesetter = nil;
 			if (lineOrigin.x + rangeWidth > containerSize.width)
 			{
 				if (wrapWidth)
-				{
-					lineRange = wrapRange;
+				{	lineRange = wrapRange;
 					lineWidth = wrapWidth;
 				}
 				isNewline = YES;
@@ -209,19 +207,6 @@ var _sharedSimpleTypesetter = nil;
 				[_layoutManager setLocation:CPMakePoint(0, _lineBase) forStartOfGlyphRange:lineRange];
 				[_layoutManager _setAdvancements: advancements forGlyphRange: lineRange];
 
-				lineOrigin.x = 0;
-				
-				if (glyphIndex >= [_textStorage length] -1)
-				{
-					rect = CPRectMake(lineOrigin.x, lineOrigin.y, containerSize.width, _lineHeight);
-					[_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
-					return;
-				}
-				else
-				{
-					rect = CPRectMake(lineOrigin.x, lineOrigin.y + _lineHeight, containerSize.width, _lineHeight);
-					[_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
-				}
 				lineOrigin.y += _lineHeight;
 				_lineHeight = 0;
 				lineWidth = 0;
