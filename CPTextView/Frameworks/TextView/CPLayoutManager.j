@@ -170,8 +170,7 @@ var _objectsInRange = function(aList, aRange)
 
         do {
             var attributes = [textStorage attributesAtIndex:location effectiveRange:effectiveRange];
-            effectiveRange.length = MIN(CPMaxRange(effectiveRange) - effectiveRange.location, CPMaxRange(aRange) - aRange.location);
-            effectiveRange.location = location;
+			effectiveRange=CPIntersectionRange(aRange, effectiveRange);
 			var string= [textStorage._string substringWithRange:effectiveRange]
 			var font= [textStorage font] || [CPFont systemFontOfSize:12.0];
             if ([attributes containsKey:CPFontAttributeName])
@@ -585,6 +584,7 @@ var _objectsInRange = function(aList, aRange)
                     lineFragmentGlyphRange:(CPRange)lineGlyphRange
                     containerOrigin:(CPPoint)containerOrigin
 {
+// FIXME
 }
 
 - (void)drawGlyphsForGlyphRange:(CPRange)aRange atPoint:(CPPoint)aPoint

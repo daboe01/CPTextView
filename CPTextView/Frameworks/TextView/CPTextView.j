@@ -1042,7 +1042,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     else
         _carretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
-document.title= _carretRect.size.height;
     _carretRect.origin.x += _textContainerOrigin.x;
     _carretRect.origin.y += _textContainerOrigin.y;            
     _carretRect.size.width = 1;

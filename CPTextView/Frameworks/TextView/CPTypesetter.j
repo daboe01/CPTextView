@@ -180,11 +180,10 @@ var _sharedSimpleTypesetter = nil;
 			if (currentChar == ' ')
 			{
 				wrapRange = CPCopyRange(lineRange);
-				wrapWidth = lineWidth;
+				wrapWidth = rangeWidth;
 			}
 			else if (currentChar == '\n') /* FIXME: should send actionForControlCharacterAtIndex: */
-			{
-				isNewline = YES;
+			{	isNewline = YES;
 			}
 			lineWidth = rangeWidth;
 			if (lineOrigin.x + rangeWidth > containerSize.width)
@@ -208,20 +207,20 @@ var _sharedSimpleTypesetter = nil;
 				[_layoutManager _setAdvancements: advancements forGlyphRange: lineRange];
 
 				lineOrigin.y += _lineHeight;
-				_lineHeight = 0;
-				lineWidth = 0;
-				_lineBase = 0;
-				numLines++;
-				advancements= [];
-				prevRangeWidth=0;
-				currentAnchor=0;
-				_previousFont=nil;
-				
+				_lineHeight   = 0;
+				lineWidth     = 0;
+				_lineBase     = 0;
+				advancements  = [];
+				prevRangeWidth= 0;
+				currentAnchor = 0;
+				_previousFont = nil;
+
 				lineRange = CPMakeRange(glyphIndex+1, 0);
 				wrapRange = CPMakeRange(0, 0);
 				wrapWidth = 0;
 				isNewline = NO;
 				isWordWrapped = NO;
+				numLines++;
 			}
 		glyphIndex++;
     } while (numLines != maxNumLines && glyphIndex < [_textStorage length]);

@@ -1,8 +1,8 @@
 /*
  * AppController.j
  * fixmes:
- *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  clicking on "empty" space in the textless part of a line does not work
+ *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  fix cursor up/ down navigation (make it stable)
  */
  
@@ -82,7 +82,7 @@
     [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
-               
+       
        [_textView insertText:@" lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];
 
    /* [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin," 
