@@ -1025,11 +1025,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 		style.backgroundColor = "black";
 		self._DOMElement.appendChild(_carretDOM);
 		_carretDOM.style.width= "1px";
-		_carretDOM.style.height= (aRect.size.height)+"px";
 	}
 	_carretDOM.style.left=(aRect.origin.x)+"px";
 	_carretDOM.style.top= (aRect.origin.y)+"px";
-    style.visibility = flag ? "visible":"hidden";
+	_carretDOM.style.height= (aRect.size.height)+"px";
+	style.visibility = flag ? "visible":"hidden";
 }
 
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
@@ -1038,11 +1038,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_selectionRange.location >= [_textStorage length])	// cursor is "behind" the last chacacter
     {	 _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
             _carretRect.origin.x += _carretRect.size.width;
-// document.title= _carretRect.origin.x;
    }
     else
         _carretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
+document.title= _carretRect.size.height;
     _carretRect.origin.x += _textContainerOrigin.x;
     _carretRect.origin.y += _textContainerOrigin.y;            
     _carretRect.size.width = 1;
