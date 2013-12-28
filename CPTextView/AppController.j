@@ -1,9 +1,11 @@
 /*
  * AppController.j
  * fixmes:
- *  clicking on "empty" space in the textless part of a line does not work
+ *  pressing return does not initially display carret on right place
+ *  why do we need alt-ret?
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  fix cursor up/ down navigation (make it stable)
+ *  chomp newlines at end in the spans (to make alexander happy)
  */
  
 @import <TextView/CPTextView.j>

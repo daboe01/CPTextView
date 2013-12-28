@@ -439,12 +439,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     /* stop _carretTimer */
     [_carretTimer invalidate];
     _carretTimer = nil;
-
+	[self _hideCarret];
     // convert to container coordinate
     point.x -= _textContainerOrigin.x;
     point.y -= _textContainerOrigin.y;
     
-    _startTrackingLocation = [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
+    _startTrackingLocation = [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
     if (_startTrackingLocation == CPNotFound)
         _startTrackingLocation = [_textStorage length];
 	var granularities=[-1, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
@@ -1030,16 +1030,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 	_carretDOM.style.height= (aRect.size.height)+"px";
 	style.visibility = flag ? "visible":"hidden";
 }
-
+- (void) _hideCarret
+{	if(_carretDOM) _carretDOM.style.visibility ="hidden";
+}
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
-{	if(	_carretDOM && _selectionRange.length) _carretDOM.style.visibility ="hidden";
-
+{	if(_selectionRange.length) [self _hideCarret];
     if (_selectionRange.location >= [_textStorage length])	// cursor is "behind" the last chacacter
-    {	 _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
-            _carretRect.origin.x += _carretRect.size.width;
-   }
-    else
-        _carretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
+    {	_carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
+		_carretRect.origin.x += _carretRect.size.width;
+	}
+    else _carretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
     _carretRect.origin.x += _textContainerOrigin.x;
     _carretRect.origin.y += _textContainerOrigin.y;            

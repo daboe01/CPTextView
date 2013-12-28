@@ -607,8 +607,6 @@ var _objectsInRange = function(aList, aRange)
 
 - (unsigned)glyphIndexForPoint:(CPPoint)point inTextContainer:(CPTextContainer)container fractionOfDistanceThroughGlyph:(FloatArray)partialFraction
 {
-    [self _validateLayoutAndGlyphs];
-
     var c = [_lineFragments count];
     for (var i = 0; i < c; i++)
     {
@@ -627,7 +625,16 @@ var _objectsInRange = function(aList, aRange)
             }
         }
     }
-    return CPNotFound;
+	// not found, maybe a point left to the last character was clicked->search again
+    for (var i = 0; i < c; i++)
+    {	var fragment = _lineFragments[i];
+        if (fragment._textContainer === container)
+        {	if (point.y > fragment._fragmentRect.origin.y && point.y<= fragment._fragmentRect.origin.y+ fragment._fragmentRect.size.height)
+			{	return MAX(0, CPMaxRange(fragment._range)-1);
+			}
+        }
+    }
+	return CPNotFound;
 }
 
 - (unsigned)glyphIndexForPoint:(CPPoint)point inTextContainer:(CPTextContainer)container
