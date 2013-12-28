@@ -1,6 +1,8 @@
 /*
  * AppController.j
  * fixmes:
+ *  baseline-alignment
+ *  clicking
  *  fix delete key not working
  *  fix cursor up/ down navigation
  */
@@ -78,10 +80,10 @@
 
     item = [mainMenu insertItemWithTitle:@"Font" action:nil keyEquivalent:nil atIndex:1];    
 
-/*    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce" 
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
- */              
+               
        [_textView insertText:@" lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];
 
    /* [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin," 
