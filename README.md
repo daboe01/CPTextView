@@ -14,3 +14,5 @@ while the basic functionality is already there, a lot remains to do:
 * ruler and tab-stop support
 * parsers/deparsers for RTF/HTML (CPAttributedString)
 * optimizations (cornercutting typesetting, e.g. when text remains unchanged after the next paragraph)
+
+please fork and pull to help out!
