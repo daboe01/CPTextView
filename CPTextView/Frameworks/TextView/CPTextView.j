@@ -562,16 +562,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 }
 
-- (void)deleteBackward:(id)sender
-{
-    var changedRange = nil;
-
-    if (CPEmptyRange(_selectionRange) && _selectionRange.location > 0)
-        changedRange = CPMakeRange(_selectionRange.location - 1, 1);
-    else
-        changedRange = _selectionRange;
-
-    if (![self shouldChangeTextInRange:changedRange replacementString:@""])
+- (void)_deleteForRange:(CPRange) changedRange
+{	if (![self shouldChangeTextInRange:changedRange replacementString:@""])
         return;
 
     [_textStorage deleteCharactersInRange:CPCopyRange(changedRange)];
@@ -580,6 +572,24 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self setSelectedRange:CPMakeRange(changedRange.location, 0)];
     [self didChangeText];
     [self sizeToFit];
+}
+
+- (void)deleteBackward:(id)sender
+{	var changedRange;
+
+    if (CPEmptyRange(_selectionRange) && _selectionRange.location > 0)
+         changedRange = CPMakeRange(_selectionRange.location - 1, 1);
+    else changedRange = _selectionRange;
+	[self _deleteForRange: changedRange];
+}
+- (void)deleteForward:(id)sender
+{	var changedRange = nil;
+
+    if (CPEmptyRange(_selectionRange) && _selectionRange.location < [_textStorage length])
+         changedRange = CPMakeRange(_selectionRange.location, 1);
+    else changedRange = _selectionRange;
+
+	[self _deleteForRange: changedRange];
 }
 
 - (void)insertLineBreak:(id)sender

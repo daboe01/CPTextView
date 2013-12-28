@@ -2,8 +2,7 @@
  * AppController.j
  * fixmes:
  *  baseline-alignment
- *  clicking
- *  fix delete key not working
+ *  clicking in "empty" lines does not work
  *  fix cursor up/ down navigation
  */
  
