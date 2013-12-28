@@ -28,17 +28,16 @@
 
 CPCopyRange=function(_3){ return {location:_3.location,length:_3.length}; };
 
-function MakeRangeFromAbs( a1, a2)
+function _MakeRangeFromAbs( a1, a2)
 {	if(a1< a2)	return CPMakeRange(a1,a2-a1);	
 	else		return CPMakeRange(a2,a1-a2);
 }
-
 
 @implementation CPColor(CPTextViewExtensions)
 
 + (CPColor)selectedTextBackgroundColor
 {
-    return [[CPColor alloc] _initWithRGBA:[0.38, 0.85, 1.0, 1.0]];
+    return [[CPColor alloc] _initWithRGBA:[0.4, 0.90, 1.0, 1.0]];
 }
 @end
 
@@ -481,11 +480,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         index = _scrollingDownward? CPMaxRange(oldRange): oldRange.location;
  
 	if (index> oldRange.location)
-	{	[self _clearRange: MakeRangeFromAbs(oldRange.location,index) ];
+	{	[self _clearRange: _MakeRangeFromAbs(oldRange.location,index) ];
 		_scrollingDownward=YES;
 	}
 	if(index< CPMaxRange(oldRange) )
-	{	[self _clearRange: MakeRangeFromAbs(index, CPMaxRange(oldRange)) ];
+	{	[self _clearRange: _MakeRangeFromAbs(index, CPMaxRange(oldRange)) ];
 		_scrollingDownward=NO;
 	}
 

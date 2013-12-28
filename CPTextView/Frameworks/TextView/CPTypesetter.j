@@ -162,7 +162,7 @@ var _sharedSimpleTypesetter = nil;
 				_currentFont = [_currentAttributes objectForKey:CPFontAttributeName];
 				if(!_currentFont)
 					_currentFont = [_textStorage font];
-				ascent = ["A" sizeWithFont:_currentFont].height-1;
+				ascent = ["x" sizeWithFont:_currentFont].height;
 				descent = 0;	//FIXME
 				leading = (ascent - descent) * 0.2; // FAKE leading
 			}
