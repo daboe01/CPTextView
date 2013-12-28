@@ -626,14 +626,18 @@ var _objectsInRange = function(aList, aRange)
         }
     }
 	// not found, maybe a point left to the last character was clicked->search again
-    for (var i = 0; i < c; i++)
-    {	var fragment = _lineFragments[i];
-        if (fragment._textContainer === container)
-        {	if (point.y > fragment._fragmentRect.origin.y && point.y<= fragment._fragmentRect.origin.y+ fragment._fragmentRect.size.height)
-			{	return MAX(0, CPMaxRange(fragment._range)-1);
+    if([[_textStorage string] length])
+	{	for (var i = 0; i < c; i++)
+		{	var fragment = _lineFragments[i];
+			if (fragment._textContainer === container)
+			{	if (point.y > fragment._fragmentRect.origin.y && point.y<= fragment._fragmentRect.origin.y+ fragment._fragmentRect.size.height)
+				{	var nlLoc= CPMaxRange(fragment._range)-1;
+					if ( [[_textStorage string] characterAtIndex: nlLoc] === '\n') return nlLoc;
+					return nlLoc+1;
+				}
 			}
-        }
-    }
+		}
+	}
 	return CPNotFound;
 }
 
@@ -1007,7 +1011,11 @@ var _objectsInRange = function(aList, aRange)
 }
 
 - (CPPoint)locationForGlyphAtIndex:(unsigned)index
-{
+{	if(_lineFragments.length > 0 && index >= [self numberOfGlyphs]-1)
+	{	var lineFragment= _lineFragments[_lineFragments.length-1];
+		var glyphFrames = [lineFragment glyphFrames];
+		if(glyphFrames.length > 0) return CPPointCreateCopy(glyphFrames[glyphFrames.length-1].origin);
+	}
     [self _validateLayoutAndGlyphs];
     var lineFragment = _objectWithLocationInRange(_lineFragments, index);
     if (lineFragment)

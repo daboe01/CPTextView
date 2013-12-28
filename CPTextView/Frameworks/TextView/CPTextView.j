@@ -111,6 +111,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     BOOL _isVerticallyResizable;
 
 	var _carretDOM;
+	int  _stickyXLocation;
 }
 -(id) initWithFrame:(CPRect)aFrame textContainer:(CPTextContainer)aContainer
 {
@@ -499,6 +500,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     /* will post CPTextViewDidChangeSelectionNotification */
     [self setSelectedRange:[self selectedRange] affinity:0 stillSelecting:NO];
+	var point = [_layoutManager locationForGlyphAtIndex: [self selectedRange].location];
+	_stickyXLocation= point.x;
 }
 
 - (void)moveDown:(id)sender
@@ -507,6 +510,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 		var sindex = CPMaxRange([self selectedRange]);
         var point = [_layoutManager locationForGlyphAtIndex: sindex];
 		var rect=   [_layoutManager lineFragmentRectForGlyphAtIndex: sindex effectiveRange:NULL];
+		if(_stickyXLocation) point.x = _stickyXLocation;
 		point.y+=2+rect.size.height;
 		point.x+=2;
 		var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
@@ -519,8 +523,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {   var fraction = [];
 		var sindex = [self selectedRange].location;
         var point = [_layoutManager locationForGlyphAtIndex: sindex];
+		if(_stickyXLocation) point.x = _stickyXLocation;
 		point.y-=2;
 		point.x+=2;
+debugger;
 		var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
 		[self setSelectedRange: CPMakeRange(dindex,0) ];
 		[self scrollRangeToVisible: CPMakeRange(dindex, 0)]
@@ -534,7 +540,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         /* TODO: handle modifiers */
         if (_selectionRange.location > 0)
-            [self setSelectedRange:CPMakeRange(_selectionRange.location - 1, 0)];
+        {	[self setSelectedRange:CPMakeRange(_selectionRange.location - 1, 0)];
+        	var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location - 1];
+			_stickyXLocation= point.x;
+		}
     }
 }
 
@@ -544,7 +553,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         /* TODO: handle modifiers */
         if (_selectionRange.location < [_textStorage length])
-            [self setSelectedRange:CPMakeRange(_selectionRange.location + 1, 0)];
+        {	[self setSelectedRange:CPMakeRange(_selectionRange.location + 1, 0)];
+			var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location + 1];
+			_stickyXLocation= point.x;
+		}
     }
 }
 
@@ -1013,8 +1025,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)drawInsertionPointInRect:(CPRect)aRect color:(CPColor)aColor turnedOn:(BOOL)flag
 {
 	if(!_carretDOM)
-	{
-		_carretDOM = document.createElement("span");
+	{	_carretDOM = document.createElement("span");
 		style = _carretDOM.style;
 		style.position = "absolute";
 		style.visibility = "visible";
@@ -1022,8 +1033,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 		style.margin = "0px";
 		style.whiteSpace = "pre";
 		style.backgroundColor = "black";
-		self._DOMElement.appendChild(_carretDOM);
 		_carretDOM.style.width= "1px";
+		self._DOMElement.appendChild(_carretDOM);
 	}
 	_carretDOM.style.left=(aRect.origin.x)+"px";
 	_carretDOM.style.top= (aRect.origin.y)+"px";

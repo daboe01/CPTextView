@@ -1,11 +1,11 @@
 /*
  * AppController.j
  * fixmes:
- *  pressing return does not initially display carret on right place
- *  why do we need alt-ret at all?
+ *  constrain cursor up/ down navigation beyond first/last line
+ *  delete all->type again crashes
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
- *  fix cursor up/ down navigation (make it stable)
  *  chomp newlines at end in the spans (to make alexander happy)
+ *  why do we need alt-ret at all?
  */
  
 @import <TextView/CPTextView.j>
