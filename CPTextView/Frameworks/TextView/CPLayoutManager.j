@@ -858,7 +858,6 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPDictionary)temporaryAttributesAtCharacterIndex:(unsigned)index effectiveRange:(CPRangePointer)effectiveRange
 {
-alert("came here to wild guess");
     var tempAttribute = _objectWithLocationInRange(_runs, index);	// <!> _runs is wild guess
     if (!tempAttribute)
         return nil;

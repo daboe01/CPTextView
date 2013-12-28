@@ -1038,6 +1038,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_selectionRange.location >= [_textStorage length])	// cursor is "behind" the last chacacter
     {	_carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
 		_carretRect.origin.x += _carretRect.size.width;
+		if (_selectionRange.location>0 && [[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')
+		{	_carretRect.origin.y += _carretRect.size.height;
+			_carretRect.origin.x = 0;
+		}
 	}
     else _carretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
