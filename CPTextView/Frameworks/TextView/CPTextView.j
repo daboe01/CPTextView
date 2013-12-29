@@ -671,6 +671,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {	[self deleteBackward: sender];
 }
 
+- stringValue
+{	return _textStorage._string;
+}
+- objectValue
+{	return [self stringValue];
+}
 - (void)setFont:(CPFont)font
 {
     _font = font;

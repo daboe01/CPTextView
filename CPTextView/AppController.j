@@ -1,6 +1,7 @@
 /*
  * AppController.j
  * fixmes:
+ *  paste "Fusce" into first line crashes
  *  constrain cursor up/ down navigation beyond first/last line
  *  delete all->type again crashes
  *  Typesetter: reanchor after each whitespace (to increase performance)

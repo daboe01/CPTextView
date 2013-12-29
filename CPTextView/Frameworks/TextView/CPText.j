@@ -44,13 +44,15 @@ CPDeleteCharacter             = 0x007f;
     @ingroup appkit
     @class CPText
 */
-@implementation CPText : CPView
+@implementation CPText : CPView	//<!>CPResponder?
 {
 }
+
 - (void)changeFont:(id)sender
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)copy:(id)sender
 {	var selectedRange = [self selectedRange];
 
@@ -58,7 +60,7 @@ CPDeleteCharacter             = 0x007f;
             return;
 
 	var pasteboard = [CPPasteboard generalPasteboard],
-            stringForPasting = [_stringValue substringWithRange:selectedRange];
+            stringForPasting = [[self stringValue] substringWithRange:selectedRange];
 
 	[pasteboard declareTypes:[CPStringPboardType] owner:nil];
 	[pasteboard setString:stringForPasting forType:CPStringPboardType];
