@@ -131,7 +131,8 @@ var _sharedSimpleTypesetter = nil;
         wrapRange = CPMakeRange(0, 0),
         wrapWidth = 0,
         isNewline = NO,
-        isWordWrapped = NO;
+        isWordWrapped = NO,
+		numberOfGlyphs= [_textStorage length];
 
     var numLines = 0,
         lineWidth = 0,
@@ -215,20 +216,19 @@ var _sharedSimpleTypesetter = nil;
 				currentAnchor = 0;
 				_previousFont = nil;
 
-				lineRange = CPMakeRange(glyphIndex+1, 0);
-				wrapRange = CPMakeRange(0, 0);
-				wrapWidth = 0;
-				isNewline = NO;
+				lineRange     = CPMakeRange(glyphIndex+1, 0);
+				wrapRange     = CPMakeRange(0, 0);
+				wrapWidth     = 0;
+				isNewline     = NO;
 				isWordWrapped = NO;
 				numLines++;
 			}
 		glyphIndex++;
-    } while (numLines != maxNumLines && glyphIndex < [_textStorage length]);
+    } while (numLines != maxNumLines && glyphIndex < numberOfGlyphs);
 
     if (lineRange.length)
     {
-        [_layoutManager setTextContainer:_currentTextContainer forGlyphRange:lineRange];
-
+		[_layoutManager setTextContainer:_currentTextContainer forGlyphRange:lineRange];
         var rect = CPRectMake(lineOrigin.x, lineOrigin.y, lineWidth, _lineHeight);
         // FIXME: handle line fragment padding
         [_layoutManager setLineFragmentRect:rect forGlyphRange:lineRange usedRect:rect];

@@ -1,13 +1,12 @@
 /*
  * AppController.j
  * fixmes:
- *  paste "Fusce" into first line crashes
+ *  deleting newline after headline deletes attributes as well
  *  constrain cursor up/ down navigation beyond first/last line
- *  delete all->type again crashes
- *  Typesetter: reanchor after each whitespace (to increase performance)
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  chomp newlines at end in the spans (to make alexander happy)
- *  why do we need alt-ret at all?
+ *  copy/paste rich text
+ *  Typesetter: reanchor after each whitespace (to increase performance)
  */
  
 @import <TextView/CPTextView.j>
@@ -43,7 +42,7 @@
     
     [contentView setBackgroundColor:[CPColor colorWithWhite:0.95 alpha:1.0]];
     
-    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];    
+    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
     [_textView setBackgroundColor:[CPColor whiteColor]];
   
     var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(20, 20,510,510)];
@@ -83,13 +82,13 @@
 
     item = [mainMenu insertItemWithTitle:@"Font" action:nil keyEquivalent:nil atIndex:1];    
 
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce" 
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce\n" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
        
-       [_textView insertText:@" lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];
+     [_textView insertText:@" lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];
 
-   /* [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin," 
+/*	 [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin," 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:16.0],[CPColor greenColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
                 

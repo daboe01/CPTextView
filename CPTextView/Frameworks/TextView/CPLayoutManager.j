@@ -170,7 +170,7 @@ var _objectsInRange = function(aList, aRange)
 
         do {
             var attributes = [textStorage attributesAtIndex:location effectiveRange:effectiveRange];
-			effectiveRange=CPIntersectionRange(aRange, effectiveRange);
+			effectiveRange= attributes? CPIntersectionRange(aRange, effectiveRange): aRange;
 			var string= [textStorage._string substringWithRange:effectiveRange]
 			var font= [textStorage font] || [CPFont systemFontOfSize:12.0];
             if ([attributes containsKey:CPFontAttributeName])
@@ -378,9 +378,12 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRect)boundingRectForGlyphRange:(CPRange)aRange inTextContainer:(CPTextContainer)container
 {
+	if(![self numberOfGlyphs]) return CPRectMake(0,0,1,12);	// crude hack to give a cursor in an empty doc.
+
     var fragments = _objectsInRange(_lineFragments, aRange),
         rect = nil,
         c = [fragments count];
+
     for (var i = 0; i < c; i++)
     {
         var fragment = fragments[i];
@@ -467,7 +470,7 @@ var _objectsInRange = function(aList, aRange)
 	if (!startIndex)   // We erased all lines 
 		[self setExtraLineFragmentRect: CPRectMake(0,0) usedRect:CPRectMake(0,0) textContainer:nil];
 
-	document.title=startIndex;
+//	document.title=startIndex;
 	[_typesetter layoutGlyphsInLayoutManager: self startingAtGlyphIndex: startIndex maxNumberOfLineFragments:-1 nextGlyphIndex:nil];
 
     _isValidatingLayoutAndGlyphs = NO;

@@ -44,7 +44,7 @@ CPDeleteCharacter             = 0x007f;
     @ingroup appkit
     @class CPText
 */
-@implementation CPText : CPView	//<!>CPResponder?
+@implementation CPText : CPControl
 {
 }
 
@@ -115,7 +115,7 @@ CPDeleteCharacter             = 0x007f;
 - (void)paste:(id)sender
 {	var pasteboard = [CPPasteboard generalPasteboard],
 		stringForPasting = [pasteboard stringForType:CPStringPboardType];
-	if (stringForPasting) [self replaceCharactersInRange: [self selectedRange] withString: stringForPasting];
+	if (stringForPasting) [self insertText: stringForPasting];
 }
 - (void)pasteFont:(id)sender
 {

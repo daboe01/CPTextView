@@ -2,6 +2,9 @@
  *  CPTextView.j
  *  AppKit
  *
+ *  Created by Daniel Boehringer on 27/12/2013.
+ *  All modifications copyright Daniel Boehringer 2013.
+ *  Based on original work by
  *  Created by Emmanuel Maillard on 27/02/2010.
  *  Copyright Emmanuel Maillard 2010.
  *
@@ -202,7 +205,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {	return [_textStorage string];
 }
 - (void)setString:(CPString)aString
-{	[_textStorage replaceCharactersInRange: CPMakeRange(0, [[self string] length]) withString:aString];
+{	[_textStorage replaceCharactersInRange: CPMakeRange(0, [_layoutManager numberOfGlyphs]) withString:aString];
     [self didChangeText];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
@@ -390,7 +393,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 - (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity /* unused */ )affinity stillSelecting:(BOOL)selecting
-{
+{	var maxRange=CPMakeRange(0, [_layoutManager numberOfGlyphs]);
+	range= CPIntersectionRange(maxRange, range);
     if (!selecting && (_delegateRespondsToSelectorMask & kDelegateRespondsTo_textView_willChangeSelectionFromCharacterRange_toCharacterRange))
         _selectionRange = [_delegate textView:self willChangeSelectionFromCharacterRange:_selectionRange toCharacterRange:range];
     else
@@ -447,7 +451,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     
     _startTrackingLocation = [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
     if (_startTrackingLocation == CPNotFound)
-        _startTrackingLocation = [_textStorage length];
+        _startTrackingLocation = [_layoutManager numberOfGlyphs];
 	var granularities=[-1, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
 	[self setSelectionGranularity:granularities[[event clickCount]]];
     [self setSelectedRange:CPMakeRange(_startTrackingLocation, 0) affinity:0 stillSelecting:YES];
@@ -551,7 +555,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_isSelectable)
     {
         /* TODO: handle modifiers */
-        if (_selectionRange.location < [_textStorage length])
+        if (_selectionRange.location < [_layoutManager numberOfGlyphs])
         {	[self setSelectedRange:CPMakeRange(_selectionRange.location + 1, 0)];
 			var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location + 1];
 			_stickyXLocation= point.x;
@@ -568,7 +572,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             [_carretTimer invalidate];
             _carretTimer = nil;
         }
-        [self setSelectedRange:CPMakeRange(0, [_textStorage length])];
+        [self setSelectedRange:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
     }
 }
 
@@ -576,9 +580,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {	if (![self shouldChangeTextInRange:changedRange replacementString:@""])
         return;
 
+//alert([self string])
     [_textStorage deleteCharactersInRange:CPCopyRange(changedRange)];
+//alert([self string])
 	[self setSelectionGranularity: CPSelectByCharacter];
-
     [self setSelectedRange:CPMakeRange(changedRange.location, 0)];
     [self didChangeText];
     [self sizeToFit];
@@ -595,7 +600,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)deleteForward:(id)sender
 {	var changedRange = nil;
 
-    if (CPEmptyRange(_selectionRange) && _selectionRange.location < [_textStorage length])
+    if (CPEmptyRange(_selectionRange) && _selectionRange.location < [_layoutManager numberOfGlyphs])
          changedRange = CPMakeRange(_selectionRange.location, 1);
     else changedRange = _selectionRange;
 
@@ -680,7 +685,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)setFont:(CPFont)font
 {
     _font = font;
-    var length = [_textStorage length];
+    var length = [_layoutManager numberOfGlyphs];
     [_textStorage addAttribute:CPFontAttributeName value:_font range:CPMakeRange(0, length)];
     [_textStorage setFont:_font];
     [self scrollRangeToVisible:CPMakeRange(length, 0)];
@@ -691,7 +696,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (!_isRichText)
         return;
 
-    if (CPMaxRange(range) >= [_textStorage length])
+    if (CPMaxRange(range) >= [_layoutManager numberOfGlyphs])
     {
         _font = font;
         [_textStorage setFont:_font];
@@ -766,10 +771,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     _textColor = aColor;
     if (_textColor)
-        [_textStorage addAttribute:CPForegroundColorAttributeName value:_textColor range:CPMakeRange(0, [_textStorage length])];
+        [_textStorage addAttribute:CPForegroundColorAttributeName value:_textColor range:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
     else
-        [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRange(0, [_textStorage length])];
-    [self scrollRangeToVisible:CPMakeRange([_textStorage length], 0)];
+        [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
+    [self scrollRangeToVisible:CPMakeRange([_layoutManager numberOfGlyphs], 0)];
 }
 
 - (void)setTextColor:(CPColor)aColor range:(CPRange)range
@@ -777,7 +782,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (!_isRichText)
         return;
 
-    if (CPMaxRange(range) >= [_textStorage length])
+    if (CPMaxRange(range) >= [_layoutManager numberOfGlyphs])
     {
         _textColor = aColor;
         [_textStorage setForegroundColor:_textColor];
@@ -882,7 +887,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var minSize = [self minSize],
         maxSize = [self maxSize];
     var desiredSize = aSize,
-        rect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(0, [_textStorage length]) inTextContainer:_textContainer];
+        rect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(0, [_layoutManager numberOfGlyphs]) inTextContainer:_textContainer];
 
     if ([_layoutManager extraLineFragmentTextContainer] === _textContainer)
         rect = CPRectUnion(rect, [_layoutManager extraLineFragmentRect]);
@@ -910,7 +915,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var rect;
     if (CPEmptyRange(aRange))
     {
-        if (aRange.location >= [_textStorage length])
+        if (aRange.location >= [_layoutManager numberOfGlyphs])
             rect = [_layoutManager extraLineFragmentRect];
         else
             rect = [_layoutManager lineFragmentRectForGlyphAtIndex:aRange.location effectiveRange:nil];
@@ -966,7 +971,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (CPRange)selectionRangeForProposedRange:(CPRange)proposedRange granularity:(CPSelectionGranularity)granularity
 {
-    var textStorageLength = [_textStorage length];    
+    var textStorageLength = [_layoutManager numberOfGlyphs];    
     if (textStorageLength == 0)
         return CPMakeRange(0, 0);
 
@@ -1051,7 +1056,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
 {	if(_selectionRange.length) [self _hideCarret];
-    if (_selectionRange.location >= [_textStorage length])	// cursor is "behind" the last chacacter
+    if (_selectionRange.location >= [_layoutManager numberOfGlyphs])	// cursor is "behind" the last chacacter
     {	_carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
 		_carretRect.origin.x += _carretRect.size.width;
 		if (_selectionRange.location>0 && [[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')
@@ -1059,7 +1064,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 			_carretRect.origin.x = 0;
 		}
 	}
-    else _carretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
+    else _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
     _carretRect.origin.x += _textContainerOrigin.x;
     _carretRect.origin.y += _textContainerOrigin.y;            
