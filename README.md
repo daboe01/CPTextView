@@ -15,4 +15,6 @@ while the basic functionality is already there, a lot remains to do:
 * parsers/deparsers for RTF/HTML (CPAttributedString)
 * optimizations (cornercutting typesetting, e.g. when text remains unchanged after the next paragraph)
 
+online demo is at <http://aug-fancy.ukl.uni-freiburg.de/NewApplication2>
+
 please fork and pull to help out!
