@@ -3,6 +3,7 @@
  * fixmes:
  *  constrain cursor up/ down navigation beyond first/last line
  *  delete all->type again crashes
+ *  Typesetter: reanchor after each whitespace (to increase performance)
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  chomp newlines at end in the spans (to make alexander happy)
  *  why do we need alt-ret at all?

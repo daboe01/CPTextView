@@ -526,7 +526,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 		if(_stickyXLocation) point.x = _stickyXLocation;
 		point.y-=2;
 		point.x+=2;
-debugger;
 		var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
 		[self setSelectedRange: CPMakeRange(dindex,0) ];
 		[self scrollRangeToVisible: CPMakeRange(dindex, 0)]
