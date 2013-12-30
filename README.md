@@ -9,12 +9,11 @@ i replaced canvas-drawing with DOM-spans to addesss the immanent performance and
 the (buggy) CPAttributedString implementation from the cappuccino-proper is fixed through monkey-patching.
 
 while the basic functionality is already there, a lot remains to do:
-* fix minor glitches in selection handling and keyboard navigation
 * native copy and paste
 * ruler and tab-stop support
 * parsers/deparsers for RTF/HTML (CPAttributedString)
 * optimizations (cornercutting typesetting, e.g. when text remains unchanged after the next paragraph)
 
-online demo is at <http://aug-fancy.ukl.uni-freiburg.de/NewApplication2>
+online demo is at <http://aug-fancy.ukl.uni-freiburg.de/CPTextView>
 
 please fork and pull to help out!
