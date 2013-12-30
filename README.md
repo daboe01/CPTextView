@@ -16,4 +16,4 @@ while the basic functionality is already there, a lot remains to do:
 
 online demo is at <http://aug-fancy.ukl.uni-freiburg.de/CPTextView>
 
-please fork and pull to help out!
+please fork and help out!
