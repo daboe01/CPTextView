@@ -3,6 +3,7 @@
  * fixmes:
  *  deleting newline after headline deletes attributes as well
  *  formatting via fontpanel inserts whitespace?!
+ *  make text color-drop accepting
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based sizing
  *  chomp newlines at end in the spans (to make alexander happy)
