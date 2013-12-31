@@ -40,7 +40,7 @@ function _MakeRangeFromAbs( a1, a2)
 
 + (CPColor)selectedTextBackgroundColor
 {
-    return [[CPColor alloc] _initWithRGBA:[0.4, 0.90, 1.0, 1.0]];
+    return [CPColor colorWithHexString: "99CCFF"];
 }
 @end
 
