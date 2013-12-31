@@ -71,7 +71,10 @@ CPDeleteCharacter             = 0x007f;
 }
 - (void)cut:(id)sender
 {	[self copy:sender];
+	var loc= [self selectedRange].location;
 	[self replaceCharactersInRange: [self selectedRange] withString: ""];
+	[self setSelectionGranularity: CPSelectByCharacter];
+	[self setSelectedRange: CPMakeRange(loc,0) ];
 }
 - (void)delete:(id)sender
 {

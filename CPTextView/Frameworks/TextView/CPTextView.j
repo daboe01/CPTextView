@@ -31,10 +31,7 @@
 
 CPCopyRange=function(_3){ return {location:_3.location,length:_3.length}; };
 
-function _MakeRangeFromAbs( a1, a2)
-{	if(a1< a2)	return CPMakeRange(a1,a2-a1);	
-	else		return CPMakeRange(a2,a1-a2);
-}
+function _MakeRangeFromAbs( a1, a2){ return (a1< a2)? CPMakeRange(a1,a2-a1) : CPMakeRange(a2,a1-a2);}
 
 @implementation CPColor(CPTextViewExtensions)
 
