@@ -1019,7 +1019,6 @@ var _objectsInRange = function(aList, aRange)
 		var glyphFrames = [lineFragment glyphFrames];
 		if(glyphFrames.length > 0) return CPPointCreateCopy(glyphFrames[glyphFrames.length-1].origin);
 	}
-    [self _validateLayoutAndGlyphs];
     var lineFragment = _objectWithLocationInRange(_lineFragments, index);
     if (lineFragment)
     {

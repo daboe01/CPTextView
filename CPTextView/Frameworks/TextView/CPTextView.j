@@ -120,7 +120,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     self = [super initWithFrame:aFrame];
     if (self)
-    {
+    {	_DOMElement.style.cursor="text";
         _textContainerInset = CPSizeMake(2,0);
         _textContainerOrigin = CPPointMake(_bounds.origin.x, _bounds.origin.y);
         [aContainer setTextView:self];
@@ -511,22 +511,28 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)moveDown:(id)sender
 {	if (_isSelectable)
     {   var fraction = [];
+		var nglyphs= [_layoutManager numberOfGlyphs];
 		var sindex = CPMaxRange([self selectedRange]);
-        var point = [_layoutManager locationForGlyphAtIndex: sindex];
-		var rect=   [_layoutManager lineFragmentRectForGlyphAtIndex: sindex effectiveRange:NULL];
+		var rectSource = [_layoutManager boundingRectForGlyphRange: CPMakeRange(sindex, 1) inTextContainer:_textContainer];
+		var rectEnd = nglyphs? [_layoutManager boundingRectForGlyphRange: CPMakeRange(nglyphs-1, 1) inTextContainer:_textContainer]: rectSource;
+        var point = rectSource.origin;
+		if(point.y >= rectEnd.origin.y) return;
 		if(_stickyXLocation) point.x = _stickyXLocation;
-		point.y+=2+rect.size.height;
+		point.y+=2+ rectSource.size.height;
 		point.x+=2;
 		var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
 		[self setSelectedRange: CPMakeRange(dindex,0) ];
 		[self scrollRangeToVisible: CPMakeRange(dindex, 0)]
+
     }
 }
 - (void)moveUp:(id)sender
 {	if (_isSelectable)
     {   var fraction = [];
 		var sindex = [self selectedRange].location;
-        var point = [_layoutManager locationForGlyphAtIndex: sindex];
+		var rectSource = [_layoutManager boundingRectForGlyphRange: CPMakeRange(sindex, 1) inTextContainer:_textContainer];
+        var point = rectSource.origin;
+		if(point.y <= 0) return;
 		if(_stickyXLocation) point.x = _stickyXLocation;
 		point.y-=2;
 		point.x+=2;

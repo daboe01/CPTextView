@@ -2,7 +2,6 @@
  * AppController.j
  * fixmes:
  *  deleting newline after headline deletes attributes as well
- *  constrain cursor up/ down navigation beyond first/last line
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  chomp newlines at end in the spans (to make alexander happy)
  *  copy/paste rich text
