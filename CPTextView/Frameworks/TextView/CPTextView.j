@@ -28,9 +28,9 @@
 @import "CPTextContainer.j"
 @import "CPLayoutManager.j"
 @import <AppKit/CPFontManager.j>
+@import "CPFontManagerAdditions.j"
 
 CPCopyRange=function(_3){ return {location:_3.location,length:_3.length}; };
-
 function _MakeRangeFromAbs( a1, a2){ return (a1< a2)? CPMakeRange(a1,a2-a1) : CPMakeRange(a2,a1-a2);}
 
 @implementation CPColor(CPTextViewExtensions)

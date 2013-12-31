@@ -2,9 +2,9 @@
  * AppController.j
  * fixmes:
  *  deleting newline after headline deletes attributes as well
- *  make font button work
- *  revisit canvas-based sizing
+ *  formatting via fontpanel inserts whitespace?!
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
+ *  revisit canvas-based sizing
  *  chomp newlines at end in the spans (to make alexander happy)
  *  copy/paste rich text
  *  Typesetter: reanchor after each whitespace (to increase performance)
@@ -81,7 +81,7 @@
     
     [mainMenu setSubmenu:editMenu forItem:item];
 
-    item = [mainMenu insertItemWithTitle:@"Font" action:nil keyEquivalent:nil atIndex:1];    
+    item = [mainMenu insertItemWithTitle:@"Font" action:@selector(orderFrontFontPanel:) keyEquivalent:nil atIndex:1];    
 
     [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce\n" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
@@ -102,5 +102,8 @@
  */
     [theWindow orderFront:self];
   [CPMenu setMenuBarVisible:YES];
+}
+- orderFrontFontPanel:sender
+{	[[CPFontManager sharedFontManager] orderFrontFontPanel:self];
 }
 @end
