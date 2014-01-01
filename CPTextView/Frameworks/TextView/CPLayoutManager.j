@@ -136,7 +136,7 @@ var _objectsInRange = function(aList, aRange)
     /* 'Glyphs' frames */
     CPArray _glyphsFrames;
 }
-- createDOMElementWithText: aString andFont: aFont
+- createDOMElementWithText: aString andFont: aFont andColor: aColor
 {	var style;
 	var DOMFlexibleWidthSpanElement = document.createElement("span");
     style = DOMFlexibleWidthSpanElement.style;
@@ -147,6 +147,7 @@ var _objectsInRange = function(aList, aRange)
     style.whiteSpace = "pre";
 	style.backgroundColor = "transparent";
 	style.font=[aFont cssString];
+	if(aColor) style.color=[aColor cssString];
     DOMFlexibleWidthSpanElement.innerText = aString;
 
 	return DOMFlexibleWidthSpanElement;
@@ -175,7 +176,9 @@ var _objectsInRange = function(aList, aRange)
 			var font= [textStorage font] || [CPFont systemFontOfSize:12.0];
             if ([attributes containsKey:CPFontAttributeName])
                  font = [attributes objectForKey:CPFontAttributeName];
-			var elem=[self createDOMElementWithText: string andFont: font];
+			var color=[attributes objectForKey:CPForegroundColorAttributeName];
+
+			var elem=[self createDOMElementWithText: string andFont: font andColor: color];
             var run = { _range:CPCopyRange(effectiveRange), elem: elem, string: string };
 
             _runs.push(run);

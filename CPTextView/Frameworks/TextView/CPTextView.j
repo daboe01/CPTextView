@@ -150,8 +150,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         
         _carretRect = CPRectMake(0,0,1,11);
     }
+	[self registerForDraggedTypes:[CPColorDragType]];
     return self;
 }
+
 - (id)initWithFrame:(CPRect)aFrame
 {
     var layoutManager = [[CPLayoutManager alloc] init],
@@ -1079,4 +1081,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _carretTimer = [CPTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(_blinkCarret:) userInfo:nil repeats:YES];
     }
 }
+
+- (void)performDragOperation:(CPDraggingInfo)aSender
+{
+    var location = [self convertPoint:[aSender draggingLocation] fromView:nil],
+        pasteboard = [aSender draggingPasteboard];
+
+    if (![pasteboard availableTypeFromArray:[CPColorDragType]]) return NO;
+   [self setTextColor:[CPKeyedUnarchiver unarchiveObjectWithData:[pasteboard dataForType:CPColorDragType]] range: _selectionRange ];
+}
+
 @end

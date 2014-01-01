@@ -2,6 +2,7 @@
  * AppController.j
  * fixmes:
  *  make text color-drop accepting
+ *	implement +fontWithDescriptor:
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based sizing
  *  chomp newlines at end in the spans (to make alexander happy)
