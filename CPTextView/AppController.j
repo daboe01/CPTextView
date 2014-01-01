@@ -1,14 +1,11 @@
 /*
  * AppController.j
  * fixmes:
- *  make text color-drop accepting
- *	implement +fontWithDescriptor:
- *  baseline-alignment (hint: collect heights in the same way as the advancements)
- *  revisit canvas-based sizing
- *  chomp newlines at end in the spans (to make alexander happy)
- *  copy/paste rich text
+ *  redo fontpanel
  *  fix CPAttributedString delete range attributes issue
- *  Typesetter: reanchor after each whitespace (to increase performance)
+ *  baseline-alignment (hint: collect heights in the same way as the advancements)
+ *  revisit canvas-based sizing for performance
+ *  copy/paste rich text
  */
  
 @import <TextView/CPTextView.j>
@@ -78,7 +75,6 @@
     [editMenu addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"];
     [editMenu addItemWithTitle:@"Delete" action:@selector(delete:) keyEquivalent:@""];
     [editMenu addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
-    [editMenu addItemWithTitle:@"Bold" action:@selector(addFontTrait:) keyEquivalent:@"b"];
     
     [mainMenu setSubmenu:editMenu forItem:item];
 
@@ -94,19 +90,8 @@
 	 [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:12.0]] forKeys: [CPFontAttributeName]]]];
 
-/*	 [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin," 
-                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:16.0],[CPColor greenColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
-                ];
-                
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@" neque cr as eget,"
-                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:14.0],[CPColor blackColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
-                ];
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@" integer quam facilisi a adipiscing posuere."
-                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:10.0],[CPColor grayColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
-                ];
- */
-    [theWindow orderFront:self];
-  [CPMenu setMenuBarVisible:YES];
+	[theWindow orderFront:self];
+	[CPMenu setMenuBarVisible:YES];
 }
 - orderFrontFontPanel:sender
 {	[[CPFontManager sharedFontManager] orderFrontFontPanel:self];

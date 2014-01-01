@@ -18,9 +18,8 @@
 {	var aName=   [fontDescriptor objectForKey: CPFontNameAttribute] ,
 		aSize=   [fontDescriptor pointSize],
 		isBold=  [fontDescriptor symbolicTraits] & CPFontBoldTrait,
-		isItalic=[fontDescriptor symbolicTraits] & CPFontItalicTrait,
-		isSystem=NO;
-    return [self _initWithName: aName size: aSize bold: isBold italic: isItalic system: isSystem];
+		isItalic=[fontDescriptor symbolicTraits] & CPFontItalicTrait;
+    return [self _initWithName: aName size: aSize bold: isBold italic: isItalic system: NO];
 }
 
 + (CPFont)fontWithDescriptor:(CPFontDescriptor)fontDescriptor size:(float)aSize
