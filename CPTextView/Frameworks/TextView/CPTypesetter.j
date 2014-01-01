@@ -81,6 +81,14 @@ var CPSystemTypesetterFactory = Nil;
 }
 @end
 
+var _measuringContext;
+function _widthOfStringForFont(aString, aFont)
+{	if(!_measuringContext) _measuringContext =CGBitmapGraphicsContextCreate();
+    _measuringContext.font = [aFont cssString];
+    return _measuringContext.measureText(aString);
+}
+
+
 var _sharedSimpleTypesetter = nil;
 
 @implementation CPSimpleTypesetter:CPTypesetter
