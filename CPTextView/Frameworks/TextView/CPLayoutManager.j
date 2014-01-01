@@ -230,11 +230,12 @@ var _objectsInRange = function(aList, aRange)
 {
     var runs = _objectsInRange(_runs, aRange),
         c = runs.length,
-        orig = CPPointMake(_location.x + _fragmentRect.origin.x, _location.y + _fragmentRect.origin.y);
+        orig = CPPointMake(_location.x, _location.y + _fragmentRect.origin.y);
     orig.y += aPoint.y;
+
 	for (var i = 0; i < c; i++)
-    {	 var run = runs[i];
-		orig.x=(i&& _glyphsFrames[run._range.location]? _glyphsFrames[run._range.location].origin.x:0)+ aPoint.x;
+    {	var run = runs[i];
+		orig.x=( _glyphsFrames[run._range.location-runs[0]._range.location]? _glyphsFrames[run._range.location-runs[0]._range.location].origin.x:0)+ aPoint.x;
 		run.elem.style.left=(orig.x)+"px";
 		run.elem.style.top= (orig.y-_usedRect.size.height+4)+"px";
 		if(!run.DOMactive) _textContainer._textView._DOMElement.appendChild(run.elem);
@@ -598,11 +599,10 @@ var _objectsInRange = function(aList, aRange)
 
     var ctx = [[CPGraphicsContext currentContext] graphicsPort],
         paintedRange = CPCopyRange(aRange),
-        lineFragmentIndex = 0,
-        currentFragment = lineFragments[lineFragmentIndex],
+        lineFragmentIndex,
 		l= lineFragments.length;
 
-    for(;lineFragmentIndex <l; lineFragmentIndex++)
+    for(lineFragmentIndex = 0; lineFragmentIndex <l; lineFragmentIndex++)
     {	currentFragment = lineFragments[lineFragmentIndex];
 		[currentFragment drawInContext: ctx atPoint: aPoint forRange:paintedRange];
     }

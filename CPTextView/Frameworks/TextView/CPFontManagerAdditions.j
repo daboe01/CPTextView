@@ -188,6 +188,6 @@ CPRemoveTraitFontAction = 7;
 }
 
 @end
-// why is + initialize not called?
+// why is +initialize not called in this category?
 [CPFontManager setFontManagerFactory:[CPFontManager class]];
 [CPFontManager setFontPanelFactory:[CPFontPanel class]];

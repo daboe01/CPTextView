@@ -84,11 +84,15 @@
 
     item = [mainMenu insertItemWithTitle:@"Font" action:@selector(orderFrontFontPanel:) keyEquivalent:nil atIndex:1];    
 
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce\n" 
-                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce " 
+                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:12.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
        
-     [_textView insertText:@" lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];
+     [_textView insertText:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];
+	 [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
+                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:12.0]] forKeys: [CPFontAttributeName]]]];
+	 [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
+                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:12.0]] forKeys: [CPFontAttributeName]]]];
 
 /*	 [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin," 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:16.0],[CPColor greenColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]

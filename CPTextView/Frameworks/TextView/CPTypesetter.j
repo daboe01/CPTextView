@@ -169,7 +169,7 @@ var _sharedSimpleTypesetter = nil;
 			}
 			if(_previousFont !== _currentFont)
 			{	measuringRange= CPMakeRange(glyphIndex, 0);
-				currentAnchor+= prevRangeWidth;
+				currentAnchor= prevRangeWidth;
 				_previousFont= _currentFont;
 			}
 			lineRange.length++;
@@ -209,8 +209,8 @@ var _sharedSimpleTypesetter = nil;
 
 				lineOrigin.y += _lineHeight;
 				_lineHeight   = 0;
-				lineWidth     = 0;
 				_lineBase     = 0;
+				lineWidth     = 0;
 				advancements  = [];
 				prevRangeWidth= 0;
 				currentAnchor = 0;

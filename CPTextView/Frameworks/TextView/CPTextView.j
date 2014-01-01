@@ -705,7 +705,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [_textStorage setFont:_font];
     }
     [_textStorage addAttribute:CPFontAttributeName value:font range:CPCopyRange(range)];
-    [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
+   [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
 }
 
 - (CPFont)font
