@@ -2,7 +2,6 @@
  * AppController.j
  * fixmes:
  *  deleting newline after headline deletes attributes as well
- *  formatting via fontpanel inserts whitespace?!
  *  make text color-drop accepting
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based sizing
@@ -84,8 +83,8 @@
 
     item = [mainMenu insertItemWithTitle:@"Font" action:@selector(orderFrontFontPanel:) keyEquivalent:nil atIndex:1];    
 
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce " 
-                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:12.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce\n" 
+                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
                 ];
        
      [_textView insertText:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];

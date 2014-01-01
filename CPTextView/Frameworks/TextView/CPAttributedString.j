@@ -526,7 +526,8 @@
 
         startingRangeEntry.range.length = CPMaxRange(aRange) - startingRangeEntry.range.location;
 
-        _rangeEntries.splice(startingIndex, endingIndex - startingIndex);
+//		_rangeEntries.splice(startingIndex, endingIndex - startingIndex);
+startingIndex--
     }
 
     endingIndex = startingIndex + 1;
