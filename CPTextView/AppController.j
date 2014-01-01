@@ -1,12 +1,12 @@
 /*
  * AppController.j
  * fixmes:
- *  deleting newline after headline deletes attributes as well
  *  make text color-drop accepting
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based sizing
  *  chomp newlines at end in the spans (to make alexander happy)
  *  copy/paste rich text
+ *  fix CPAttributedString delete range attributes issue
  *  Typesetter: reanchor after each whitespace (to increase performance)
  */
  
