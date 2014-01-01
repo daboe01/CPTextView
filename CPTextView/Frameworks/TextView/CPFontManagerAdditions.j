@@ -8,6 +8,35 @@
 
 @import <AppKit/CPFont.j>
 @import "CPFontPanel.j"
+@import "CPFontDescriptor.j"
+
+
+
+@implementation CPFont(DescriptorAdditions)
+
+- (id)_initWithFontDescriptor:(CPFontDescriptor)fontDescriptor
+{	var aName=   [fontDescriptor objectForKey: CPFontNameAttribute] ,
+		aSize=   [fontDescriptor pointSize],
+		isBold=  [fontDescriptor symbolicTraits] & CPFontBoldTrait,
+		isItalic=[fontDescriptor symbolicTraits] & CPFontItalicTrait,
+		isSystem=NO;
+    return [self _initWithName: aName size: aSize bold: isBold italic: isItalic system: isSystem];
+}
+
++ (CPFont)fontWithDescriptor:(CPFontDescriptor)fontDescriptor size:(float)aSize
+{	var aName=   [fontDescriptor objectForKey: CPFontNameAttribute] ,
+		aSize=   [fontDescriptor pointSize],
+		isBold=  [fontDescriptor symbolicTraits] & CPFontBoldTrait,
+		isItalic=[fontDescriptor symbolicTraits] & CPFontItalicTrait;
+	return [self _fontWithName: aName size: aSize bold: isBold italic: isItalic];
+}
+- (CPFontDescriptor)fontDescriptor
+{
+	return [CPFontDescriptor fontDescriptorWithName: _name size: _size];
+}
+
+@end
+
 
 var CPSharedFontManager     = nil,
     CPFontManagerFactory    = Nil,
@@ -90,9 +119,6 @@ CPRemoveTraitFontAction = 7;
     if (fontTrait & CPExpandedFontMask)
         symbolicTrait |= CPFontExpandedTrait;
 
-    if (fontTrait & CPCompensedFontMask)
-        symbolicTrait |= CPFontCondensedTrait;
-
     if (fontTrait & CPSmallCapsFontMask)
         symbolicTrait |= CPFontSmallCapsTrait;
 
@@ -124,9 +150,6 @@ CPRemoveTraitFontAction = 7;
     if (fontTrait & CPExpandedFontMask)
         symbolicTrait &= ~CPFontExpandedTrait;
         
-    if (fontTrait & CPCompensedFontMask)
-        symbolicTrait &= ~CPFontCondensedTrait;
-
     if (fontTrait & CPSmallCapsFontMask)
         symbolicTrait &= ~CPFontSmallCapsTrait;
 
@@ -146,8 +169,8 @@ CPRemoveTraitFontAction = 7;
 */
 - (CPFont)convertFont:(CPFont)aFont toSize:(float)aSize
 {
-//<!> fixme fontWithDescriptor:[CPFontDescriptor fontDescriptorWithFontAttributes:attributes
-    return [[aFont class] _fontWithName: aFont._name size:aSize bold:NO italic: NO];
+   return [[aFont class] fontWithDescriptor:[CPFontDescriptor fontDescriptorWithFontAttributes:attributes] size:aSize]
+//   return [[aFont class] _fontWithName: aFont._name size:aSize bold:NO italic: NO];
 }
 
 - (void)orderFrontFontPanel:(id)sender

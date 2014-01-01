@@ -158,7 +158,7 @@ var _sharedSimpleTypesetter = nil;
 	    lineOrigin = CPPointCreateCopy([_layoutManager lineFragmentRectForGlyphAtIndex: glyphIndex effectiveRange:nil].origin);
 	else if ([_layoutManager extraLineFragmentTextContainer])
         lineOrigin = CPPointMake(0, [_layoutManager extraLineFragmentUsedRect].origin.y);
-    else lineOrigin = CPPointMake(0,0);
+    else lineOrigin= CPPointMake(0,0);
 
 	[_layoutManager _removeInvalidLineFragments];
     if (![_textStorage length]) return;
