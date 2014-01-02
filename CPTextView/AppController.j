@@ -2,6 +2,8 @@
  * AppController.j
  * fixmes:
  *  redo fontpanel
+ *	tripel-click does not work
+ *	selection drawing artifact between lines
  *  fix CPAttributedString delete range attributes issue
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based sizing for performance
@@ -9,6 +11,15 @@
  */
  
 @import <TextView/CPTextView.j>
+
+// measure the performance against the capp-builtin sizing
+var _measuringContext;
+function _widthOfStringForFont(aString, aFont)
+{	if(!_measuringContext) _measuringContext =CGBitmapGraphicsContextCreate();
+    _measuringContext.font = [aFont cssString];
+    return _measuringContext.measureText(aString);
+}
+
 
 
 @implementation AppController : CPObject
@@ -44,7 +55,7 @@
     _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
     [_textView setBackgroundColor:[CPColor whiteColor]];
   
-    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(20, 20,510,510)];
+    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(20, 20,520,510)];
   //  [scrollView setAutohidesScrollers:YES];
     [scrollView setDocumentView:_textView]; 
     

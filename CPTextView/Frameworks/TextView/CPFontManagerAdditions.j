@@ -168,8 +168,9 @@ CPRemoveTraitFontAction = 7;
 */
 - (CPFont)convertFont:(CPFont)aFont toSize:(float)aSize
 {
-   return [[aFont class] fontWithDescriptor:[CPFontDescriptor fontDescriptorWithFontAttributes:attributes] size:aSize]
-//   return [[aFont class] _fontWithName: aFont._name size:aSize bold:NO italic: NO];
+//<!> FIXME
+//   return [[aFont class] fontWithDescriptor:[CPFontDescriptor fontDescriptorWithFontAttributes:attributes] size:aSize]
+	return [[aFont class] _fontWithName: aFont._name size:aSize bold:NO italic: NO];
 }
 
 - (void)orderFrontFontPanel:(id)sender

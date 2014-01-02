@@ -26,7 +26,6 @@
 @import "CPTextStorage.j"
 @import "CPTextContainer.j"
 @import "CPTypesetter.j"
-@import <CoreText/CoreText.j>
 
 // CGContextCanvas additions
 function CGContextSetFont(aContext, aFont)
