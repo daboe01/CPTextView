@@ -120,11 +120,7 @@ CPDeleteCharacter             = 0x007f;
 	var pasteboard = [CPPasteboard generalPasteboard],
 		stringForPasting = [pasteboard stringForType:CPStringPboardType];
 	if (stringForPasting)
-	{	var loc= [self selectedRange].location;
-
-		[self insertText: stringForPasting];
-		[self setSelectionGranularity: CPSelectByCharacter];
-		[self setSelectedRange: CPMakeRange(loc+[stringForPasting length],0) ];
+	{	[self insertText: stringForPasting];
 	}
 }
 - (void)pasteFont:(id)sender

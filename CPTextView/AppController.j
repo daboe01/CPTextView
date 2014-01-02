@@ -1,15 +1,15 @@
 /*
  * AppController.j
  * fixmes:
- *	does not display in firefox
- *  native pasting in safari
  *	tripel-click does not work
  *	undo/redo
+ *	colorpanel does not open with carret 'behind' text
  *	selection drawing artifact between lines
  *  fix CPAttributedString delete range attributes issue
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based sizing for performance
  *  copy/paste rich text
+ *  native pasting in safari (try tricking around with contenteditable)
  */
  
 @import <TextView/CPTextView.j>
@@ -27,7 +27,7 @@ function _widthOfStringForFont(aString, aFont)
 @implementation AppController : CPObject
 {
     CPTextView _textView;    
-  //  CPTextField _selectionRange;
+	CPTextField _selectionRange;
 }
 
 - (void)updateSelectionRange
@@ -38,7 +38,7 @@ function _widthOfStringForFont(aString, aFont)
 
 - (void)textViewDidChangeSelection:(CPNotification)aNotif
 {
-//    [self updateSelectionRange];
+    [self updateSelectionRange];
 }
 
 - (void)changeColor:(id)sender
@@ -58,22 +58,19 @@ function _widthOfStringForFont(aString, aFont)
     [_textView setBackgroundColor:[CPColor whiteColor]];
   
     var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(20, 20,520,510)];
-  //  [scrollView setAutohidesScrollers:YES];
+//	[scrollView setAutohidesScrollers:YES];
     [scrollView setDocumentView:_textView]; 
     
     [contentView addSubview: scrollView];
     
-    /*
-    var label = [CPTextField labelWithTitle:@"Selection Range"];
-    [label setFrameOrigin:CPPointMake(540,100)];
-    
-    _selectionRange = [CPTextField labelWithTitle:@""];
-    [_selectionRange setFrameOrigin:CPPointMake(550 + [label frame].size.width,100)];
-        [contentView addSubview:label];
-        [contentView addSubview:_selectionRange];
-        [self updateSelectionRange];
+    _selectionRange = [CPTextField labelWithTitle:@"xx"];
+	[_selectionRange setEditable: YES];
+	[_selectionRange setBezeled: YES];
+    [_selectionRange setFrame:CPMakeRect(590,100,100,32)];
+	[contentView addSubview:_selectionRange];
+	[self updateSelectionRange];
     [_textView setDelegate:self];
-    */
+
    
     /* build our menu */
     var mainMenu = [CPApp mainMenu];
@@ -88,6 +85,8 @@ function _widthOfStringForFont(aString, aFont)
     [editMenu addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"];
     [editMenu addItemWithTitle:@"Delete" action:@selector(delete:) keyEquivalent:@""];
     [editMenu addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
+    [editMenu addItemWithTitle:@"Undo" action:@selector(undo:) keyEquivalent:@"z"];
+    [editMenu addItemWithTitle:@"Redo" action:@selector(redo:) keyEquivalent:@"Z"];
     
     [mainMenu setSubmenu:editMenu forItem:item];
 
