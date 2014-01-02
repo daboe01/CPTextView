@@ -3,12 +3,12 @@
  * AppKit
  *
  * TODOs:
- *  1. make browser for size smaller and fix columns
+ *  1. make browser-width for size smaller and fix columns
  *  2. bind selection (browsers+colorwell) to the firstresponder attribs
- *  3. add all the missing features from the MacOS X counterpart
+ *  3. sampleview is currently not shown
+ *  4. add all the missing features from the MacOS X counterpart
+ *  5. handle multiple selection properly instead of setting only the new attrib (all bolds in current selection should become bold italic)
  *
- *	FIXMEs:
- *	 changing only size does not preserve traits (same for font)
  *
  * Created by Daniel Boehringer on 2/JAN/2014.
  * All modifications copyright Daniel Boehringer 2013.
@@ -127,7 +127,6 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
     id		_textColorWell;
         
     CPColor _textColor;
-    CPColor _backgroundColor;
     int		_currentColorButtonTag;
     BOOL	_setupDone;
     
@@ -171,7 +170,6 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
         _availableFonts = [[CPFontManager sharedFontManager] availableFonts];
         
         _textColor = [CPColor blackColor];
-        _backgroundColor = [CPColor whiteColor];
         
         _setupDone = NO;
         _fontChanges = kNothingChanged;

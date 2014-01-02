@@ -23,15 +23,17 @@
 }
 
 + (CPFont)fontWithDescriptor:(CPFontDescriptor)fontDescriptor size:(float)aSize
-{	var aName=   [fontDescriptor objectForKey: CPFontNameAttribute] ,
-		aSize=   [fontDescriptor pointSize],
+{	var aName=   [fontDescriptor objectForKey: CPFontNameAttribute],
 		isBold=  [fontDescriptor symbolicTraits] & CPFontBoldTrait,
 		isItalic=[fontDescriptor symbolicTraits] & CPFontItalicTrait;
-	return [self _fontWithName: aName size: aSize bold: isBold italic: isItalic];
+	return [self _fontWithName: aName size: aSize || [fontDescriptor pointSize] bold: isBold italic: isItalic];
 }
 - (CPFontDescriptor)fontDescriptor
-{
-	return [CPFontDescriptor fontDescriptorWithName: _name size: _size];
+{	var traits=0;
+	if([self isBold]) traits|= CPFontBoldTrait;
+	if([self isItalic]) traits|= CPFontItalicTrait;
+	var descriptor=[[CPFontDescriptor fontDescriptorWithName: _name size: _size] fontDescriptorWithSymbolicTraits: traits ];
+	return descriptor;
 }
 
 @end
@@ -167,60 +169,13 @@ CPRemoveTraitFontAction = 7;
     @result The converted font or \c aFont if the conversion failed.
 */
 - (CPFont)convertFont:(CPFont)aFont toSize:(float)aSize
-{
-//<!> FIXME
-//   return [[aFont class] fontWithDescriptor:[CPFontDescriptor fontDescriptorWithFontAttributes:attributes] size:aSize]
-	return [[aFont class] _fontWithName: aFont._name size:aSize bold:NO italic: NO];
+{	var descriptor= [aFont fontDescriptor];
+	return [[aFont class] fontWithDescriptor: descriptor size:aSize]
 }
 
 - (void)orderFrontFontPanel:(id)sender
 {
     [[self fontPanel:YES] orderFront:sender];
-}
-
-/*!
-    Return the application font menu, optionaly create it if necessary.
-    @param createIt If \c YES the font menu is create if necessary.
-    @result The application’s Font menu.
-*/
-- (CPMenu)fontMenu:(BOOL)createIt
-{
-    if (!_fontMenu && createIt)
-    {
-        _fontMenu = [[CPMenu alloc] initWithTitle:@"Font Menu"];
-        
-        var menuItem = [_fontMenu addItemWithTitle:@"Show Fonts" action:@selector(orderFrontFontPanel:) keyEquivalent:@"t"];
-        [menuItem setTarget:self];
-        
-        menuItem = [_fontMenu addItemWithTitle:@"Italic" action:@selector(addFontTrait:) keyEquivalent:@"i"];
-        [menuItem setTag:CPItalicFontMask];
-        [menuItem setTarget:self];
-        
-        menuItem = [_fontMenu addItemWithTitle:@"Bold" action:@selector(addFontTrait:) keyEquivalent:@"b"];
-        [menuItem setTag:CPBoldFontMask];
-        [menuItem setTarget:self];
-        
-        [_fontMenu addItemWithTitle:@"Underline" action:@selector(underline:) keyEquivalent:@"u"];
-        [_fontMenu addItem:[CPMenuItem separatorItem]];
-        
-        menuItem = [_fontMenu addItemWithTitle:@"Bigger" action:@selector(modifyFont:) keyEquivalent:@"+"];
-        [menuItem setTag:CPSizeUpFontAction];
-        
-        menuItem = [_fontMenu addItemWithTitle:@"Smaller" action:@selector(modifyFont:) keyEquivalent:@"-"];
-        [menuItem setTag:CPSizeDownFontAction];
-        [_fontMenu addItem:[CPMenuItem separatorItem]];
-        
-        /* Finish me ... */
-
-        [_fontMenu addItemWithTitle:@"Show Colors" action:@selector(orderFrontColorPanel:) keyEquivalent:@"C"];
-        [_fontMenu addItem:[CPMenuItem separatorItem]];
-        
-        menuItem = [_fontMenu addItemWithTitle:@"Copy Style" action:@selector(copyFont:) keyEquivalent:@"C"];
-        [menuItem setKeyEquivalentModifierMask:CPAlternateKeyMask];
-        menuItem = [_fontMenu addItemWithTitle:@"Paste Style" action:@selector(pasteFont:) keyEquivalent:@"V"];
-        [menuItem setKeyEquivalentModifierMask:CPAlternateKeyMask];
-    }
-    return _fontMenu;
 }
 
 - (void)modifyFont:(id)sender
