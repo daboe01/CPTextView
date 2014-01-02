@@ -107,6 +107,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     BOOL _isRichText;
     BOOL _usesFontPanel;
     BOOL _allowsUndo;
+    CPUndoManager   _undoManager;
     BOOL _isHorizontallyResizable;
     BOOL _isVerticallyResizable;
 
@@ -144,15 +145,26 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         
         _isRichText = YES;
         _usesFontPanel = YES;
-        _allowsUndo = NO;
+        _allowsUndo = YES;
         _isVerticallyResizable = YES;
         _isHorizontallyResizable = NO;
         
         _carretRect = CPRectMake(0,0,1,11);
+		_undoManager=[CPUndoManager new];
     }
 	[self registerForDraggedTypes:[CPColorDragType]];
 
     return self;
+}
+
+-(void) undo: sender
+{	if(_allowsUndo)
+	{
+		[_undoManager undo];
+	}
+}
+-(void) redo: sender
+{    if(_allowsUndo) [_undoManager redo];
 }
 
 - (id)initWithFrame:(CPRect)aFrame
@@ -332,10 +344,15 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (isAttributed)
     {
+	    [[_undoManager prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPCopyRange(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange: _selectionRange ] ];
+		[_undoManager setActionName:@"insertText"];
+
 		[_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withAttributedString:aString];
     }
 	else
-    {	[_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withString: aString];
+    {	[[_undoManager prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPCopyRange(_selectionRange) withString: [[self string] substringWithRange: _selectionRange ] ];
+		[_undoManager setActionName:@"insertText"];
+		[_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withString: aString];
 	}
 	[self setSelectionGranularity: CPSelectByCharacter];
 	[self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
