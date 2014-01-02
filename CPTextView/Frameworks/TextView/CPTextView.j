@@ -151,6 +151,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _carretRect = CPRectMake(0,0,1,11);
     }
 	[self registerForDraggedTypes:[CPColorDragType]];
+
     return self;
 }
 
