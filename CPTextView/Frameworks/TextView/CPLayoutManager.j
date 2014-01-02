@@ -137,8 +137,8 @@ var _objectsInRange = function(aList, aRange)
 }
 - createDOMElementWithText: aString andFont: aFont andColor: aColor
 {	var style;
-	var DOMFlexibleWidthSpanElement = document.createElement("span");
-    style = DOMFlexibleWidthSpanElement.style;
+	var span = document.createElement("span");
+    style = span.style;
     style.position = "absolute";
     style.visibility = "visible";
     style.padding = "0px";
@@ -147,9 +147,12 @@ var _objectsInRange = function(aList, aRange)
 	style.backgroundColor = "transparent";
 	style.font=[aFont cssString];
 	if(aColor) style.color=[aColor cssString];
-    DOMFlexibleWidthSpanElement.innerText = aString;
 
-	return DOMFlexibleWidthSpanElement;
+    if (CPFeatureIsCompatible(CPJavaScriptInnerTextFeature))
+        span.innerText = aString;
+    else if (CPFeatureIsCompatible(CPJavaScriptTextContentFeature))
+        span.textContent = aString;
+	return span;
 }
 
 - (id) initWithRange:(CPRange)aRange textContainer:(CPTextContainer)aContainer textStorage:(CPTextStorage)textStorage

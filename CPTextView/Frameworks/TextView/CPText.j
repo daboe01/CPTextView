@@ -116,9 +116,16 @@ CPDeleteCharacter             = 0x007f;
     return CPMakeSize(0,0);
 }
 - (void)paste:(id)sender
-{	var pasteboard = [CPPasteboard generalPasteboard],
+{
+	var pasteboard = [CPPasteboard generalPasteboard],
 		stringForPasting = [pasteboard stringForType:CPStringPboardType];
-	if (stringForPasting) [self insertText: stringForPasting];
+	if (stringForPasting)
+	{	var loc= [self selectedRange].location;
+
+		[self insertText: stringForPasting];
+		[self setSelectionGranularity: CPSelectByCharacter];
+		[self setSelectedRange: CPMakeRange(loc+[stringForPasting length],0) ];
+	}
 }
 - (void)pasteFont:(id)sender
 {

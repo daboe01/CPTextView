@@ -9,8 +9,8 @@ i replaced canvas-drawing with DOM-spans to addesss the immanent performance and
 the (buggy) CPAttributedString implementation from the cappuccino-proper is fixed through monkey-patching.
 
 while the basic functionality is already there, a lot remains to do:
-* native copy and paste
-* proper implemention of undo and redo stuff
+* native paste on safari
+* proper implemention of undo and redo
 * Locale support (font-panel, word-boundaries and so on)
 * ruler and tab-stop support
 * parsers/deparsers for RTF/HTML (CPAttributedString)

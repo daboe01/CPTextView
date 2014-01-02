@@ -1,6 +1,8 @@
 /*
  * AppController.j
  * fixmes:
+ *	does not display in firefox
+ *  native pasting in safari
  *	tripel-click does not work
  *	undo/redo
  *	selection drawing artifact between lines
