@@ -10,7 +10,7 @@ the (buggy) CPAttributedString implementation from the cappuccino-proper is fixe
 
 while the basic functionality is already there, a lot remains to do:
 * native copy and paste
-* undo and redo behavior
+* proper implemention of undo and redo stuff
 * Locale support (font-panel, word-boundaries and so on)
 * ruler and tab-stop support
 * parsers/deparsers for RTF/HTML (CPAttributedString)

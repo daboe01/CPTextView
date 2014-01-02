@@ -1,8 +1,8 @@
 /*
  * AppController.j
  * fixmes:
- *  redo fontpanel
  *	tripel-click does not work
+ *	undo/redo
  *	selection drawing artifact between lines
  *  fix CPAttributedString delete range attributes issue
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
