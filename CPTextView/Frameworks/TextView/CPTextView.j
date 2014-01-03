@@ -994,10 +994,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (CPRange)_characterRangeForWordAtIndex:(unsigned)index inString:(CPString)string
 {
-    var characterSet = [' ', '\n', '\t', ',', ';', '.', '!', '?', '\'', '"', '-', ':']; /* just a testing characterSet 
-                                                                                            all of this depend of the current language.
-                                                                                            Need some CPLocale support and others...
-                                                                                        */
+ /* <!> FIXME
+	just a testing characterSet 
+	all of this depend of the current language.
+	Need some CPLocale support and maybe even a FSM...
+  */
+
+    var characterSet = [' ', '\n', '\t', ',', ';', '.', '!', '?', '\'', '"', '-', ':'];
     return [self _characterRangeForUnitAtIndex: index inString: string asDefinedByCharArray: characterSet];
 }
 

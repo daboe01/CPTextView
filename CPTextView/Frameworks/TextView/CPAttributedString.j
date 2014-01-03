@@ -527,7 +527,7 @@
         startingRangeEntry.range.length = CPMaxRange(aRange) - startingRangeEntry.range.location;
 
 // <!> FIXME: splice only, if complete range got removed, hotfix: see next line
-//
+//     {range:aRange, attributes:[attributes copy]};
 if(1)
 		_rangeEntries.splice(startingIndex, endingIndex - startingIndex);
 else	startingIndex--;
