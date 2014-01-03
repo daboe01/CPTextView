@@ -3,19 +3,19 @@ CPTextView
 this is an implementation of the cocoa text system for cappuccino.
 this work is based on the (dead) cappuccino-fork from <http://github.com/emaillard/cappuccino>.
 
-i refactored the classes CPTextView, CPTextStorage, CPTextContainer, CPLayoutManager and CPSimpleTypesetter into a standalone framework that can be used with current cappuccino versions.
-i heavily debugged the stuff to get basic editing and selection handling working as expected.
-i replaced canvas-drawing with DOM-spans to addesss the immanent performance and rendering-quality issues.
-the (buggy) CPAttributedString implementation from the cappuccino-proper is fixed through monkey-patching.
+I extracted the classes CPTextView, CPTextStorage, CPTextContainer, CPLayoutManager and CPSimpleTypesetter and created a standalone framework. This framework works with the current version of cappuccino.
+I heavily debugged the stuff to get basic editing and selection handling working as expected.
+I replaced canvas-drawing with DOM-spans to addresss the immanent performance and rendering-quality issues.
+The (buggy) CPAttributedString implementation from the cappuccino-proper is fixed through monkey-patching.
 
-while the basic functionality is already there, a lot remains to do:
-* native paste on safari
-* proper implemention of undo and redo
+While the basic functionality is already there, a lot remains to do:
+* Compliance with cappuccino formatting rules
+* Native paste is broken on safari
+* Ruler and tab-stop support
+* Parsers/deparsers for RTF/HTML (CPAttributedString)
+* Optimizations (cornercutting typesetting, e.g. when text remains unchanged after the next paragraph)
 * Locale support (font-panel, word-boundaries and so on)
-* ruler and tab-stop support
-* parsers/deparsers for RTF/HTML (CPAttributedString)
-* optimizations (cornercutting typesetting, e.g. when text remains unchanged after the next paragraph)
 
-online demo is at <http://aug-fancy.ukl.uni-freiburg.de/CPTextView>
+Online demo is at <http://aug-fancy.ukl.uni-freiburg.de/CPTextView>
 
-please fork and help out!
+Please fork and help out!
