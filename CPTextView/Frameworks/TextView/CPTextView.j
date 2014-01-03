@@ -31,7 +31,7 @@
 @import "CPFontManagerAdditions.j"
 
 CPCopyRange=function(_3){ return {location:_3.location,length:_3.length}; };		// why is this not in cappuccino?
-function _MakeRangeFromAbs( a1, a2){ return (a1< a2)? CPMakeRange(a1,a2-a1) : CPMakeRange(a2,a1-a2);}
+_MakeRangeFromAbs=function( a1, a2){ return (a1< a2)? CPMakeRange(a1,a2-a1) : CPMakeRange(a2,a1-a2);};
 
 @implementation CPColor(CPTextViewExtensions)
 
@@ -956,12 +956,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self scrollRectToVisible:rect];
 }
 
-- (CPRange)_characterRangeForWordAtIndex:(unsigned)index inString:(CPString)string
+- (CPRange)_characterRangeForUnitAtIndex:(unsigned)index inString:(CPString)string asDefinedByCharArray: characterSet
 {
-    var characterSet = [' ', '\n', '\t', ',', ';', '.', '!', '?', '\'', '"', '-', ':'], /* just a testing characterSet 
-                                                                                            all of this depend of the current language.
-                                                                                            Need some CPLocale support and others...
-                                                                                        */
         wordRange = CPMakeRange(0, 0),
         lastIndex = CPNotFound,
         searchIndex = 0;
@@ -996,6 +992,15 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     return wordRange;
 }
 
+- (CPRange)_characterRangeForWordAtIndex:(unsigned)index inString:(CPString)string
+{
+    var characterSet = [' ', '\n', '\t', ',', ';', '.', '!', '?', '\'', '"', '-', ':']; /* just a testing characterSet 
+                                                                                            all of this depend of the current language.
+                                                                                            Need some CPLocale support and others...
+                                                                                        */
+    return [self _characterRangeForUnitAtIndex: index inString: string asDefinedByCharArray: characterSet];
+}
+
 - (CPRange)selectionRangeForProposedRange:(CPRange)proposedRange granularity:(CPSelectionGranularity)granularity
 {
     var textStorageLength = [_layoutManager numberOfGlyphs];    
@@ -1008,28 +1013,22 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (CPMaxRange(proposedRange) > textStorageLength)
         proposedRange.length = textStorageLength - proposedRange.location;
 
+	var string = [_textStorage string];
     switch(granularity)
     {
         case CPSelectByWord:
-        {
-            /*
-                FIXME: use an internal method.
-                But it seems that CPAttributedString(AppKitAdditions) -doubleClickAtIndex: is really what we need.
-            */
-            var string = [_textStorage string],
-                wordRange = [self _characterRangeForWordAtIndex:proposedRange.location inString:string];
-                
-            if (proposedRange.length)
-                wordRange = CPUnionRange(wordRange, [self _characterRangeForWordAtIndex:CPMaxRange(proposedRange) inString:string]);
-                
+        {	var wordRange = [self _characterRangeForWordAtIndex:proposedRange.location inString:string];
+			if (proposedRange.length)
+                wordRange = CPUnionRange(wordRange, [self _characterRangeForWordAtIndex:CPMaxRange(proposedRange) inString:string]);       
             return wordRange;
         } break;
 
         case CPSelectByParagraph:
-            CPLog.error(_cmd+" CPSelectByParagraph granularity unimplemented");
-        /* fallback to default */
-
-        case CPSelectByCharacter: /* FIXME: unclear how CPSelectByCharacter should affect selection range */
+        {	var parRange = [self _characterRangeForUnitAtIndex: proposedRange.location inString: string asDefinedByCharArray: ['\n']];       
+			if (proposedRange.length)
+                parRange = CPUnionRange(parRange, [self _characterRangeForUnitAtIndex: CPMaxRange(proposedRange) inString: string asDefinedByCharArray: ['\n']]);       
+            return parRange;
+        } break;
         default:
             return proposedRange;
     }

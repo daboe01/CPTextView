@@ -1,11 +1,10 @@
 /*
  * AppController.j
  * fixmes:
- *	tripel-click does not work
- *	undo/redo
+ *  fix CPAttributedString delete range attributes issue
+ *	undo/redo selection handling (move undo callbacks from storage to textview)
  *	colorpanel does not open with carret 'behind' text
  *	selection drawing artifact between lines
- *  fix CPAttributedString delete range attributes issue
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based sizing for performance
  *  copy/paste rich text
