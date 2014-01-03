@@ -180,7 +180,7 @@ var _sharedSimpleTypesetter = nil;
 			prevRangeWidth= rangeWidth;
 			if (currentChar == ' ')
 			{
-				wrapRange = CPCopyRange(lineRange);
+				wrapRange = CPMakeRangeCopy(lineRange);
 				wrapWidth = rangeWidth;
 			}
 			else if (currentChar == '\n') /* FIXME: should send actionForControlCharacterAtIndex: */

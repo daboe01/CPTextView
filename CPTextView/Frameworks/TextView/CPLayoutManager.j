@@ -163,7 +163,7 @@ var _objectsInRange = function(aList, aRange)
         _fragmentRect = CPRectMakeZero();
         _usedRect = CPRectMakeZero();
         _location = CPPointMakeZero();
-        _range = CPCopyRange(aRange);
+        _range = CPMakeRangeCopy(aRange);
         _textContainer = aContainer;
         _isInvalid = NO;
         
@@ -181,7 +181,7 @@ var _objectsInRange = function(aList, aRange)
 			var color=[attributes objectForKey:CPForegroundColorAttributeName];
 
 			var elem=[self createDOMElementWithText: string andFont: font andColor: color];
-            var run = { _range:CPCopyRange(effectiveRange), elem: elem, string: string };
+            var run = { _range:CPMakeRangeCopy(effectiveRange), elem: elem, string: string };
 
             _runs.push(run);
 
@@ -272,7 +272,7 @@ var _objectsInRange = function(aList, aRange)
     if (self)
     {
         _attributes = attributes;
-        _range = CPCopyRange(aRange);
+        _range = CPMakeRangeCopy(aRange);
     }
     return self;
 }
@@ -424,7 +424,7 @@ var _objectsInRange = function(aList, aRange)
         if (fragment._textContainer === aTextContainer)
         {
            if (!range)
-                range = CPCopyRange(fragment._range);
+                range = CPMakeRangeCopy(fragment._range);
             else
                 range = CPUnionRange(range, fragment._range);
         }
@@ -471,7 +471,7 @@ var _objectsInRange = function(aList, aRange)
     }
 
     if (removeRange.length)    
-    {	_removeInvalidLineFragmentsRange=CPCopyRange(removeRange);
+    {	_removeInvalidLineFragmentsRange=CPMakeRangeCopy(removeRange);
 	}
 	if (!startIndex)   // We erased all lines 
 		[self setExtraLineFragmentRect: CPRectMake(0,0) usedRect:CPRectMake(0,0) textContainer:nil];
@@ -508,7 +508,7 @@ var _objectsInRange = function(aList, aRange)
         }
     } else firstFragmentIndex = firstFragmentIndex+ (firstFragmentIndex? -1:0);
     var fragment = _lineFragments[firstFragmentIndex],
-        range = CPCopyRange(fragment._range);
+        range = CPMakeRangeCopy(fragment._range);
 
     fragment._isInvalid = YES;
 
@@ -549,7 +549,7 @@ var _objectsInRange = function(aList, aRange)
             if (CPRectContainsRect(aRect, fragment._usedRect))
             {
                 if (!range)
-                    range = CPCopyRange(fragment._range);
+                    range = CPMakeRangeCopy(fragment._range);
                 else
                     range = CPUnionRange(range, fragment._range);
             }
@@ -571,7 +571,7 @@ var _objectsInRange = function(aList, aRange)
                 if (glyphRange.location != CPNotFound)
                 {
                     if (!range)
-                        range = CPCopyRange(glyphRange);
+                        range = CPMakeRangeCopy(glyphRange);
                     else
                         range = CPUnionRange(range, glyphRange);
                 }
@@ -603,7 +603,7 @@ var _objectsInRange = function(aList, aRange)
         return;
 
     var ctx = [[CPGraphicsContext currentContext] graphicsPort],
-        paintedRange = CPCopyRange(aRange),
+        paintedRange = CPMakeRangeCopy(aRange),
         lineFragmentIndex,
 		l= lineFragments.length;
 
@@ -683,7 +683,7 @@ var _objectsInRange = function(aList, aRange)
             {
                 [self performSelector:attributesOperation withObject:attributes withObject:tempAttributes];
                 
-                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPCopyRange(tempAttributes._range);
+                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPMakeRangeCopy(tempAttributes._range);
 
                 location += tempAttributes._range.length;
                 length += tempAttributes._range.length;
@@ -705,7 +705,7 @@ var _objectsInRange = function(aList, aRange)
                 location += tempAttributes._range.length;
                 length += tempAttributes._range.length;
                 
-                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPCopyRange(tempAttributes._range);
+                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPMakeRangeCopy(tempAttributes._range);
                 dirtyRange = CPUnionRange(dirtyRange, splittedAttribute._range);
             }
             else
@@ -719,7 +719,7 @@ var _objectsInRange = function(aList, aRange)
                     [_temporaryAttributes insertObject:splittedAttribute atIndex:tempAttributesIndex + 1];
                 
                 tempAttributes._range = CPMakeRange(tempAttributes._range.location, location - tempAttributes._range.location);
-                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPCopyRange(tempAttributes._range);
+                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPMakeRangeCopy(tempAttributes._range);
                 dirtyRange = CPUnionRange(dirtyRange, splittedAttribute._range);
                 
                 if (splittedAttribute._range.length <= charRange.length)
@@ -750,7 +750,7 @@ var _objectsInRange = function(aList, aRange)
         else
         {
             [_temporaryAttributes addObject:[[_CPTemporaryAttributes alloc] initWithRange:charRange attributes:attributes]];
-            dirtyRange = CPCopyRange(charRange);
+            dirtyRange = CPMakeRangeCopy(charRange);
             break;
         }
     } while (length != charRange.length);
@@ -789,7 +789,7 @@ var _objectsInRange = function(aList, aRange)
             {
                 location += tempAttributes._range.length;
                 length += tempAttributes._range.length;
-                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPCopyRange(tempAttributes._range);
+                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPMakeRangeCopy(tempAttributes._range);
                 
                 [tempAttributes._attributes removeObjectForKey:attributeName];
                 if ([[tempAttributes._attributes allKeys] count] == 0)
@@ -815,7 +815,7 @@ var _objectsInRange = function(aList, aRange)
                 if ([[tempAttributes._attributes allKeys] count] == 0)
                     [_temporaryAttributes removeObjectAtIndex:tempAttributesIndex];
                     
-                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPCopyRange(tempAttributes._range);
+                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPMakeRangeCopy(tempAttributes._range);
                 dirtyRange = CPUnionRange(dirtyRange, splittedAttribute._range);
             }
             else
@@ -830,7 +830,7 @@ var _objectsInRange = function(aList, aRange)
 
                 tempAttributes._range = CPMakeRange(tempAttributes._range.location, location - tempAttributes._range.location);
 
-                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPCopyRange(tempAttributes._range);
+                dirtyRange = (dirtyRange)?CPUnionRange(dirtyRange, tempAttributes._range):CPMakeRangeCopy(tempAttributes._range);
                 dirtyRange = CPUnionRange(dirtyRange, splittedAttribute._range);
 
                 if (splittedAttribute._range.length < charRange.length)

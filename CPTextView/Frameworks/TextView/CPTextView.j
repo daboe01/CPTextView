@@ -30,7 +30,6 @@
 @import <AppKit/CPFontManager.j>
 @import "CPFontManagerAdditions.j"
 
-CPCopyRange=function(_3){ return {location:_3.location,length:_3.length}; };		// why is this not in cappuccino?
 _MakeRangeFromAbs=function( a1, a2){ return (a1< a2)? CPMakeRange(a1,a2-a1) : CPMakeRange(a2,a1-a2);};
 
 @implementation CPColor(CPTextViewExtensions)
@@ -337,7 +336,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var isAttributed = [aString isKindOfClass:CPAttributedString],
         string = (isAttributed)?[aString string]:aString;
 
-    if (![self shouldChangeTextInRange:CPCopyRange(_selectionRange) replacementString:string])
+    if (![self shouldChangeTextInRange:CPMakeRangeCopy(_selectionRange) replacementString:string])
         return;
 
 	if(_selectionRange.length === 0)
@@ -346,16 +345,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 	}
 	if (isAttributed)
 	{	if(_selectionRange.length > 0)
-		{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPCopyRange(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange: _selectionRange ] ];
+		{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange: _selectionRange ] ];
 			[[[self window] undoManager] setActionName:@"Replace rich text"];
 		}
-		[_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withAttributedString:aString];
+		[_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:aString];
 	} else
 	{	if(_selectionRange.length > 0)
-		{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPCopyRange(_selectionRange) withString: [[self string] substringWithRange: _selectionRange ] ];
+		{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: [[self string] substringWithRange: _selectionRange ] ];
 			[[[self window] undoManager] setActionName:@"Replace plain text"];
 		}
-		[_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withString: aString];
+		[_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: aString];
 	}
 	[self setSelectionGranularity: CPSelectByCharacter];
 	[self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
@@ -419,7 +418,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (!selecting && (_delegateRespondsToSelectorMask & kDelegateRespondsTo_textView_willChangeSelectionFromCharacterRange_toCharacterRange))
         _selectionRange = [_delegate textView:self willChangeSelectionFromCharacterRange:_selectionRange toCharacterRange:range];
     else
-    {	_selectionRange = CPCopyRange(range);
+    {	_selectionRange = CPMakeRangeCopy(range);
 		_selectionRange=[self selectionRangeForProposedRange:_selectionRange granularity:[self selectionGranularity]];
 
 	}
@@ -608,7 +607,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         return;
 
 //alert([self string])
-    [_textStorage deleteCharactersInRange:CPCopyRange(changedRange)];
+    [_textStorage deleteCharactersInRange:CPMakeRangeCopy(changedRange)];
 //alert([self string])
 	[self setSelectionGranularity: CPSelectByCharacter];
     [self setSelectedRange:CPMakeRange(changedRange.location, 0)];
@@ -728,7 +727,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _font = font;
         [_textStorage setFont:_font];
     }
-    [_textStorage addAttribute:CPFontAttributeName value:font range:CPCopyRange(range)];
+    [_textStorage addAttribute:CPFontAttributeName value:font range:CPMakeRangeCopy(range)];
    [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
 }
 
@@ -774,7 +773,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         if ([attrib containsKey:CPUnderlineStyleAttributeName] && [[attrib objectForKey:CPUnderlineStyleAttributeName] intValue])
             [_textStorage removeAttribute:CPUnderlineStyleAttributeName range:_selectionRange];
         else
-            [_textStorage addAttribute:CPUnderlineStyleAttributeName value:[CPNumber numberWithInt:1] range:CPCopyRange(_selectionRange)];
+            [_textStorage addAttribute:CPUnderlineStyleAttributeName value:[CPNumber numberWithInt:1] range:CPMakeRangeCopy(_selectionRange)];
     }
     /* else TODO: */
 }
@@ -815,9 +814,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [_textStorage setForegroundColor:_textColor];
     }
     if (aColor)
-        [_textStorage addAttribute:CPForegroundColorAttributeName value:aColor range:CPCopyRange(range)];
+        [_textStorage addAttribute:CPForegroundColorAttributeName value:aColor range:CPMakeRangeCopy(range)];
     else
-        [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPCopyRange(range)];
+        [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRangeCopy(range)];
 
     [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
 }
