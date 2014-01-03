@@ -30,7 +30,7 @@
 @import <AppKit/CPFontManager.j>
 @import "CPFontManagerAdditions.j"
 
-CPCopyRange=function(_3){ return {location:_3.location,length:_3.length}; };
+CPCopyRange=function(_3){ return {location:_3.location,length:_3.length}; };		// why is this not in cappuccino?
 function _MakeRangeFromAbs( a1, a2){ return (a1< a2)? CPMakeRange(a1,a2-a1) : CPMakeRange(a2,a1-a2);}
 
 @implementation CPColor(CPTextViewExtensions)
@@ -107,7 +107,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     BOOL _isRichText;
     BOOL _usesFontPanel;
     BOOL _allowsUndo;
-    CPUndoManager   _undoManager;
     BOOL _isHorizontallyResizable;
     BOOL _isVerticallyResizable;
 
@@ -150,7 +149,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _isHorizontallyResizable = NO;
         
         _carretRect = CPRectMake(0,0,1,11);
-		_undoManager=[CPUndoManager new];
     }
 	[self registerForDraggedTypes:[CPColorDragType]];
 
@@ -160,11 +158,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 -(void) undo: sender
 {	if(_allowsUndo)
 	{
-		[_undoManager undo];
+		[[[self window] undoManager] undo];
 	}
 }
 -(void) redo: sender
-{    if(_allowsUndo) [_undoManager redo];
+{    if(_allowsUndo) [[[self window] undoManager] redo];
 }
 
 - (id)initWithFrame:(CPRect)aFrame
@@ -342,16 +340,21 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (![self shouldChangeTextInRange:CPCopyRange(_selectionRange) replacementString:string])
         return;
 
-    if (isAttributed)
-    {
-	    [[_undoManager prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPCopyRange(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange: _selectionRange ] ];
-		[_undoManager setActionName:@"insertText"];
-
+	if(_selectionRange.length === 0)
+	{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPMakeRange(_selectionRange.location, [string length]) withString:@""];
+		[[ [self window] undoManager] setActionName:@"Insert text"];
+	}
+	if (isAttributed)
+	{	if(_selectionRange.length > 0)
+		{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPCopyRange(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange: _selectionRange ] ];
+			[[[self window] undoManager] setActionName:@"Replace rich text"];
+		}
 		[_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withAttributedString:aString];
-    }
-	else
-    {	[[_undoManager prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPCopyRange(_selectionRange) withString: [[self string] substringWithRange: _selectionRange ] ];
-		[_undoManager setActionName:@"insertText"];
+	} else
+	{	if(_selectionRange.length > 0)
+		{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPCopyRange(_selectionRange) withString: [[self string] substringWithRange: _selectionRange ] ];
+			[[[self window] undoManager] setActionName:@"Replace plain text"];
+		}
 		[_textStorage replaceCharactersInRange: CPCopyRange(_selectionRange) withString: aString];
 	}
 	[self setSelectionGranularity: CPSelectByCharacter];

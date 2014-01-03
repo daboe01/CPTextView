@@ -7,7 +7,7 @@
  *  2. bind selection (browsers+colorwell) to the firstresponder attribs
  *  3. sampleview is currently not shown
  *  4. add all the missing features from the MacOS X counterpart
- *  5. handle multiple selection properly instead of setting only the new attrib (all bolds in current selection should become bold italic)
+ *  5. handle multiple selection properly instead of setting only the new attrib (all bolds in current selection should e.g. become bold italic)
  *
  *
  * Created by Daniel Boehringer on 2/JAN/2014.
@@ -310,9 +310,9 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 // FIXME<!> Locale support
 -(void) currentTrait
 {	var sel=[_traitBrowser selectedItem];
-	if (sel==="Italic") return kTypefaceIndex_Italic;
-	if (sel==="Bold") return kTypefaceIndex_Bold;
-	if (sel==="Bold Italic") return kTypefaceIndex_BoldItalic;
+	if (sel === "Italic") return kTypefaceIndex_Italic;
+	if (sel === "Bold") return kTypefaceIndex_Bold;
+	if (sel === "Bold Italic") return kTypefaceIndex_BoldItalic;
 	return ret=kTypefaceIndex_Normal;
 }
 
