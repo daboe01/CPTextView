@@ -330,6 +330,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     return shouldChange;
 }
 
+- (void) _replaceCharactersInRange: aRange withAttributedString: aString
+{	[_textStorage replaceCharactersInRange: aRange withAttributedString: aString];
+	[self setSelectionGranularity: CPSelectByCharacter];
+	[self setSelectedRange: CPMakeRange(aRange.location, [aString length])];
+	[self setNeedsDisplay:YES];
+
+}
+- (void) _replaceCharactersInRange: aRange withString: aString
+{
+	[_textStorage replaceCharactersInRange: CPMakeRangeCopy( aRange) withString: aString];
+	[self setSelectionGranularity: CPSelectByCharacter];
+	[self setSelectedRange: CPMakeRange(aRange.location, aString.length)];
+	[self setNeedsDisplay:YES];
+}
 - (void)insertText:(id)aString
 {
 
@@ -340,18 +354,19 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         return;
 
 	if(_selectionRange.length === 0)
-	{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPMakeRange(_selectionRange.location, [string length]) withString:@""];
+	{	[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRange(_selectionRange.location, [string length]) withString:@""];
 		[[ [self window] undoManager] setActionName:@"Insert text"];
 	}
 	if (isAttributed)
 	{	if(_selectionRange.length > 0)
-		{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange: _selectionRange ] ];
+		{	[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange: _selectionRange ] ];
 			[[[self window] undoManager] setActionName:@"Replace rich text"];
 		}
 		[_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:aString];
 	} else
 	{	if(_selectionRange.length > 0)
-		{	[[[[self window] undoManager] prepareWithInvocationTarget: _textStorage] replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: [[self string] substringWithRange: _selectionRange ] ];
+		{
+			[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: [[self string] substringWithRange: CPMakeRangeCopy(_selectionRange) ] ];
 			[[[self window] undoManager] setActionName:@"Replace plain text"];
 		}
 		[_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: aString];
@@ -606,9 +621,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {	if (![self shouldChangeTextInRange:changedRange replacementString:@""])
         return;
 
-//alert([self string])
-    [_textStorage deleteCharactersInRange:CPMakeRangeCopy(changedRange)];
-//alert([self string])
+	[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRange(_selectionRange.location, 0) withAttributedString:[_textStorage attributedSubstringFromRange: CPMakeRangeCopy(changedRange) ] ]
+    [_textStorage deleteCharactersInRange: CPMakeRangeCopy(changedRange)];
+
 	[self setSelectionGranularity: CPSelectByCharacter];
     [self setSelectedRange:CPMakeRange(changedRange.location, 0)];
     [self didChangeText];
