@@ -1,10 +1,9 @@
 /*
  * AppController.j
  * fixmes:
- *  fix CPAttributedString delete range attributes issue
  *	undo/redo selection handling (move undo callbacks from storage to textview)
  *	colorpanel does not open with carret 'behind' text
- *	selection drawing artifact between lines
+ *	selection drawing 'artifact' between lines
  *  baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based font-sizing for performance
  *  copy/paste rich text

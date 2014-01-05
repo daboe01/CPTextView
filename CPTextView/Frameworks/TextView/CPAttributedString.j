@@ -51,13 +51,22 @@
 
 // Creating a CPAttributedString Object
 /*!
+    Creates an empty attributed string.
+    @return a new empty CPAttributedString.
+*/
+- (id)init
+{
+    return [self initWithString:@"" attributes:nil];
+}
+
+/*!
     Creates a new attributed string from a character string.
     @param aString is the string to initialise from.
     @return a new CPAttributedString containing the string \c aString.
 */
 - (id)initWithString:(CPString)aString
 {
-    return [self initWithString: aString attributes:nil];
+    return [self initWithString:aString attributes:nil];
 }
 
 /*!
@@ -67,7 +76,7 @@
 */
 - (id)initWithAttributedString:(CPAttributedString)aString
 {
-    var string = [self initWithString:"" attributes:nil];
+    var string = [self initWithString:@"" attributes:nil];
 
     [string setAttributedString:aString];
 
@@ -89,10 +98,10 @@
     if (self)
     {
         if (!attributes)
-            attributes = [CPDictionary dictionary];
+            attributes = @{};
 
-        _string = ""+aString;
-        _rangeEntries = [CPArray arrayWithObject: makeRangeEntry(CPMakeRange(0, _string.length), attributes)];
+        _string = "" + aString;
+        _rangeEntries = [makeRangeEntry(CPMakeRange(0, _string.length), attributes)];
     }
 
     return self;
@@ -130,22 +139,25 @@
 }
 
 // private method
-- (unsigned)_indexOfEntryWithIndex:(unsigned) anIndex
+- (unsigned)_indexOfEntryWithIndex:(unsigned)anIndex
 {
     if (anIndex < 0 || anIndex > _string.length || anIndex === undefined)
         return CPNotFound;
-    //find the range entry that contains anIndex.
+
+    // find the range entry that contains anIndex.
     var sortFunction = function(index, entry)
     {
-        //index is the character index we're searching for, while range is the actual range entry we're comparing against
-        if (CPLocationInRange(index, entry.range)||(!index&&!CPMaxRange(entry.range)))
+        // index is the character index we're searching for,
+        // while range is the actual range entry we're comparing against
+        if (CPLocationInRange(index, entry.range) || (!index && !CPMaxRange(entry.range)))
             return CPOrderedSame;
         else if (CPMaxRange(entry.range) <= index)
             return CPOrderedDescending;
         else
             return CPOrderedAscending;
     };
-    return [_rangeEntries indexOfObject: anIndex inSortedRange:nil options:0 usingComparator:sortFunction];
+
+    return [_rangeEntries indexOfObject:anIndex inSortedRange:nil options:0 usingComparator:sortFunction];
 }
 
 //Retrieving Attribute Information
@@ -164,18 +176,19 @@
     same as those at index, \c anIndex. If not required pass
     \c nil.
     @return a CPDictionary containing the attributes associated with the
-    character at index \c anIndex. Returns \c nil if index
+    character at index \c anIndex. Returns an empty dictionary if index
     is out of bounds.
 */
 - (CPDictionary)attributesAtIndex:(unsigned)anIndex effectiveRange:(CPRangePointer)aRange
 {
-    //find the range entry that contains anIndex.
+    // find the range entry that contains anIndex.
     var entryIndex = [self _indexOfEntryWithIndex:anIndex];
 
-    if (entryIndex == CPNotFound)
-        return nil;
+    if (entryIndex === CPNotFound)
+        return @{};
 
     var matchingRange = _rangeEntries[entryIndex];
+
     if (aRange)
     {
         aRange.location = matchingRange.range.location;
@@ -203,15 +216,15 @@
     @param rangeLimit a range limiting the search for the attributes' applicable
     range.
     @return a CPDictionary containing the attributes associated with the
-    character at index \c anIndex. Returns \c nil if index
+    character at index \c anIndex. Returns an empty dictionary if index
     is out of bounds.
 */
 - (CPDictionary)attributesAtIndex:(unsigned)anIndex longestEffectiveRange:(CPRangePointer)aRange inRange:(CPRange)rangeLimit
 {
     var startingEntryIndex = [self _indexOfEntryWithIndex:anIndex];
 
-    if (startingEntryIndex == CPNotFound)
-        return nil;
+    if (startingEntryIndex === CPNotFound)
+        return @{};
 
     if (!aRange)
         return _rangeEntries[startingEntryIndex].attributes;
@@ -224,7 +237,7 @@
         return _rangeEntries[startingEntryIndex].attributes;
     }
 
-    //scan backwards
+    // scan backwards
     var nextRangeIndex = startingEntryIndex - 1,
         currentEntry = _rangeEntries[startingEntryIndex],
         comparisonDict = currentEntry.attributes;
@@ -244,7 +257,7 @@
 
     aRange.location = MAX(currentEntry.range.location, rangeLimit.location);
 
-    //scan forwards
+    // scan forwards
     currentEntry = _rangeEntries[startingEntryIndex];
     nextRangeIndex = startingEntryIndex + 1;
 
@@ -321,10 +334,9 @@
 */
 - (id)attribute:(CPString)attribute atIndex:(unsigned)anIndex longestEffectiveRange:(CPRangePointer)aRange inRange:(CPRange)rangeLimit
 {
-    //find the range entry that contains anIndex.
     var startingEntryIndex = [self _indexOfEntryWithIndex:anIndex];
 
-    if (startingEntryIndex == CPNotFound || !attribute)
+    if (startingEntryIndex === CPNotFound || !attribute)
         return nil;
 
     if (!aRange)
@@ -338,7 +350,7 @@
         return [_rangeEntries[startingEntryIndex].attributes objectForKey:attribute];
     }
 
-    //scan backwards
+    // scan backwards
     var nextRangeIndex = startingEntryIndex - 1,
         currentEntry = _rangeEntries[startingEntryIndex],
         comparisonAttribute = [currentEntry.attributes objectForKey:attribute];
@@ -358,7 +370,7 @@
 
     aRange.location = MAX(currentEntry.range.location, rangeLimit.location);
 
-    //scan forwards
+    // scan forwards
     currentEntry = _rangeEntries[startingEntryIndex];
     nextRangeIndex = startingEntryIndex + 1;
 
@@ -392,7 +404,7 @@
     if (!aString)
         return NO;
 
-    if (_string != [aString string])
+    if (_string !== [aString string])
         return NO;
 
     var myRange = CPMakeRange(),
@@ -403,9 +415,12 @@
 
     while (CPMaxRange(CPUnionRange(myRange, comparisonRange)) < length)
     {
-        if (CPIntersectionRange(myRange, comparisonRange).length > 0 && ![myAttributes isEqualToDictionary:comparisonAttributes])
+        if (CPIntersectionRange(myRange, comparisonRange).length > 0 &&
+            ![myAttributes isEqualToDictionary:comparisonAttributes])
+        {
             return NO;
-        if (CPMaxRange(myRange) < CPMaxRange(comparisonRange))
+        }
+        else if (CPMaxRange(myRange) < CPMaxRange(comparisonRange))
             myAttributes = [self attributesAtIndex:CPMaxRange(myRange) effectiveRange:myRange];
         else
             comparisonAttributes = [aString attributesAtIndex:CPMaxRange(comparisonRange) effectiveRange:comparisonRange];
@@ -423,7 +438,7 @@
 */
 - (BOOL)isEqual:(id)anObject
 {
-    if (anObject == self)
+    if (anObject === self)
         return YES;
 
     if ([anObject isKindOfClass:[self class]])
@@ -447,8 +462,12 @@
                     reason:"tried to get attributedSubstring for an invalid range: "+(aRange?CPStringFromRange(aRange):"nil")];
 
     var newString = [[CPAttributedString alloc] initWithString:_string.substring(aRange.location, CPMaxRange(aRange))],
-        entryIndex = [self _indexOfEntryWithIndex:aRange.location],
-        currentRangeEntry = _rangeEntries[entryIndex],
+        entryIndex = [self _indexOfEntryWithIndex:aRange.location];
+
+    if (entryIndex === CPNotFound)
+        _CPRaiseRangeException(self, _cmd, aRange.location, _string.length);
+
+    var currentRangeEntry = _rangeEntries[entryIndex],
         lastIndex = CPMaxRange(aRange);
 
     newString._rangeEntries = [];
@@ -505,38 +524,52 @@
 - (void)replaceCharactersInRange:(CPRange)aRange withString:(CPString)aString
 {
     if (!aString)
-        aString = "";
-	var startingIndex = [self _indexOfEntryWithIndex: aRange.location];
-	if(startingIndex<0) startingIndex=MAX(_rangeEntries.length-1,0);
-	var     startingRangeEntry = _rangeEntries[startingIndex];
-	var    endingIndex = [self _indexOfEntryWithIndex: CPMaxRange(aRange) ];
-	if(endingIndex<0) endingIndex=MAX(_rangeEntries.length-1,0);
+        aString = @"";
 
-	var     endingRangeEntry = _rangeEntries[endingIndex];
-	var   additionalLength = aString.length - aRange.length;
+    var    lastValidIndex= MAX(_rangeEntries.length-1, 0);
+    var startingIndex = [self _indexOfEntryWithIndex: aRange.location];
 
-   _string = _string.substring(0, aRange.location) + aString + _string.substring(CPMaxRange(aRange));
+    if (startingIndex < 0) startingIndex = lastValidIndex;
+    var endingIndex = [self _indexOfEntryWithIndex: CPMaxRange(aRange)];
 
-    if (startingIndex == endingIndex)
-        startingRangeEntry.range.length += additionalLength;
+    if (endingIndex < 0) endingIndex = lastValidIndex;
+
+    var additionalLength = aString.length - aRange.length;
+    var patchPosition = startingIndex;
+
+    _string = _string.substring(0, aRange.location) + aString + _string.substring(CPMaxRange(aRange));
+    var originalLength= _rangeEntries[patchPosition].range.length;
+
+    if (startingIndex === endingIndex)
+        _rangeEntries[patchPosition].range.length += additionalLength;
     else
     {
-        endingRangeEntry.range.length = CPMaxRange(endingRangeEntry.range) - CPMaxRange(aRange);
-        endingRangeEntry.range.location = CPMaxRange(aRange);
+        if (CPIntersectionRange(_rangeEntries[patchPosition].range, aRange).length < originalLength)
+        {
+            startingIndex++;
+        }
 
-        startingRangeEntry.range.length = CPMaxRange(aRange) - startingRangeEntry.range.location;
+        if (endingIndex > startingIndex)
+        {
+            var originalOffset= _rangeEntries[startingIndex].range.location;
+            var offsetFromSplicing = CPMaxRange(_rangeEntries[endingIndex].range)-originalOffset
+            _rangeEntries.splice(startingIndex, endingIndex - startingIndex);
+            _rangeEntries[startingIndex].range=CPMakeRange(originalOffset, offsetFromSplicing);
+        }
+        var lhsOffset=aString.length -CPIntersectionRange(CPMakeRange(_rangeEntries[patchPosition].range.location, originalLength), aRange).length;
+        _rangeEntries[patchPosition].range.length = originalLength+lhsOffset;
 
-// <!> FIXME: splice only, if complete range got removed, hotfix: see next line
-//     {range:aRange, attributes:[attributes copy]};
-if(1)
-		_rangeEntries.splice(startingIndex, endingIndex - startingIndex);
-else	startingIndex--;
-
+		if(patchPosition !== startingIndex) 
+        {   var rhsOffset=aString.length -CPIntersectionRange(_rangeEntries[startingIndex].range, aRange).length;
+            _rangeEntries[startingIndex].range.location += lhsOffset;
+            _rangeEntries[startingIndex].range.length += rhsOffset;
+            patchPosition= startingIndex;
+        }
     }
 
-    endingIndex = startingIndex + 1;
-    while (endingIndex < _rangeEntries.length)
-        _rangeEntries[endingIndex++].range.location += additionalLength;
+    var l= _rangeEntries.length;
+    for (var patchIndex= patchPosition+1; patchIndex < l; patchIndex++)
+        _rangeEntries[patchIndex].range.location += additionalLength;
 }
 
 /*!
@@ -566,7 +599,7 @@ else	startingIndex--;
         endingEntryIndex = [self _indexOfRangeEntryForIndex:CPMaxRange(aRange) splitOnMaxIndex:YES],
         current = startingEntryIndex;
 
-    if (endingEntryIndex == CPNotFound)
+    if (endingEntryIndex === CPNotFound)
         endingEntryIndex = _rangeEntries.length;
 
     while (current < endingEntryIndex)
@@ -592,7 +625,7 @@ else	startingIndex--;
         endingEntryIndex = [self _indexOfRangeEntryForIndex:CPMaxRange(aRange) splitOnMaxIndex:YES],
         current = startingEntryIndex;
 
-    if (endingEntryIndex == CPNotFound)
+    if (endingEntryIndex === CPNotFound)
         endingEntryIndex = _rangeEntries.length;
 
     while (current < endingEntryIndex)
@@ -624,7 +657,7 @@ else	startingIndex--;
 */
 - (void)addAttribute:(CPString)anAttribute value:(id)aValue range:(CPRange)aRange
 {
-    [self addAttributes:[CPDictionary dictionaryWithObject:aValue forKey:anAttribute] range:aRange];
+    [self addAttributes:@{ anAttribute: aValue } range:aRange];
 }
 
 /*!
@@ -639,7 +672,7 @@ else	startingIndex--;
         endingEntryIndex = [self _indexOfRangeEntryForIndex:CPMaxRange(aRange) splitOnMaxIndex:YES],
         current = startingEntryIndex;
 
-    if (endingEntryIndex == CPNotFound)
+    if (endingEntryIndex === CPNotFound)
         endingEntryIndex = _rangeEntries.length;
 
     while (current < endingEntryIndex)
@@ -678,7 +711,7 @@ else	startingIndex--;
         otherRangeEntries = aString._rangeEntries,
         length = [aString length];
 
-    if (entryIndexOfNextEntry == CPNotFound)
+    if (entryIndexOfNextEntry === CPNotFound)
         entryIndexOfNextEntry = _rangeEntries.length;
 
     _string = _string.substring(0, anIndex) + aString._string + _string.substring(anIndex);
@@ -713,7 +746,7 @@ else	startingIndex--;
 - (void)replaceCharactersInRange:(CPRange)aRange withAttributedString:(CPAttributedString)aString
 {
     [self deleteCharactersInRange:aRange];
-    [self insertAttributedString: aString atIndex:aRange.location];
+    [self insertAttributedString:aString atIndex:aRange.location];
 }
 
 /*!
@@ -738,12 +771,12 @@ else	startingIndex--;
 {
     var index = [self _indexOfEntryWithIndex:characterIndex];
 
-    if (index < 0)
+    if (index === CPNotFound)
         return index;
 
     var rangeEntry = _rangeEntries[index];
 
-    if (rangeEntry.range.location == characterIndex || (CPMaxRange(rangeEntry.range) - 1 == characterIndex && !split))
+    if (rangeEntry.range.location === characterIndex || (CPMaxRange(rangeEntry.range) - 1 === characterIndex && !split))
         return index;
 
     var newEntries = splitRangeEntryAtIndex(rangeEntry, characterIndex);
@@ -809,9 +842,9 @@ else	startingIndex--;
 
 @end
 
-var isEqual = function isEqual(a, b)
+var isEqual = function(a, b)
 {
-    if (a == b)
+    if (a === b)
         return YES;
 
     if ([a respondsToSelector:@selector(isEqual:)] && [a isEqual:b])
@@ -820,17 +853,17 @@ var isEqual = function isEqual(a, b)
     return NO;
 };
 
-var makeRangeEntry = function makeRangeEntry(/*CPRange*/aRange, /*CPDictionary*/attributes)
+var makeRangeEntry = function(/*CPRange*/aRange, /*CPDictionary*/attributes)
 {
     return {range:aRange, attributes:[attributes copy]};
 };
 
-var copyRangeEntry = function copyRangeEntry(/*RangeEntry*/aRangeEntry)
+var copyRangeEntry = function(/*RangeEntry*/aRangeEntry)
 {
     return makeRangeEntry(CPMakeRangeCopy(aRangeEntry.range), [aRangeEntry.attributes copy]);
 };
 
-var splitRangeEntry = function splitRangeEntryAtIndex(/*RangeEntry*/aRangeEntry, /*unsigned*/anIndex)
+var splitRangeEntryAtIndex = function(/*RangeEntry*/aRangeEntry, /*unsigned*/anIndex)
 {
     var newRangeEntry = copyRangeEntry(aRangeEntry),
         cachedIndex = CPMaxRange(aRangeEntry.range);
