@@ -1,12 +1,10 @@
 /*
  * AppController.j
  * fixmes:
- *	undo/redo selection handling (move undo callbacks from storage to textview)
- *	colorpanel does not open with carret 'behind' text
- *	selection drawing 'artifact' between lines
- *  baseline-alignment (hint: collect heights in the same way as the advancements)
- *  revisit canvas-based font-sizing for performance
  *  copy/paste rich text
+ *	selection drawing 'artifact' between lines
+ *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
+ *  revisit canvas-based font-sizing for performance
  *  native pasting in safari (try tricking around with contenteditable)
  */
  
