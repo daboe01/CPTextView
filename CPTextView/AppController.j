@@ -1,7 +1,10 @@
 /*
  * AppController.j
  * fixmes:
- *  copy/paste rich text
+ *	support centre and right-aligned text
+ *	update demo to use a 2-column-setup
+ *	support "hot-linking" to font-panel (observe first responder as possibly in textextras (linenumber))
+ *	support methods from CPKeyBinding.j
  *	selection drawing 'artifact' between lines
  *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based font-sizing for performance

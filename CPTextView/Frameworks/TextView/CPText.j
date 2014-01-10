@@ -40,6 +40,8 @@ CPBackspaceCharacter          = 0x0008;
 CPBackTabCharacter            = 0x0019;
 CPDeleteCharacter             = 0x007f;
 
+CPRichStringPboardType="CPRichStringPboardType";
+
 /*!
     @ingroup appkit
     @class CPText
@@ -60,10 +62,14 @@ CPDeleteCharacter             = 0x007f;
             return;
 
 	var pasteboard = [CPPasteboard generalPasteboard],
-            stringForPasting = [[self stringValue] substringWithRange:selectedRange];
-
-	[pasteboard declareTypes:[CPStringPboardType] owner:nil];
+        stringForPasting = [[self stringValue] substringWithRange:selectedRange];
+	[pasteboard declareTypes:[self isRichText]? [CPStringPboardType, CPRichStringPboardType]:[CPStringPboardType] owner:nil];
 	[pasteboard setString:stringForPasting forType:CPStringPboardType];
+
+	if([self isRichText])
+    {   var richData = [CPKeyedArchiver archivedDataWithRootObject: [self textStorage]];
+	    [pasteboard setData:richData forType:CPRichStringPboardType];
+    }
 }
 - (void)copyFont:(id)sender
 {
@@ -118,9 +124,11 @@ CPDeleteCharacter             = 0x007f;
 - (void)paste:(id)sender
 {
 	var pasteboard = [CPPasteboard generalPasteboard],
+		dataForPasting = [CPKeyedUnarchiver unarchiveObjectWithData:[pasteboard dataForType:CPRichStringPboardType]],
 		stringForPasting = [pasteboard stringForType:CPStringPboardType];
-	if (stringForPasting)
-	{	[self insertText: stringForPasting];
+
+	if (dataForPasting || stringForPasting)
+	{	[self insertText:dataForPasting || stringForPasting];
 	}
 }
 - (void)pasteFont:(id)sender

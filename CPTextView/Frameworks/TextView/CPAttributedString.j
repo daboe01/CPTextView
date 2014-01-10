@@ -554,10 +554,10 @@
             var originalOffset= _rangeEntries[startingIndex].range.location;
             var offsetFromSplicing = CPMaxRange(_rangeEntries[endingIndex].range)-originalOffset
             _rangeEntries.splice(startingIndex, endingIndex - startingIndex);
-            _rangeEntries[startingIndex].range=CPMakeRange(originalOffset, offsetFromSplicing);
+            _rangeEntries[startingIndex].range = CPMakeRange(originalOffset, offsetFromSplicing);
         }
 
-		if(patchPosition !== startingIndex) 
+		if(patchPosition !== startingIndex)
         {   var lhsOffset=aString.length -CPIntersectionRange(_rangeEntries[patchPosition].range, aRange).length;
             _rangeEntries[patchPosition].range.length = originalLength+lhsOffset;
             var rhsOffset=aString.length -CPIntersectionRange(_rangeEntries[startingIndex].range, aRange).length;
@@ -832,6 +832,39 @@
     //do nothing (says cocotron and gnustep)
 }
 
+- (id)initWithCoder:(id)aCoder
+{
+    self=[self init];
+    if (self != nil)
+    {
+		_string=[aCoder decodeObjectForKey:"_string"];
+		var decoded_ranges = [aCoder decodeObjectForKey:"ranges"],
+            decoded_attribs = [aCoder decodeObjectForKey:"attributes"];
+		_rangeEntries=[];
+
+		var i, l= decoded_ranges.length;
+		for(i=0; i<l; i++)
+		{
+			_rangeEntries.push( makeRangeEntry(decoded_ranges[i], decoded_attribs[i]));
+		}
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(id)aCoder
+{
+    [aCoder encodeObject: _string forKey:"_string"];
+	var ranges_for_encoding=[],
+        dicts_for_encoding=[];
+	var i, l= _rangeEntries.length;
+	for(i=0; i<l; i++)
+	{	ranges_for_encoding.push(_rangeEntries[i].range);
+		dicts_for_encoding.push(_rangeEntries[i].attributes);
+	}
+    [aCoder encodeObject: ranges_for_encoding forKey:"ranges"];
+    [aCoder encodeObject: dicts_for_encoding forKey:"attributes"];
+}
+
 @end
 
 /*!
@@ -879,3 +912,4 @@ var splitRangeEntryAtIndex = function(/*RangeEntry*/aRangeEntry, /*unsigned*/anI
 
     return [aRangeEntry, newRangeEntry];
 };
+
