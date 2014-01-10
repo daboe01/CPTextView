@@ -24,6 +24,8 @@
  */
 
 @import <Foundation/CPObject.j>
+@import "CPTextStorage.j"
+@import "CPParagraphStyle.j"
 
 /*
     CPTypesetterControlCharacterAction
@@ -56,28 +58,28 @@ var CPSystemTypesetterFactory = Nil;
 
 - (CPTypesetterControlCharacterAction)actionForControlCharacterAtIndex:(unsigned)charIndex
 {
-	CPLog.error(@"-[CPTypesetter "+cmd+"] subclass responsability");
+	CPLog.error(@"-[CPTypesetter subclass responsability");
     return CPTypesetterZeroAdvancementAction;
 }
 - (CPLayoutManager)layoutManager
 {
-	CPLog.error(@"-[CPTypesetter "+cmd+"] subclass responsability");
+	CPLog.error(@"-[CPTypesetter subclass responsability");
     return nil;
 }
 - (CPTextContainer)currentTextContainer
 {
-	CPLog.error(@"-[CPTypesetter "+cmd+"] subclass responsability");
+	CPLog.error(@"-[CPTypesetter subclass responsability");
     return nil;
 }
 - (CPArray)textContainers
 {
-	CPLog.error(@"-[CPTypesetter "+cmd+"] subclass responsability");
+	CPLog.error(@"-[CPTypesetter subclass responsability");
     return nil;
 }
 - (void)layoutGlyphsInLayoutManager:(CPLayoutManager)layoutManager startingAtGlyphIndex:(unsigned)startGlyphIndex 
         maxNumberOfLineFragments:(unsigned)maxNumLines nextGlyphIndex:(UIntegerPointer)nextGlyph
 {
-   CPLog.error(@"-[CPTypesetter "+cmd+"] subclass responsability");
+   CPLog.error(@"-[CPTypesetter subclass responsability");
 }
 @end
 
@@ -92,6 +94,7 @@ var _sharedSimpleTypesetter = nil;
     CPRange _attributesRange;
     CPDictionary _currentAttributes;
     CPFont _currentFont;
+	CPParagraphStyle _currentParagraph;
 
     float _lineHeight;
     float _lineBase;
@@ -132,7 +135,8 @@ var _sharedSimpleTypesetter = nil;
         wrapWidth = 0,
         isNewline = NO,
         isWordWrapped = NO,
-		numberOfGlyphs= [_textStorage length];
+		numberOfGlyphs= [_textStorage length],
+		leading;
 
     var numLines = 0,
         lineWidth = 0,
@@ -161,7 +165,8 @@ var _sharedSimpleTypesetter = nil;
 			{
 				_currentAttributes = [_textStorage attributesAtIndex:glyphIndex effectiveRange:_attributesRange];
 				_currentFont = [_currentAttributes objectForKey:CPFontAttributeName];
-				if(!_currentFont)
+				_currentParagraph = [_currentAttributes objectForKey:CPParagraphStyleAttributeName] || [CPParagraphStyle defaultParagraphStyle];
+				if (!_currentFont)
 					_currentFont = [_textStorage font];
 				ascent = ["x" sizeWithFont:_currentFont].height;
 				descent = 0;	//FIXME
@@ -199,33 +204,48 @@ var _sharedSimpleTypesetter = nil;
 			}
 			_lineHeight = MAX(_lineHeight, ascent - descent + leading);
 			_lineBase = MAX(_lineBase, ascent);
+
 			if (isNewline)
 			{
+	// <!>FIXME: refactor to private method so that it can be used also for "flushing" (see below)
 				[_layoutManager setTextContainer: _currentTextContainer forGlyphRange:lineRange];	// creates a new lineFragment
 				var rect = CPRectMake(lineOrigin.x, lineOrigin.y, lineWidth, _lineHeight);
 				[_layoutManager setLineFragmentRect: rect forGlyphRange:lineRange usedRect:rect];
-				[_layoutManager setLocation:CPMakePoint(0, _lineBase) forStartOfGlyphRange:lineRange];
+				var myX=0;
+				switch ([_currentParagraph alignment])
+				{	case CPLeftTextAlignment:
+						myX=0;
+					break;
+					case CPCenterTextAlignment:
+						myX=(containerSize.width - lineWidth) / 2;
+					break;
+					case CPRightTextAlignment:
+						// FIXME
+					break;
+				}
+				[_layoutManager setLocation:CPMakePoint(myX, _lineBase) forStartOfGlyphRange:lineRange];
 				[_layoutManager _setAdvancements: advancements forGlyphRange: lineRange];
 
 				lineOrigin.y += _lineHeight;
-				_lineHeight   = 0;
-				_lineBase     = 0;
-				lineWidth     = 0;
-				advancements  = [];
-				prevRangeWidth= 0;
-				currentAnchor = 0;
-				_previousFont = nil;
+				_lineHeight    = 0;
+				_lineBase      = 0;
+				lineWidth      = 0;
+				advancements   = [];
+				prevRangeWidth = 0;
+				currentAnchor  = 0;
+				_previousFont  = nil;
 
-				lineRange     = CPMakeRange(glyphIndex+1, 0);
-				wrapRange     = CPMakeRange(0, 0);
-				wrapWidth     = 0;
-				isNewline     = NO;
-				isWordWrapped = NO;
+				lineRange      = CPMakeRange(glyphIndex+1, 0);
+				wrapRange      = CPMakeRange(0, 0);
+				wrapWidth      = 0;
+				isNewline      = NO;
+				isWordWrapped  = NO;
 				numLines++;
 			}
 		glyphIndex++;
     } while (numLines != maxNumLines && glyphIndex < numberOfGlyphs);
 
+	// this is to "flush" the last line
     if (lineRange.length)
     {
 		[_layoutManager setTextContainer:_currentTextContainer forGlyphRange:lineRange];

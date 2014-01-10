@@ -42,6 +42,7 @@ CPDeleteCharacter             = 0x007f;
 
 CPRichStringPboardType="CPRichStringPboardType";
 
+
 /*!
     @ingroup appkit
     @class CPText

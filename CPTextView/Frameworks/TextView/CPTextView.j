@@ -24,6 +24,7 @@
  */
 
 @import "CPText.j"
+@import "CPParagraphStyle.j"
 @import "CPTextStorage.j"
 @import "CPTextContainer.j"
 @import "CPLayoutManager.j"

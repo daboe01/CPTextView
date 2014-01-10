@@ -1,7 +1,7 @@
 /*
  * AppController.j
  * fixmes:
- *	support centre and right-aligned text
+ *	support CPParagraphStyleAttributeName  centre and right-aligned text
  *	update demo to use a 2-column-setup
  *	support "hot-linking" to font-panel (observe first responder as possibly in textextras (linenumber))
  *	support methods from CPKeyBinding.j
@@ -13,7 +13,7 @@
  
 @import <TextView/CPTextView.j>
 
-// measure the performance against the capp-builtin sizing
+// <!> TODO measure the performance against the capp-builtin sizing using this code (could be faster, would be safe against HTML)
 var _measuringContext;
 function _widthOfStringForFont(aString, aFont)
 {	if(!_measuringContext) _measuringContext =CGBitmapGraphicsContextCreate();
@@ -91,8 +91,10 @@ function _widthOfStringForFont(aString, aFont)
 
     item = [mainMenu insertItemWithTitle:@"Font" action:@selector(orderFrontFontPanel:) keyEquivalent:nil atIndex:1];    
 
+	var centeredParagraph=[CPParagraphStyle defaultParagraphStyle];
+	[centeredParagraph setAlignment: CPCenterTextAlignment];
     [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce\n" 
-                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPFontAttributeName,CPForegroundColorAttributeName]]]
+                attributes:[CPDictionary dictionaryWithObjects:[centeredParagraph, [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPParagraphStyleAttributeName, CPFontAttributeName, CPForegroundColorAttributeName]]]
                 ];
        
      [_textView insertText:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];

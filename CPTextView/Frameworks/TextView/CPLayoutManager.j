@@ -193,7 +193,7 @@ var _objectsInRange = function(aList, aRange)
 -(void) setAdvancements: someAdvancements
 {   _glyphsFrames = [];
 	var count = someAdvancements.length,
-        origin = CPPointMake(_fragmentRect.origin.x, _fragmentRect.origin.y);
+        origin = CPPointMake(_fragmentRect.origin.x + _location.x, _fragmentRect.origin.y);
 	for (var i = 0; i < count; i++)
 	{	_glyphsFrames.push(CPRectMake(origin.x, origin.y, someAdvancements[i], _usedRect.size.height));
 		origin.x += someAdvancements[i];
@@ -240,7 +240,8 @@ var _objectsInRange = function(aList, aRange)
 
 	for (var i = 0; i < c; i++)
     {	var run = runs[i];
-		orig.x=( _glyphsFrames[run._range.location-runs[0]._range.location]? _glyphsFrames[run._range.location-runs[0]._range.location].origin.x:0)+ aPoint.x;
+		orig.x=( _glyphsFrames[run._range.location-runs[0]._range.location]? _glyphsFrames[run._range.location-runs[0]._range.location].origin.x:0)+
+					aPoint.x;
 		run.elem.style.left=(orig.x)+"px";
 		run.elem.style.top= (orig.y-_usedRect.size.height+4)+"px";
 		if(!run.DOMactive) _textContainer._textView._DOMElement.appendChild(run.elem);
