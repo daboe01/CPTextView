@@ -119,7 +119,15 @@ var _sharedSimpleTypesetter = nil;
     return [_layoutManager textContainers];
 }
 
--(void)layoutGlyphsInLayoutManager:(CPLayoutManager)layoutManager startingAtGlyphIndex:(unsigned)glyphIndex
+- (void)_flush:(CPLayoutManager)layoutManager startingAtGlyphIndex:(unsigned)glyphIndex
+            maxNumberOfLineFragments:(unsigned)maxNumLines nextGlyphIndex:(UIntegerReference)nextGlyph
+{	// <!>FIXME: refactor to private method so that it can be used also for "flushing" (see below)
+				[_layoutManager setTextContainer: _currentTextContainer forGlyphRange:lineRange];	// creates a new lineFragment
+				var rect = CPRectMake(lineOrigin.x, lineOrigin.y, lineWidth, _lineHeight);
+				[_layoutManager setLineFragmentRect: rect forGlyphRange:lineRange usedRect:rect];
+}
+
+- (void)layoutGlyphsInLayoutManager:(CPLayoutManager)layoutManager startingAtGlyphIndex:(unsigned)glyphIndex
             maxNumberOfLineFragments:(unsigned)maxNumLines nextGlyphIndex:(UIntegerReference)nextGlyph
 {
     _layoutManager = layoutManager;

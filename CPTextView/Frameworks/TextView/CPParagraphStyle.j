@@ -4,7 +4,7 @@
  *
  * FIXME
  *  This is basically a stub.
- *  We also need to store spacing information as well as writing direction (among others)
+ *  We need to store all the spacing informations as well as writing direction (among others)
  *
  *  Created by Daniel Boehringer on 11/01/2014
  *  Copyright Daniel Boehringer 2014.
@@ -51,6 +51,23 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
     }
     return self;
 }
+- (id)initWithCoder:(id)aCoder
+{
+    self=[self init];
+    if (self)
+    {
+		_type = [aCoder decodeIntForKey:"_type"];
+		_location = [aCoder decodeDoubleForKey:"_location"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(id)aCoder
+{
+    [aCoder encodeInt: _type forKey:"_type"];
+    [aCoder encodeDouble: _location forKey:"_location"];
+}
+
 @end
 
 @implementation CPParagraphStyle : CPObject
@@ -101,5 +118,23 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
    _tabStops=[[other tabStops] copy];
    return self;
 }
+
+- (id)initWithCoder:(id)aCoder
+{
+    self=[self init];
+    if (self)
+    {
+		_tabStops = [aCoder decodeObjectForKey:"_tabStops"];
+		_alignment = [aCoder decodeIntForKey:"_alignment"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(id)aCoder
+{
+    [aCoder encodeInt: _alignment forKey:"_alignment"];
+    [aCoder encodeObject: _tabStops forKey:"_tabStops"];
+}
+
 
 @end

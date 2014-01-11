@@ -193,7 +193,7 @@ var _objectsInRange = function(aList, aRange)
 -(void) setAdvancements: someAdvancements
 {   _glyphsFrames = [];
 	var count = someAdvancements.length,
-        origin = CPPointMake(_fragmentRect.origin.x + _location.x, _fragmentRect.origin.y);
+        origin = CPPointMake(_fragmentRect.origin.x + _location.x, _fragmentRect.origin.y); // FIXME _location.y
 	for (var i = 0; i < count; i++)
 	{	_glyphsFrames.push(CPRectMake(origin.x, origin.y, someAdvancements[i], _usedRect.size.height));
 		origin.x += someAdvancements[i];

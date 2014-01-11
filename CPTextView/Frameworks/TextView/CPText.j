@@ -68,7 +68,7 @@ CPRichStringPboardType="CPRichStringPboardType";
 	[pasteboard setString:stringForPasting forType:CPStringPboardType];
 
 	if([self isRichText])
-    {   var richData = [CPKeyedArchiver archivedDataWithRootObject: [self textStorage]];
+    {   var richData = [CPKeyedArchiver archivedDataWithRootObject:[self textStorage]];
 	    [pasteboard setData:richData forType:CPRichStringPboardType];
     }
 }
@@ -79,7 +79,7 @@ CPRichStringPboardType="CPRichStringPboardType";
 - (void)cut:(id)sender
 {	[self copy:sender];
 	var loc= [self selectedRange].location;
-	[self replaceCharactersInRange: [self selectedRange] withString: ""];
+	[self replaceCharactersInRange: [self selectedRange] withString:""];
 	[self setSelectionGranularity: CPSelectByCharacter];
 	[self setSelectedRange: CPMakeRange(loc,0) ];
 }
@@ -125,11 +125,12 @@ CPRichStringPboardType="CPRichStringPboardType";
 - (void)paste:(id)sender
 {
 	var pasteboard = [CPPasteboard generalPasteboard],
-		dataForPasting = [CPKeyedUnarchiver unarchiveObjectWithData:[pasteboard dataForType:CPRichStringPboardType]],
+		dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
 		stringForPasting = [pasteboard stringForType:CPStringPboardType];
-
-	if (dataForPasting || stringForPasting)
-	{	[self insertText:dataForPasting || stringForPasting];
+	if (dataForPasting)
+        stringForPasting=[CPKeyedUnarchiver unarchiveObjectWithData:dataForPasting];
+	if (stringForPasting)
+	{	[self insertText:stringForPasting];
 	}
 }
 - (void)pasteFont:(id)sender
