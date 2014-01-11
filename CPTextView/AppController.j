@@ -1,7 +1,6 @@
 /*
  * AppController.j
  * fixmes:
- *	insertText->attributedSubstring exception (enter return+aaa, doubleclick+enter something)
  *	update demo to use a 2-column-setup
  *	support "hot-linking" to font-panel (observe first responder as possibly in textextras (linenumber))
  *	support methods from CPKeyBinding.j
@@ -9,6 +8,7 @@
  *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based font-sizing for performance
  *  native pasting in safari (try tricking around with contenteditable)
+ *	selection over multiple newlines
  */
  
 @import <TextView/CPTextView.j>

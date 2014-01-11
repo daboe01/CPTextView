@@ -535,10 +535,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)mouseUp:(CPEvent)event
 {
     /* will post CPTextViewDidChangeSelectionNotification */
+	[self setSelectionGranularity: CPSelectByCharacter];
     [self setSelectedRange:[self selectedRange] affinity:0 stillSelecting:NO];
 	var point = [_layoutManager locationForGlyphAtIndex: [self selectedRange].location];
 	_stickyXLocation= point.x;
-	[self setSelectionGranularity: CPSelectByCharacter];
 }
 
 - (void)moveDown:(id)sender

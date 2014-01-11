@@ -144,7 +144,7 @@ var _sharedSimpleTypesetter = nil;
 	[_layoutManager setLocation:CPMakePoint(myX, _lineBase) forStartOfGlyphRange:lineRange];
 	[_layoutManager _setAdvancements: advancements forGlyphRange:lineRange];
 
-	if(isLast)
+	if (isLast)
 	{
         rect = CPRectMake(lineOrigin.x + _lineWidth, lineOrigin.y, containerSize.width - _lineWidth, _lineHeight);
         [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
