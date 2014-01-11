@@ -217,7 +217,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)setString:(CPString)aString
 {	[_textStorage replaceCharactersInRange: CPMakeRange(0, [_layoutManager numberOfGlyphs]) withString:aString];
     [self didChangeText];
-    [self sizeToFit];
+	[_layoutManager _validateLayoutAndGlyphs];
+	[self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
 }
 // KVO support
@@ -353,7 +354,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 	if(_selectionRange.length === 0)
 	{	[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRange(_selectionRange.location, [string length]) withString:@""];
-		[[ [self window] undoManager] setActionName:@"Insert text"];
+		[[[self window] undoManager] setActionName:@"Insert text"];
 	}
 	if (isAttributed)
 	{	if(_selectionRange.length > 0)
@@ -372,6 +373,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 	[self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
 
     [self didChangeText];
+    [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
 }
@@ -624,6 +626,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     [self setSelectedRange:CPMakeRange(changedRange.location, 0)];
     [self didChangeText];
+    [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
 }
 
@@ -726,7 +729,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var length = [_layoutManager numberOfGlyphs];
     [_textStorage addAttribute:CPFontAttributeName value:_font range:CPMakeRange(0, length)];
     [_textStorage setFont:_font];
-    [self scrollRangeToVisible:CPMakeRange(length, 0)];
+	[self scrollRangeToVisible:CPMakeRange(length, 0)];
 }
 
 - (void)setFont:(CPFont)font range:(CPRange)range
@@ -740,7 +743,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [_textStorage setFont:_font];
     }
     [_textStorage addAttribute:CPFontAttributeName value:font range:CPMakeRangeCopy(range)];
-   [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
+	[_layoutManager _validateLayoutAndGlyphs];
+	[self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
 }
 
 - (CPFont)font
@@ -756,22 +760,22 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)changeFont:(id)sender
 {
     var attributes = [_textStorage attributesAtIndex:_selectionRange.location effectiveRange:nil],
-        oldFont = [attributes objectForKey:CPFontAttributeName];
+        oldFont = [attributes objectForKey:CPFontAttributeName],
+		scrollRange=CPMakeRange(CPMaxRange(_selectionRange), 0);
 
     if (!oldFont)
         oldFont = [self font];
 
     if ([self isRichText])
-    {
         [self setFont:[sender convertFont:oldFont] range:_selectionRange];
-        [self scrollRangeToVisible:CPMakeRange(CPMaxRange(_selectionRange), 0)];
-    }
     else
     {
         var length = [_textStorage length];
         [self setFont:[sender convertFont:oldFont] range:CPMakeRange(0,length)];
-        [self scrollRangeToVisible:CPMakeRange(length, 0)];
+        scrollRange = CPMakeRange(length, 0);
     }
+	[_layoutManager _validateLayoutAndGlyphs];
+	[self scrollRangeToVisible:scrollRange];
 }
 
 - (void)underline:(id)sender
@@ -812,6 +816,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [_textStorage addAttribute:CPForegroundColorAttributeName value:_textColor range:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
     else
         [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
+	[_layoutManager _validateLayoutAndGlyphs];
     [self scrollRangeToVisible:CPMakeRange([_layoutManager numberOfGlyphs], 0)];
 }
 
@@ -830,6 +835,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     else
         [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRangeCopy(range)];
 
+	[_layoutManager _validateLayoutAndGlyphs];
     [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
 }
 
@@ -1015,7 +1021,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 	all of this depend of the current language.
 	Need some CPLocale support and maybe even a FSM...
   */
-debugger
 
     var characterSet = ['\n', ' ', '\t', ',', ';', '.', '!', '?', '\'', '"', '-', ':'];
     return [self _characterRangeForUnitAtIndex: index inString: string asDefinedByCharArray: characterSet];

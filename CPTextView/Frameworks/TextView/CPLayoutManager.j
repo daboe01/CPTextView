@@ -385,6 +385,7 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRect)boundingRectForGlyphRange:(CPRange)aRange inTextContainer:(CPTextContainer)container
 {
+//    [self _validateLayoutAndGlyphs];
 	if(![self numberOfGlyphs]) return CPRectMake(0,0,1,12);	// crude hack to give a cursor in an empty doc.
 
     var fragments = _objectsInRange(_lineFragments, aRange),
@@ -415,7 +416,7 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRange)glyphRangeForTextContainer:(CPTextContainer)aTextContainer
 {
-    [self _validateLayoutAndGlyphs];
+//    [self _validateLayoutAndGlyphs];
 
     var range = nil,
         c = [_lineFragments count];
@@ -462,7 +463,7 @@ var _objectsInRange = function(aList, aRange)
         if (startIndex == CPNotFound && CPMaxRange (_lineFragments[l - 1]._range) < [_textStorage length])
             startIndex =  CPMaxRange(_lineFragments[l - 1]._range);
     }
-    else	startIndex = 0;
+    else startIndex = 0;
 
     /* nothing to validate and layout */
     if (startIndex == CPNotFound)
@@ -537,7 +538,7 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRange)glyphRangeForBoundingRect:(CPRect)aRect inTextContainer:(CPTextContainer)container
 {    
-    [self _validateLayoutAndGlyphs];
+ //   [self _validateLayoutAndGlyphs];
 
     var range = nil,
         i, c = [_lineFragments count];
@@ -990,7 +991,7 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRect)lineFragmentRectForGlyphAtIndex:(unsigned)glyphIndex effectiveRange:(CPRangePointer)effectiveGlyphRange
 {
-    [self _validateLayoutAndGlyphs];
+//    [self _validateLayoutAndGlyphs];
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphIndex);
     if (!lineFragment)
         return CPRectMakeZero();
@@ -1005,7 +1006,7 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRect)lineFragmentUsedRectForGlyphAtIndex:(unsigned)glyphIndex effectiveRange:(CPRangePointer)effectiveGlyphRange
 {
-    [self _validateLayoutAndGlyphs];
+ //   [self _validateLayoutAndGlyphs];
     
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphIndex);
     if (!lineFragment)
@@ -1039,8 +1040,9 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPTextContainer)textContainerForGlyphAtIndex:(unsigned)index effectiveRange:(CPRangePointer)effectiveGlyphRange withoutAdditionalLayout:(BOOL)flag
 {
-    if (!flag)
+/*    if (!flag)
         [self _validateLayoutAndGlyphs];
+*/
 
     var lineFragment = _objectWithLocationInRange(_lineFragments, index);
     if (lineFragment)
@@ -1082,7 +1084,7 @@ var _objectsInRange = function(aList, aRange)
                       inTextContainer:(CPTextContainer)container 
                             rectCount:(CPRectPointer)rectCount
 {
-    [self _validateLayoutAndGlyphs];
+//    [self _validateLayoutAndGlyphs];
 
     var rectArray = [CPArray array];
     var lineFragments = _objectsInRange(_lineFragments, selectedCharRange);

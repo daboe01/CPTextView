@@ -1,27 +1,17 @@
 /*
  * AppController.j
  * fixmes:
+ *	selection should properly cover newlines
+ *	optimize typesetting when next paragraph is unchanged
  *	update demo to use a 2-column-setup
- *	support "hot-linking" to font-panel (observe first responder as possibly in textextras (linenumber))
  *	support methods from CPKeyBinding.j
  *	selection drawing 'artifact' between lines
  *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based font-sizing for performance
  *  native pasting in safari (try tricking around with contenteditable)
- *	selection over multiple newlines
  */
  
 @import <TextView/CPTextView.j>
-
-// <!> TODO measure the performance against the capp-builtin sizing using this code (could be faster, would be safe against HTML)
-var _measuringContext;
-function _widthOfStringForFont(aString, aFont)
-{	if(!_measuringContext) _measuringContext =CGBitmapGraphicsContextCreate();
-    _measuringContext.font = [aFont cssString];
-    return _measuringContext.measureText(aString);
-}
-
-
 
 @implementation AppController : CPObject
 {
@@ -61,14 +51,16 @@ function _widthOfStringForFont(aString, aFont)
     [scrollView setDocumentView:_textView]; 
     
     [contentView addSubview: scrollView];
-    
+
+/*
     _selectionRange = [CPTextField labelWithTitle:@"xx"];
 	[_selectionRange setEditable: YES];
 	[_selectionRange setBezeled: YES];
     [_selectionRange setFrame:CPMakeRect(590,100,100,32)];
 	[contentView addSubview:_selectionRange];
 	[self updateSelectionRange];
-    [_textView setDelegate:self];
+*/ 
+   [_textView setDelegate:self];
 
    
     /* build our menu */
@@ -94,7 +86,7 @@ function _widthOfStringForFont(aString, aFont)
 	var centeredParagraph=[CPParagraphStyle new];
 	[centeredParagraph setAlignment: CPCenterTextAlignment];
     [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce\n" 
-                attributes:[CPDictionary dictionaryWithObjects:[centeredParagraph, [CPFont boldSystemFontOfSize:22.0],[CPColor redColor] ] forKeys: [CPParagraphStyleAttributeName, CPFontAttributeName, CPForegroundColorAttributeName]]]
+                attributes:[CPDictionary dictionaryWithObjects:[centeredParagraph, [CPFont boldSystemFontOfSize:18],[CPColor redColor] ] forKeys: [CPParagraphStyleAttributeName, CPFontAttributeName, CPForegroundColorAttributeName]]]
                 ];
        
      [_textView insertText:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];
@@ -106,7 +98,19 @@ function _widthOfStringForFont(aString, aFont)
 	[theWindow orderFront:self];
 	[CPMenu setMenuBarVisible:YES];
 }
+
+//-> CPApplication (?)
 - orderFrontFontPanel:sender
 {	[[CPFontManager sharedFontManager] orderFrontFontPanel:self];
 }
 @end
+
+
+// <!> TODO measure the performance against the capp-builtin sizing using this code (could be faster, would be safe against HTML)
+var _measuringContext;
+function _widthOfStringForFont(aString, aFont)
+{	if(!_measuringContext) _measuringContext =CGBitmapGraphicsContextCreate();
+    _measuringContext.font = [aFont cssString];
+    return _measuringContext.measureText(aString);
+}
+

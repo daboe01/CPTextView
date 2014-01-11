@@ -191,8 +191,9 @@ var _sharedSimpleTypesetter = nil;
     else lineOrigin = CPPointMake(0,0);
 
 	[_layoutManager _removeInvalidLineFragments];
-    if (![_textStorage length]) return;
-    [_layoutManager setExtraLineFragmentRect:CPRectMake(0,0) usedRect:CPRectMake(0,0) textContainer:nil];
+
+    if (![_textStorage length])
+		return;
 
     do {
 			if (!CPLocationInRange(glyphIndex, _attributesRange))

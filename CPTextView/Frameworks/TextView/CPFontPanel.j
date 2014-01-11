@@ -220,14 +220,30 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
     [self _setupBrowser: _fontBrowser];
     [self _setupBrowser: _traitBrowser];
     [self _setupBrowser: _sizeBrowser];
-
+	[[CPNotificationCenter defaultCenter] addObserver: self selector:@selector(textViewDidChangeSelection:) name:CPTextViewDidChangeSelectionNotification object:nil];
 }
 
+- (void)textViewDidChangeSelection:(CPNotification)notification
+{
+	if ([self isVisible])
+	{	var textView = [notification object];
+    	var attribs = [[textView textStorage] attributesAtIndex: [textView selectedRange].location effectiveRange:nil];
+		var font=[attribs objectForKey:CPFontAttributeName] || [[textView textStorage] font] || [CPFont systemFontOfSize:12.0];
+
+		if (font)
+		{
+debugger
+			[self setCurrentFont: font];
+			[self setCurrentSize: [font size]+""];
+		}
+	}
+}
 
 - (void)orderFront:(id)sender
 {
     [self _setupContents];
     [super orderFront:sender];
+
 }
 
 - (void)reloadDefaultFontFamilies
@@ -286,7 +302,8 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 {	return [_sizeBrowser selectedItem];
 }
 -(void) setCurrentFont: aFont
-{	[_fontBrowser selectRow: [_availableFonts indexOfObject: aSize]  inColumn:0];
+{
+	[_fontBrowser selectRow: [_availableFonts indexOfObject: [aFont familyName]]  inColumn:0];
 }
 -(CPString) currentFont
 {	return [_fontBrowser selectedItem];
@@ -382,7 +399,7 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 
 - (void)dblClicked:(id)sender
 {
-    alert("DOUBLE");
+ //   alert("DOUBLE");
 }
 
 - (id)browser:(id)aBrowser numberOfChildrenOfItem:(id)anItem
