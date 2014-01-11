@@ -9,12 +9,11 @@ I replaced canvas-drawing with DOM-spans to addresss the immanent performance an
 The (buggy) CPAttributedString implementation from the cappuccino-proper is fixed through monkey-patching.
 
 While the basic functionality is already there, a lot remains to do:
-* Compliance with cappuccino code-formatting guidelines (capp_lint)
-* Native paste is broken on safari
-* Ruler and tab-stop support
+* Finish tab-stop support and implement CPRulerView
 * Parsers/deparsers for RTF/HTML (CPAttributedString)
-* Optimizations (cornercutting typesetting, e.g. when text remains unchanged after the next paragraph)
+* Native paste is broken on safari
 * Locale support (font-panel, word-boundaries and so on)
+* Compliance with cappuccino code-formatting guidelines (capp_lint)
 
 Online demo is at <http://aug-fancy.ukl.uni-freiburg.de/CPTextView>
 

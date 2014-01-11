@@ -1,13 +1,13 @@
 /*
  * AppController.j
  * fixmes:
- *	selection should properly cover newlines
- *	optimize typesetting when next paragraph is unchanged
+ *	selection should properly cover newlines (to the right)
+ *	optimize typesetting when next paragraph is unchanged (copy fragments at top Typesetter to reinstall them later after patching)
  *	update demo to use a 2-column-setup
  *	support methods from CPKeyBinding.j
  *	selection drawing 'artifact' between lines
  *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
- *  revisit canvas-based font-sizing for performance
+ *  revisit canvas-based font-sizing for performance and html-robustness
  *  native pasting in safari (try tricking around with contenteditable)
  */
  
