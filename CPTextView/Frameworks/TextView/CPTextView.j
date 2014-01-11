@@ -333,7 +333,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void) _replaceCharactersInRange: aRange withAttributedString: aString
 {	[_textStorage replaceCharactersInRange: aRange withAttributedString: aString];
-	[self setSelectionGranularity: CPSelectByCharacter];
 	[self setSelectedRange: CPMakeRange(aRange.location, [aString length])];
 	[self setNeedsDisplay:YES];
 
@@ -341,14 +340,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void) _replaceCharactersInRange: aRange withString: aString
 {
 	[_textStorage replaceCharactersInRange: CPMakeRangeCopy( aRange) withString: aString];
-	[self setSelectionGranularity: CPSelectByCharacter];
 	[self setSelectedRange: CPMakeRange(aRange.location, aString.length)];
 	[self setNeedsDisplay:YES];
 }
 - (void)insertText:(id)aString
 {
-
-    var isAttributed = [aString isKindOfClass:CPAttributedString],
+   var isAttributed = [aString isKindOfClass:CPAttributedString],
         string = (isAttributed)?[aString string]:aString;
 
     if (![self shouldChangeTextInRange:CPMakeRangeCopy(_selectionRange) replacementString:string])
@@ -372,7 +369,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 		}
 		[_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: aString];
 	}
-	[self setSelectionGranularity: CPSelectByCharacter];
 	[self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
 
     [self didChangeText];
@@ -542,6 +538,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self setSelectedRange:[self selectedRange] affinity:0 stillSelecting:NO];
 	var point = [_layoutManager locationForGlyphAtIndex: [self selectedRange].location];
 	_stickyXLocation= point.x;
+	[self setSelectionGranularity: CPSelectByCharacter];
 }
 
 - (void)moveDown:(id)sender
@@ -625,7 +622,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 	[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRange(_selectionRange.location, 0) withAttributedString:[_textStorage attributedSubstringFromRange: CPMakeRangeCopy(changedRange) ] ]
     [_textStorage deleteCharactersInRange: CPMakeRangeCopy(changedRange)];
 
-	[self setSelectionGranularity: CPSelectByCharacter];
     [self setSelectedRange:CPMakeRange(changedRange.location, 0)];
     [self didChangeText];
     [self sizeToFit];
@@ -977,28 +973,33 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         lastIndex = CPNotFound,
         searchIndex = 0;
 
-    if ((characterSet.join("")).indexOf(string.charAt(index)) != CPNotFound)
-    {
-        wordRange.location = index;
-        wordRange.length = 1;
-        return wordRange;
-    }
+    if ((characterSet.join("")).indexOf(string.charAt(index)) !== CPNotFound)
+		return CPMakeRange(index, 1);
 
     do
     {
-        lastIndex = string.lastIndexOf(characterSet[searchIndex++], index);
-    } while (searchIndex < characterSet.length && lastIndex == CPNotFound);
+        peek = string.lastIndexOf(characterSet[searchIndex++], index);
+        if (peek !== CPNotFound)
+		{	if (lastIndex === CPNotFound)
+				lastIndex = peek;
+			else lastIndex = MAX(lastIndex, peek);
+		}
+    } while (searchIndex < characterSet.length);
 
-    if (lastIndex != CPNotFound)
+    if (lastIndex !== CPNotFound)
         wordRange.location = lastIndex + 1;
 
     lastIndex = CPNotFound;
     searchIndex = 0;
-
     do
     {
-        lastIndex = string.indexOf(characterSet[searchIndex++], index);
-    } while (searchIndex < characterSet.length && lastIndex == CPNotFound);
+        var peek= string.indexOf(characterSet[searchIndex++], index);
+        if (peek !== CPNotFound)
+		{	if (lastIndex === CPNotFound)
+				lastIndex = peek;
+			else lastIndex = MIN(lastIndex, peek);
+		}
+    } while (searchIndex < characterSet.length);
 
     if (lastIndex != CPNotFound)
         wordRange.length = lastIndex - wordRange.location;
@@ -1014,8 +1015,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 	all of this depend of the current language.
 	Need some CPLocale support and maybe even a FSM...
   */
+debugger
 
-    var characterSet = [' ', '\n', '\t', ',', ';', '.', '!', '?', '\'', '"', '-', ':'];
+    var characterSet = ['\n', ' ', '\t', ',', ';', '.', '!', '?', '\'', '"', '-', ':'];
     return [self _characterRangeForUnitAtIndex: index inString: string asDefinedByCharArray: characterSet];
 }
 

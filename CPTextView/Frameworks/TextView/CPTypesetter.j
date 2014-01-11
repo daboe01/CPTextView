@@ -149,6 +149,8 @@ var _sharedSimpleTypesetter = nil;
         rect = CPRectMake(lineOrigin.x + _lineWidth, lineOrigin.y, containerSize.width - _lineWidth, _lineHeight);
         [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
 	}
+//<!> _currentTextContainer=[_currentTextContainer textContainerForGlyphAtIndex: effectiveRange:nil withoutAdditionalLayout:YES];
+
 }
 
 - (void)layoutGlyphsInLayoutManager:(CPLayoutManager)layoutManager startingAtGlyphIndex:(unsigned)glyphIndex
@@ -185,8 +187,8 @@ var _sharedSimpleTypesetter = nil;
 	if (glyphIndex > 0)
 	    lineOrigin = CPPointCreateCopy([_layoutManager lineFragmentRectForGlyphAtIndex: glyphIndex effectiveRange:nil].origin);
 	else if ([_layoutManager extraLineFragmentTextContainer])
-        lineOrigin = CPPointMake(0, [_layoutManager extraLineFragmentUsedRect].origin.y);
-    else lineOrigin= CPPointMake(0,0);
+         lineOrigin = CPPointMake(0, [_layoutManager extraLineFragmentUsedRect].origin.y);
+    else lineOrigin = CPPointMake(0,0);
 
 	[_layoutManager _removeInvalidLineFragments];
     if (![_textStorage length]) return;
@@ -260,7 +262,7 @@ var _sharedSimpleTypesetter = nil;
 		glyphIndex++;
     } while (numLines != maxNumLines && glyphIndex < numberOfGlyphs);
 
-	// this is to "flush" the last line
+	// this is to "flush" the remaining characters
     if (lineRange.length)
 		[self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements isLast:YES];
 }

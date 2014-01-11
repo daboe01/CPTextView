@@ -80,7 +80,6 @@ CPRichStringPboardType="CPRichStringPboardType";
 {	[self copy:sender];
 	var loc= [self selectedRange].location;
 	[self replaceCharactersInRange: [self selectedRange] withString:""];
-	[self setSelectionGranularity: CPSelectByCharacter];	//<!> fixme: move to CPTextView
 	[self setSelectedRange: CPMakeRange(loc,0) ];
 }
 - (void)delete:(id)sender
