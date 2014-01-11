@@ -86,14 +86,15 @@
 	var centeredParagraph=[CPParagraphStyle new];
 	[centeredParagraph setAlignment: CPCenterTextAlignment];
     [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce\n" 
-                attributes:[CPDictionary dictionaryWithObjects:[centeredParagraph, [CPFont boldSystemFontOfSize:18],[CPColor redColor] ] forKeys: [CPParagraphStyleAttributeName, CPFontAttributeName, CPForegroundColorAttributeName]]]
+                attributes:[CPDictionary dictionaryWithObjects:[centeredParagraph, [CPFont boldFontWithName:"Arial" size:18],[CPColor redColor] ] forKeys: [CPParagraphStyleAttributeName, CPFontAttributeName, CPForegroundColorAttributeName]]]
                 ];
        
-     [_textView insertText:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" ];
+     [_textView insertText: [[CPAttributedString alloc] initWithString:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
+                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
 	 [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
-                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldSystemFontOfSize:12.0]] forKeys: [CPFontAttributeName]]]];
+                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldFontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
 	 [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
-                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont systemFontOfSize:12.0]] forKeys: [CPFontAttributeName]]]];
+                attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12.0]] forKeys: [CPFontAttributeName]]]];
 
 	[theWindow orderFront:self];
 	[CPMenu setMenuBarVisible:YES];

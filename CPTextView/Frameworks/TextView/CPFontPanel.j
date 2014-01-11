@@ -232,9 +232,17 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 
 		if (font)
 		{
-debugger
+			var trait= kTypefaceIndex_Normal;
+			if ([font isItalic] && [font isBold])
+				trait=kTypefaceIndex_BoldItalic;
+			else if ([font isItalic])
+				trait=kTypefaceIndex_Italic;
+			else if ([font isBold])
+				trait= kTypefaceIndex_Bold;
+
 			[self setCurrentFont: font];
-			[self setCurrentSize: [font size]+""];
+			[self setCurrentTrait: trait];
+			[self setCurrentSize: [font size]+""]; //cast to string
 		}
 	}
 }
