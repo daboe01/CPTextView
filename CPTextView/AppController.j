@@ -2,6 +2,7 @@
  * AppController.j
  * fixmes:
  *	refac FIXME in typesetter
+ *	why is newline included in word-granularity?
  *	update demo to use a 2-column-setup
  *	support "hot-linking" to font-panel (observe first responder as possibly in textextras (linenumber))
  *	support methods from CPKeyBinding.j

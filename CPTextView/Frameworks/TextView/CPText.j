@@ -68,7 +68,7 @@ CPRichStringPboardType="CPRichStringPboardType";
 	[pasteboard setString:stringForPasting forType:CPStringPboardType];
 
 	if([self isRichText])
-    {   var richData = [CPKeyedArchiver archivedDataWithRootObject:[self textStorage]];
+    {   var richData = [CPKeyedArchiver archivedDataWithRootObject:[[self textStorage] attributedSubstringFromRange:selectedRange]];
 	    [pasteboard setData:richData forType:CPRichStringPboardType];
     }
 }
@@ -80,7 +80,7 @@ CPRichStringPboardType="CPRichStringPboardType";
 {	[self copy:sender];
 	var loc= [self selectedRange].location;
 	[self replaceCharactersInRange: [self selectedRange] withString:""];
-	[self setSelectionGranularity: CPSelectByCharacter];
+	[self setSelectionGranularity: CPSelectByCharacter];	//<!> fixme: move to CPTextView
 	[self setSelectedRange: CPMakeRange(loc,0) ];
 }
 - (void)delete:(id)sender

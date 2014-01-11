@@ -98,6 +98,7 @@ var _sharedSimpleTypesetter = nil;
 
     float _lineHeight;
     float _lineBase;
+	float _lineWidth;
 }
 +(id)sharedInstance
 {
@@ -118,13 +119,36 @@ var _sharedSimpleTypesetter = nil;
 {
     return [_layoutManager textContainers];
 }
+- (CPTextTab)textTabForGlyphLocation:(double)glyphLocation writingDirection:(CPWritingDirection)direction maxLocation:(double)maxLocation
+{
+}
 
-- (void)_flush:(CPLayoutManager)layoutManager startingAtGlyphIndex:(unsigned)glyphIndex
-            maxNumberOfLineFragments:(unsigned)maxNumLines nextGlyphIndex:(UIntegerReference)nextGlyph
-{	// <!>FIXME: refactor to private method so that it can be used also for "flushing" (see below)
-				[_layoutManager setTextContainer: _currentTextContainer forGlyphRange:lineRange];	// creates a new lineFragment
-				var rect = CPRectMake(lineOrigin.x, lineOrigin.y, lineWidth, _lineHeight);
-				[_layoutManager setLineFragmentRect: rect forGlyphRange:lineRange usedRect:rect];
+- (void)_flushRange:(CPRange)lineRange lineOrigin:(CPPoint) lineOrigin
+	  currentContainerSize:(CPSize) containerSize advancements:(CPArray) advancements isLast:(BOOL) isLast
+{
+	[_layoutManager setTextContainer: _currentTextContainer forGlyphRange:lineRange];	// creates a new lineFragment
+	var rect = CPRectMake(lineOrigin.x, lineOrigin.y, _lineWidth, _lineHeight);
+	[_layoutManager setLineFragmentRect: rect forGlyphRange:lineRange usedRect:rect];
+	var myX=0;
+	switch ([_currentParagraph alignment])
+	{	case CPLeftTextAlignment:
+			myX=0;
+		break;
+		case CPCenterTextAlignment:
+			myX = (containerSize.width - _lineWidth) / 2;
+		break;
+		case CPRightTextAlignment:
+			myX = containerSize.width - _lineWidth;
+		break;
+	}
+	[_layoutManager setLocation:CPMakePoint(myX, _lineBase) forStartOfGlyphRange:lineRange];
+	[_layoutManager _setAdvancements: advancements forGlyphRange:lineRange];
+
+	if(isLast)
+	{
+        rect = CPRectMake(lineOrigin.x + _lineWidth, lineOrigin.y, containerSize.width - _lineWidth, _lineHeight);
+        [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
+	}
 }
 
 - (void)layoutGlyphsInLayoutManager:(CPLayoutManager)layoutManager startingAtGlyphIndex:(unsigned)glyphIndex
@@ -136,6 +160,7 @@ var _sharedSimpleTypesetter = nil;
     _attributesRange = CPMakeRange(0, 0);
     _lineHeight = 0;
     _lineBase = 0;
+	_lineWidth = 0;
 
     var containerSize = [_currentTextContainer containerSize],
         lineRange = CPMakeRange(glyphIndex, 0),
@@ -147,7 +172,6 @@ var _sharedSimpleTypesetter = nil;
 		leading;
 
     var numLines = 0,
-        lineWidth = 0,
         theString = [_textStorage string],
         lineOrigin,
         ascent, descent;
@@ -199,12 +223,12 @@ var _sharedSimpleTypesetter = nil;
 			else if (currentChar == '\n') /* FIXME: should send actionForControlCharacterAtIndex: */
 			{	isNewline = YES;
 			}
-			lineWidth = rangeWidth;
+			_lineWidth = rangeWidth;
 			if (lineOrigin.x + rangeWidth > containerSize.width)
 			{
 				if (wrapWidth)
 				{	lineRange = wrapRange;
-					lineWidth = wrapWidth;
+					_lineWidth = wrapWidth;
 				}
 				isNewline = YES;
 				isWordWrapped = YES;
@@ -215,29 +239,12 @@ var _sharedSimpleTypesetter = nil;
 
 			if (isNewline)
 			{
-	// <!>FIXME: refactor to private method so that it can be used also for "flushing" (see below)
-				[_layoutManager setTextContainer: _currentTextContainer forGlyphRange:lineRange];	// creates a new lineFragment
-				var rect = CPRectMake(lineOrigin.x, lineOrigin.y, lineWidth, _lineHeight);
-				[_layoutManager setLineFragmentRect: rect forGlyphRange:lineRange usedRect:rect];
-				var myX=0;
-				switch ([_currentParagraph alignment])
-				{	case CPLeftTextAlignment:
-						myX=0;
-					break;
-					case CPCenterTextAlignment:
-						myX=(containerSize.width - lineWidth) / 2;
-					break;
-					case CPRightTextAlignment:
-						// FIXME
-					break;
-				}
-				[_layoutManager setLocation:CPMakePoint(myX, _lineBase) forStartOfGlyphRange:lineRange];
-				[_layoutManager _setAdvancements: advancements forGlyphRange: lineRange];
+				[self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements isLast:NO];
 
 				lineOrigin.y += _lineHeight;
 				_lineHeight    = 0;
 				_lineBase      = 0;
-				lineWidth      = 0;
+				_lineWidth     = 0;
 				advancements   = [];
 				prevRangeWidth = 0;
 				currentAnchor  = 0;
@@ -255,17 +262,6 @@ var _sharedSimpleTypesetter = nil;
 
 	// this is to "flush" the last line
     if (lineRange.length)
-    {
-		[_layoutManager setTextContainer:_currentTextContainer forGlyphRange:lineRange];
-        var rect = CPRectMake(lineOrigin.x, lineOrigin.y, lineWidth, _lineHeight);
-        // FIXME: handle line fragment padding
-        [_layoutManager setLineFragmentRect:rect forGlyphRange:lineRange usedRect:rect];
-		[_layoutManager _setAdvancements: advancements forGlyphRange: lineRange];
-        [_layoutManager setLocation:CPMakePoint(0, _lineBase) forStartOfGlyphRange:lineRange];
-        
-        rect = CPRectMake(lineOrigin.x + lineWidth, lineOrigin.y, containerSize.width - lineWidth, _lineHeight);
-
-        [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
-    }
+		[self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements isLast:YES];
 }
 @end
