@@ -1,8 +1,8 @@
 /*
  * AppController.j
  * fixmes:
- *	selection should properly cover newlines (to the right)
  *	optimize typesetting when next paragraph is unchanged (copy fragments at top Typesetter to reinstall them later after patching)
+ *	selection for newline characters
  *	update demo to use a 2-column-setup
  *	support methods from CPKeyBinding.j
  *	selection drawing 'artifact' between lines

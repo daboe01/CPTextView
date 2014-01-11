@@ -515,7 +515,7 @@ var _objectsInRange = function(aList, aRange)
     fragment._isInvalid = YES;
 
     /* invalidated all fragments that follow */
-    for (i = firstFragmentIndex + 1; i < _lineFragments.length; i++)
+    for (var i = firstFragmentIndex + 1; i < _lineFragments.length; i++)
     {
         _lineFragments[i]._isInvalid = YES;
         range = CPUnionRange(range, _lineFragments[i]._range);
@@ -610,7 +610,7 @@ var _objectsInRange = function(aList, aRange)
 		l= lineFragments.length;
 
     for(lineFragmentIndex = 0; lineFragmentIndex <l; lineFragmentIndex++)
-    {	currentFragment = lineFragments[lineFragmentIndex];
+    {	var currentFragment = lineFragments[lineFragmentIndex];
 		[currentFragment drawInContext: ctx atPoint: aPoint forRange:paintedRange];
     }
 }
@@ -635,15 +635,17 @@ var _objectsInRange = function(aList, aRange)
             }
         }
     }
-	// not found, maybe a point left to the last character was clicked->search again
+	// not found, maybe a point left to the last character was clicked->search again with broader constraints
     if([[_textStorage string] length])
 	{	for (var i = 0; i < c; i++)
 		{	var fragment = _lineFragments[i];
 			if (fragment._textContainer === container)
-			{	if (point.y > fragment._fragmentRect.origin.y && point.y<= fragment._fragmentRect.origin.y+ fragment._fragmentRect.size.height)
+			{	if (fragment._range.length > 0 && point.y > fragment._fragmentRect.origin.y &&
+					point.y<= fragment._fragmentRect.origin.y+ fragment._fragmentRect.size.height)
 				{	var nlLoc= CPMaxRange(fragment._range)-1;
-					if ( [[_textStorage string] characterAtIndex: nlLoc] === '\n') return nlLoc;
-					return nlLoc+1;
+					if ([[_textStorage string] characterAtIndex: nlLoc] === '\n')
+						return nlLoc;
+					return CPMaxRange(fragment._range);
 				}
 			}
 		}
@@ -1086,10 +1088,12 @@ var _objectsInRange = function(aList, aRange)
 {
 //    [self _validateLayoutAndGlyphs];
 
-    var rectArray = [CPArray array];
+    var rectArray = [];
     var lineFragments = _objectsInRange(_lineFragments, selectedCharRange);
     if (!lineFragments.length)
         return rectArray;
+
+    var containerSize = [container containerSize];
 
     for (var i = 0; i < lineFragments.length; i++)
     {
@@ -1106,12 +1110,27 @@ var _objectsInRange = function(aList, aRange)
                         rect = CPRectCreateCopy(frames[j]);
                     else
                         rect = CPRectUnion(rect, frames[j]);
+
+					if (CPRectGetMaxX(frames[j]) >=  CPRectGetMaxX(fragment._fragmentRect) &&
+						CPMaxRange(selectedCharRange) > CPMaxRange(fragment._range))
+						rect.size.width= containerSize.width - rect.origin.x
                 }
             }
+
+/*
+			if (frames.length && [[_textStorage string] characterAtIndex:CPMaxRange(selectedCharRange)] === '\n' &&
+				CPLocationInRange(CPMaxRange(selectedCharRange), fragment._range))
+			{	rect= frames[frames.length-1];
+debugger
+				rect.size.width= containerSize.width - rect.origin.x;
+			}
+*/
+
             if (rect)
                 rectArray.push(rect);
         }
     }
+
     return rectArray;
 }
 @end
