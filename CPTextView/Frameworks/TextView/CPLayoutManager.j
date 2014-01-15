@@ -36,12 +36,12 @@ function CGContextSetFont(aContext, aFont)
 @implementation CPArray(SortedSearching)
 
 - (unsigned)indexOfObject:(id)anObject sortedByFunction:(Function)aFunction context:(id)aContext
-{	var result = [self _indexOfObject:anObject sortedByFunction:aFunction context:aContext];
+{    var result = [self _indexOfObject:anObject sortedByFunction:aFunction context:aContext];
     return (result >= 0) ? result : CPNotFound;
 }
 
 - (unsigned)_indexOfObject:(id)anObject sortedByFunction:(Function)aFunction context:(id)aContext
-{	var length= [self count];
+{    var length= [self count];
     if (!aFunction)
         return CPNotFound;
 
@@ -136,23 +136,23 @@ var _objectsInRange = function(aList, aRange)
     CPArray _glyphsFrames;
 }
 - createDOMElementWithText: aString andFont: aFont andColor: aColor
-{	var style;
-	var span = document.createElement("span");
+{    var style;
+    var span = document.createElement("span");
     style = span.style;
     style.position = "absolute";
     style.visibility = "visible";
     style.padding = "0px";
     style.margin = "0px";
     style.whiteSpace = "pre";
-	style.backgroundColor = "transparent";
-	style.font=[aFont cssString];
-	if(aColor) style.color=[aColor cssString];
+    style.backgroundColor = "transparent";
+    style.font=[aFont cssString];
+    if(aColor) style.color=[aColor cssString];
 
     if (CPFeatureIsCompatible(CPJavaScriptInnerTextFeature))
         span.innerText = aString;
     else if (CPFeatureIsCompatible(CPJavaScriptTextContentFeature))
         span.textContent = aString;
-	return span;
+    return span;
 }
 
 - (id) initWithRange:(CPRange)aRange textContainer:(CPTextContainer)aContainer textStorage:(CPTextStorage)textStorage
@@ -173,14 +173,14 @@ var _objectsInRange = function(aList, aRange)
 
         do {
             var attributes = [textStorage attributesAtIndex:location effectiveRange:effectiveRange];
-			effectiveRange= attributes? CPIntersectionRange(aRange, effectiveRange): aRange;
-			var string= [textStorage._string substringWithRange:effectiveRange]
-			var font= [textStorage font] || [CPFont systemFontOfSize:12.0];
+            effectiveRange= attributes? CPIntersectionRange(aRange, effectiveRange): aRange;
+            var string= [textStorage._string substringWithRange:effectiveRange]
+            var font= [textStorage font] || [CPFont systemFontOfSize:12.0];
             if ([attributes containsKey:CPFontAttributeName])
                  font = [attributes objectForKey:CPFontAttributeName];
-			var color=[attributes objectForKey:CPForegroundColorAttributeName];
+            var color=[attributes objectForKey:CPForegroundColorAttributeName];
 
-			var elem=[self createDOMElementWithText: string andFont: font andColor: color];
+            var elem=[self createDOMElementWithText: string andFont: font andColor: color];
             var run = { _range:CPMakeRangeCopy(effectiveRange), elem: elem, string: string };
 
             _runs.push(run);
@@ -192,12 +192,12 @@ var _objectsInRange = function(aList, aRange)
 }
 -(void) setAdvancements: someAdvancements
 {   _glyphsFrames = [];
-	var count = someAdvancements.length,
+    var count = someAdvancements.length,
         origin = CPPointMake(_fragmentRect.origin.x + _location.x, _fragmentRect.origin.y); // FIXME _location.y
-	for (var i = 0; i < count; i++)
-	{	_glyphsFrames.push(CPRectMake(origin.x, origin.y, someAdvancements[i], _usedRect.size.height));
-		origin.x += someAdvancements[i];
-	}
+    for (var i = 0; i < count; i++)
+    {    _glyphsFrames.push(CPRectMake(origin.x, origin.y, someAdvancements[i], _usedRect.size.height));
+        origin.x += someAdvancements[i];
+    }
 }
 
 - (CPString)description
@@ -222,15 +222,24 @@ var _objectsInRange = function(aList, aRange)
 }
 
 - (void)invalidate
-{	_isInvalid=YES;
-	var i,l = _runs.length;
-	for (var i = 0; i < l; i++)
-    {	if(_runs[i].elem && _runs[i].DOMactive)
-			_textContainer._textView._DOMElement.removeChild(_runs[i].elem);
-		_runs[i].elem=nil;
-		_runs[i].DOMactive=NO;
-	}
+{    _isInvalid=YES;
+    [self _removeFromDOM];
 }
+- (void)_deinvalidate
+{    _isInvalid=NO;
+}
+
+- (void)_removeFromDOM
+{
+    var i,l = _runs.length;
+    for (var i = 0; i < l; i++)
+    {    if(_runs[i].elem && _runs[i].DOMactive)
+            _textContainer._textView._DOMElement.removeChild(_runs[i].elem);
+        _runs[i].elem=nil;
+        _runs[i].DOMactive=NO;
+    }
+}
+
 - (void)drawInContext:(CGContext)context atPoint:(CPPoint)aPoint forRange:(CPRange)aRange
 {
     var runs = _objectsInRange(_runs, aRange),
@@ -238,24 +247,24 @@ var _objectsInRange = function(aList, aRange)
         orig = CPPointMake(_location.x, _location.y + _fragmentRect.origin.y);
     orig.y += aPoint.y;
 
-	for (var i = 0; i < c; i++)
-    {	var run = runs[i];
-		orig.x=( _glyphsFrames[run._range.location-runs[0]._range.location]? _glyphsFrames[run._range.location-runs[0]._range.location].origin.x:0)+
-					aPoint.x;
-		run.elem.style.left=(orig.x)+"px";
-		run.elem.style.top= (orig.y-_usedRect.size.height+4)+"px";
-		if(!run.DOMactive) _textContainer._textView._DOMElement.appendChild(run.elem);
-		run.DOMactive=YES;
+    for (var i = 0; i < c; i++)
+    {    var run = runs[i];
+        orig.x=( _glyphsFrames[run._range.location-runs[0]._range.location]? _glyphsFrames[run._range.location-runs[0]._range.location].origin.x:0)+
+                    aPoint.x;
+        run.elem.style.left=(orig.x)+"px";
+        run.elem.style.top= (orig.y-_usedRect.size.height+4)+"px";
+        if(!run.DOMactive) _textContainer._textView._DOMElement.appendChild(run.elem);
+        run.DOMactive=YES;
         if (run.underline)
         {
-			// <!> FIXME
+            // <!> FIXME
         }
     }
 }
 
 - (void)backgroundColorForGlyphAtIndex:(unsigned)index
 {
-	var run = _objectWithLocationInRange(_runs, index);
+    var run = _objectWithLocationInRange(_runs, index);
     if (run)
         return run.backgroundColor;
     return [CPColor clearColor];
@@ -297,13 +306,14 @@ var _objectsInRange = function(aList, aRange)
     CPTypesetter _typesetter;
 
     CPMutableArray _lineFragments;
+    CPMutableArray _lineFragmentsForRescue;
     id _extraLineFragment;
     Class _lineFragmentFactory;
 
     CPMutableArray _temporaryAttributes;
     
     BOOL _isValidatingLayoutAndGlyphs;
-	var _removeInvalidLineFragmentsRange;
+    var _removeInvalidLineFragmentsRange;
 }
 - (id) init
 {
@@ -385,8 +395,7 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRect)boundingRectForGlyphRange:(CPRange)aRange inTextContainer:(CPTextContainer)container
 {
-//    [self _validateLayoutAndGlyphs];
-	if(![self numberOfGlyphs]) return CPRectMake(0,0,1,12);	// crude hack to give a cursor in an empty doc.
+    if(![self numberOfGlyphs]) return CPRectMake(0,0,1,12);    // crude hack to give a cursor in an empty doc.
 
     var fragments = _objectsInRange(_lineFragments, aRange),
         rect = nil,
@@ -398,7 +407,7 @@ var _objectsInRange = function(aList, aRange)
         if (fragment._textContainer === container)
         {
             var frames = [fragment glyphFrames],
-				l= frames.length;
+                l= frames.length;
             for (var j = 0; j < l; j++)
             {
                 if (CPLocationInRange(fragment._range.location + j, aRange))
@@ -416,8 +425,6 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRange)glyphRangeForTextContainer:(CPTextContainer)aTextContainer
 {
-//    [self _validateLayoutAndGlyphs];
-
     var range = nil,
         c = [_lineFragments count];
     for (var i = 0; i < c; i++)
@@ -434,13 +441,28 @@ var _objectsInRange = function(aList, aRange)
     return (range)?range:CPMakeRange(CPNotFound, 0);
 }
 
-- (void) _removeInvalidLineFragments
-{	if  (_removeInvalidLineFragmentsRange&& _removeInvalidLineFragmentsRange.length && _lineFragments.length)    
-    {	[[_lineFragments subarrayWithRange: _removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
-		[_lineFragments removeObjectsInRange: _removeInvalidLineFragmentsRange];
-	}
+- (void)_removeInvalidLineFragments
+{
+    _lineFragmentsForRescue=[_lineFragments copy];
+    [_lineFragmentsForRescue makeObjectsPerformSelector:@selector(_deinvalidate)];
 
+    if (_removeInvalidLineFragmentsRange && _removeInvalidLineFragmentsRange.length && _lineFragments.length)    
+    {    [[_lineFragments subarrayWithRange: _removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
+        [_lineFragments removeObjectsInRange: _removeInvalidLineFragmentsRange];
+    }
 }
+- (void)_cleanUpDOM
+{
+return;
+    // foreach _lineFragmentsForRescue -> remove elem from dom if valid(!)
+    var l= _lineFragmentsForRescue.length;
+    for (var i = 0; i < l; i++)
+    {
+        if (!_lineFragmentsForRescue[i]._isInvalid)
+            [_lineFragmentsForRescue[i] _removeFromDOM];
+    }
+}
+
 - (void)_validateLayoutAndGlyphs
 {
     if (_isValidatingLayoutAndGlyphs) return;
@@ -449,15 +471,15 @@ var _objectsInRange = function(aList, aRange)
     var startIndex = CPNotFound,
         removeRange = CPMakeRange(0,0);
 
-	var l=_lineFragments.length;
+    var l=_lineFragments.length;
     if (l)
     {
         for (var i = 0; i < l; i++)
-        {	if (_lineFragments[i]._isInvalid)
-            {	startIndex =_lineFragments[i]._range.location;
-				removeRange.location = i;
-				removeRange.length = l-i;
-				break;
+        {    if (_lineFragments[i]._isInvalid)
+            {    startIndex =_lineFragments[i]._range.location;
+                removeRange.location = i;
+                removeRange.length = l-i;
+                break;
             }
         }
         if (startIndex == CPNotFound && CPMaxRange (_lineFragments[l - 1]._range) < [_textStorage length])
@@ -473,15 +495,64 @@ var _objectsInRange = function(aList, aRange)
     }
 
     if (removeRange.length)    
-    {	_removeInvalidLineFragmentsRange=CPMakeRangeCopy(removeRange);
-	}
-	if (!startIndex)   // We erased all lines 
-		[self setExtraLineFragmentRect: CPRectMake(0,0) usedRect:CPRectMake(0,0) textContainer:nil];
+    {    _removeInvalidLineFragmentsRange=CPMakeRangeCopy(removeRange);
+    }
+    if (!startIndex)   // We erased all lines 
+        [self setExtraLineFragmentRect: CPRectMake(0,0) usedRect:CPRectMake(0,0) textContainer:nil];
 
-//	document.title=startIndex;
-	[_typesetter layoutGlyphsInLayoutManager: self startingAtGlyphIndex: startIndex maxNumberOfLineFragments:-1 nextGlyphIndex:nil];
-
+//    document.title=startIndex;
+    [_typesetter layoutGlyphsInLayoutManager: self startingAtGlyphIndex: startIndex maxNumberOfLineFragments:-1 nextGlyphIndex:nil];
+    [self _cleanUpDOM];
     _isValidatingLayoutAndGlyphs = NO;
+}
+
+- (BOOL)_rescuingInvalidFragmentsWasPossibleForGlyphRange:(CPRange)aRange
+{
+    var l = _lineFragments.length,
+        location = aRange.location,
+        found = NO;
+
+    for (var i = 0; i < l; i++)
+    {
+        if (CPLocationInRange(location, _lineFragments[i]._range))
+        {    found = YES;
+            break;
+        }
+    }
+    if (!_lineFragmentsForRescue[i])
+	return NO;
+    var newLineFragment= _lineFragments[i],
+        oldLineFragment= _lineFragmentsForRescue[i];
+    var newFragmentRuns= newLineFragment._runs;
+    var oldFragmentRuns= oldLineFragment._runs;
+    var startLineForDOMRemoval=i;
+    if (!oldFragmentRuns || !newFragmentRuns || oldFragmentRuns.length !== newFragmentRuns.length) return NO;
+    var isIdentical = YES;
+return NO;
+    for (var i = 0; i < oldFragmentRuns.length; i++)
+    {
+        if (newFragmentRuns[i].string !== oldFragmentRuns[i].string || 
+            !CPRectEqualToRect(newLineFragment._fragmentRect, oldLineFragment._fragmentRect))
+//newFragmentRuns[i].elem.style.left !== oldFragmentRuns[i].elem.style.left && compare CSS-strings
+        {    isIdentical=NO;
+            break;
+        }
+    }
+    var l = _lineFragmentsForRescue.length;
+    if (isIdentical)    // patch and vertically move the dom elements
+    {    var rangeOffset = _lineFragments[startLineForDOMRemoval] - _lineFragmentsForRescue[startLineForDOMRemoval];
+        for (var i = startLineForDOMRemoval; i < l; i++)
+        {    _lineFragmentsForRescue[i]._isInvalid = YES;    // protect them from final removal
+            _lineFragmentsForRescue[i]._range.location += rangeOffset;
+        //    _lineFragmentsForRescue[i].elem.top += verticalOffset;
+            _lineFragments.push(_lineFragmentsForRescue[i]);
+        }
+    } else
+    {    for (var i = startLineForDOMRemoval; i < l; i++)
+        {    [_lineFragmentsForRescue[i] _removeFromDOM];
+        }
+    }
+    return isIdentical;
 }
 
 - (void)invalidateDisplayForGlyphRange:(CPRange)range
@@ -492,7 +563,7 @@ var _objectsInRange = function(aList, aRange)
 }
 
 - (void)invalidateLayoutForCharacterRange:(CPRange)aRange isSoft:(BOOL)flag actualCharacterRange:(CPRangePointer)actualCharRange
-{	var firstFragmentIndex = _lineFragments.length? [_lineFragments indexOfObject: aRange.location sortedByFunction:_sortRange context:nil]:CPNotFound;
+{    var firstFragmentIndex = _lineFragments.length? [_lineFragments indexOfObject: aRange.location sortedByFunction:_sortRange context:nil]:CPNotFound;
     if (firstFragmentIndex == CPNotFound)
     {
         if (_lineFragments.length)
@@ -524,7 +595,7 @@ var _objectsInRange = function(aList, aRange)
         range = CPUnionRange(range, aRange);
 
     if (actualCharRange)
-    {	actualCharRange.length = range.length;
+    {    actualCharRange.length = range.length;
         actualCharRange.location = range.location;
     }
 }
@@ -537,9 +608,7 @@ var _objectsInRange = function(aList, aRange)
 }
 
 - (CPRange)glyphRangeForBoundingRect:(CPRect)aRect inTextContainer:(CPTextContainer)container
-{    
- //   [self _validateLayoutAndGlyphs];
-
+{
     var range = nil,
         i, c = [_lineFragments count];
 
@@ -607,11 +676,11 @@ var _objectsInRange = function(aList, aRange)
     var ctx = [[CPGraphicsContext currentContext] graphicsPort],
         paintedRange = CPMakeRangeCopy(aRange),
         lineFragmentIndex,
-		l= lineFragments.length;
+        l= lineFragments.length;
 
     for(lineFragmentIndex = 0; lineFragmentIndex <l; lineFragmentIndex++)
-    {	var currentFragment = lineFragments[lineFragmentIndex];
-		[currentFragment drawInContext: ctx atPoint: aPoint forRange:paintedRange];
+    {    var currentFragment = lineFragments[lineFragmentIndex];
+        [currentFragment drawInContext: ctx atPoint: aPoint forRange:paintedRange];
     }
 }
 
@@ -635,22 +704,22 @@ var _objectsInRange = function(aList, aRange)
             }
         }
     }
-	// not found, maybe a point left to the last character was clicked->search again with broader constraints
+    // not found, maybe a point left to the last character was clicked->search again with broader constraints
     if([[_textStorage string] length])
-	{	for (var i = 0; i < c; i++)
-		{	var fragment = _lineFragments[i];
-			if (fragment._textContainer === container)
-			{	if (fragment._range.length > 0 && point.y > fragment._fragmentRect.origin.y &&
-					point.y<= fragment._fragmentRect.origin.y+ fragment._fragmentRect.size.height)
-				{	var nlLoc= CPMaxRange(fragment._range)-1;
-					if ([[_textStorage string] characterAtIndex: nlLoc] === '\n')
-						return nlLoc;
-					return CPMaxRange(fragment._range);
-				}
-			}
-		}
-	}
-	return CPNotFound;
+    {    for (var i = 0; i < c; i++)
+        {    var fragment = _lineFragments[i];
+            if (fragment._textContainer === container)
+            {    if (fragment._range.length > 0 && point.y > fragment._fragmentRect.origin.y &&
+                    point.y<= fragment._fragmentRect.origin.y+ fragment._fragmentRect.size.height)
+                {    var nlLoc= CPMaxRange(fragment._range)-1;
+                    if ([[_textStorage string] characterAtIndex: nlLoc] === '\n')
+                        return nlLoc;
+                    return CPMaxRange(fragment._range);
+                }
+            }
+        }
+    }
+    return CPNotFound;
 }
 
 - (unsigned)glyphIndexForPoint:(CPPoint)point inTextContainer:(CPTextContainer)container
@@ -874,7 +943,7 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPDictionary)temporaryAttributesAtCharacterIndex:(unsigned)index effectiveRange:(CPRangePointer)effectiveRange
 {
-    var tempAttribute = _objectWithLocationInRange(_runs, index);	// <!> _runs is wild guess
+    var tempAttribute = _objectWithLocationInRange(_runs, index);    // <!> _runs is wild guess
     if (!tempAttribute)
         return nil;
 
@@ -902,11 +971,11 @@ var _objectsInRange = function(aList, aRange)
 
 - (void)setTextContainer:(CPTextContainer)aTextContainer forGlyphRange:(CPRange)glyphRange
 {
-	var fragments = _objectsInRange(_lineFragments, glyphRange);
-	var l=fragments.length;
-	for(var i=0;i<l;i++)
-	{	[fragments[i] invalidate];
-	}
+    var fragments = _objectsInRange(_lineFragments, glyphRange);
+    var l=fragments.length;
+    for(var i=0;i<l;i++)
+    {    [fragments[i] invalidate];
+    }
 
     var lineFragment = [[_lineFragmentFactory alloc] initWithRange: glyphRange textContainer:aTextContainer textStorage:_textStorage];
     _lineFragments.push(lineFragment);
@@ -925,7 +994,7 @@ var _objectsInRange = function(aList, aRange)
 {
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphRange.location);
     if (lineFragment)
-    {	[lineFragment setAdvancements: someAdvancements];
+    {    [lineFragment setAdvancements: someAdvancements];
     }
 }
 
@@ -993,7 +1062,6 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRect)lineFragmentRectForGlyphAtIndex:(unsigned)glyphIndex effectiveRange:(CPRangePointer)effectiveGlyphRange
 {
-//    [self _validateLayoutAndGlyphs];
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphIndex);
     if (!lineFragment)
         return CPRectMakeZero();
@@ -1008,8 +1076,6 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRect)lineFragmentUsedRectForGlyphAtIndex:(unsigned)glyphIndex effectiveRange:(CPRangePointer)effectiveGlyphRange
 {
- //   [self _validateLayoutAndGlyphs];
-    
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphIndex);
     if (!lineFragment)
         return CPRectMakeZero();
@@ -1023,11 +1089,11 @@ var _objectsInRange = function(aList, aRange)
 }
 
 - (CPPoint)locationForGlyphAtIndex:(unsigned)index
-{	if(_lineFragments.length > 0 && index >= [self numberOfGlyphs]-1)
-	{	var lineFragment= _lineFragments[_lineFragments.length-1];
-		var glyphFrames = [lineFragment glyphFrames];
-		if(glyphFrames.length > 0) return CPPointCreateCopy(glyphFrames[glyphFrames.length-1].origin);
-	}
+{    if(_lineFragments.length > 0 && index >= [self numberOfGlyphs]-1)
+    {    var lineFragment= _lineFragments[_lineFragments.length-1];
+        var glyphFrames = [lineFragment glyphFrames];
+        if(glyphFrames.length > 0) return CPPointCreateCopy(glyphFrames[glyphFrames.length-1].origin);
+    }
     var lineFragment = _objectWithLocationInRange(_lineFragments, index);
     if (lineFragment)
     {
@@ -1086,7 +1152,6 @@ var _objectsInRange = function(aList, aRange)
                       inTextContainer:(CPTextContainer)container 
                             rectCount:(CPRectPointer)rectCount
 {
-//    [self _validateLayoutAndGlyphs];
 
     var rectArray = [];
     var lineFragments = _objectsInRange(_lineFragments, selectedCharRange);
@@ -1111,19 +1176,19 @@ var _objectsInRange = function(aList, aRange)
                     else
                         rect = CPRectUnion(rect, frames[j]);
 
-					if (CPRectGetMaxX(frames[j]) >=  CPRectGetMaxX(fragment._fragmentRect) &&
-						CPMaxRange(selectedCharRange) > CPMaxRange(fragment._range))
-						rect.size.width= containerSize.width - rect.origin.x
+                    if (CPRectGetMaxX(frames[j]) >=  CPRectGetMaxX(fragment._fragmentRect) &&
+                        CPMaxRange(selectedCharRange) > CPMaxRange(fragment._range))
+                        rect.size.width= containerSize.width - rect.origin.x
                 }
             }
 
 /*
-			if (frames.length && [[_textStorage string] characterAtIndex:CPMaxRange(selectedCharRange)] === '\n' &&
-				CPLocationInRange(CPMaxRange(selectedCharRange), fragment._range))
-			{	rect= frames[frames.length-1];
+            if (frames.length && [[_textStorage string] characterAtIndex:CPMaxRange(selectedCharRange)] === '\n' &&
+                CPLocationInRange(CPMaxRange(selectedCharRange), fragment._range))
+            {    rect= frames[frames.length-1];
 debugger
-				rect.size.width= containerSize.width - rect.origin.x;
-			}
+                rect.size.width= containerSize.width - rect.origin.x;
+            }
 */
 
             if (rect)

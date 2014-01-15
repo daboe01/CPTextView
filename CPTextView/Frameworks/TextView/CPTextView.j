@@ -1084,7 +1084,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 - (void)drawInsertionPointInRect:(CPRect)aRect color:(CPColor)aColor turnedOn:(BOOL)flag
-{
+{	var style;
 	if(!_carretDOM)
 	{	_carretDOM = document.createElement("span");
 		style = _carretDOM.style;
@@ -1100,7 +1100,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 	_carretDOM.style.left=(aRect.origin.x)+"px";
 	_carretDOM.style.top= (aRect.origin.y)+"px";
 	_carretDOM.style.height= (aRect.size.height)+"px";
-	style.visibility = flag ? "visible":"hidden";
+	_carretDOM.style.visibility = flag ? "visible":"hidden";
 }
 - (void) _hideCarret
 {	if(_carretDOM) _carretDOM.style.visibility ="hidden";
