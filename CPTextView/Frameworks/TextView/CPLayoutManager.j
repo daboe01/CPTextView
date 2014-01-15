@@ -223,7 +223,6 @@ var _objectsInRange = function(aList, aRange)
 
 - (void)invalidate
 {    _isInvalid=YES;
-    [self _removeFromDOM];
 }
 - (void)_deinvalidate
 {    _isInvalid=NO;
@@ -447,18 +446,17 @@ var _objectsInRange = function(aList, aRange)
     [_lineFragmentsForRescue makeObjectsPerformSelector:@selector(_deinvalidate)];
 
     if (_removeInvalidLineFragmentsRange && _removeInvalidLineFragmentsRange.length && _lineFragments.length)    
-    {    [[_lineFragments subarrayWithRange: _removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
+    {   [[_lineFragments subarrayWithRange: _removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
         [_lineFragments removeObjectsInRange: _removeInvalidLineFragmentsRange];
+        [[_lineFragmentsForRescue  subarrayWithRange: _removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
     }
 }
 - (void)_cleanUpDOM
 {
-return;
-    // foreach _lineFragmentsForRescue -> remove elem from dom if valid(!)
     var l= _lineFragmentsForRescue.length;
     for (var i = 0; i < l; i++)
     {
-        if (!_lineFragmentsForRescue[i]._isInvalid)
+        if (_lineFragmentsForRescue[i]._isInvalid)
             [_lineFragmentsForRescue[i] _removeFromDOM];
     }
 }
@@ -528,7 +526,6 @@ return;
     var startLineForDOMRemoval=i;
     if (!oldFragmentRuns || !newFragmentRuns || oldFragmentRuns.length !== newFragmentRuns.length) return NO;
     var isIdentical = YES;
-return NO;
     for (var i = 0; i < oldFragmentRuns.length; i++)
     {
         if (newFragmentRuns[i].string !== oldFragmentRuns[i].string || 
@@ -538,6 +535,8 @@ return NO;
             break;
         }
     }
+isIdentical = NO;
+
     var l = _lineFragmentsForRescue.length;
     if (isIdentical)    // patch and vertically move the dom elements
     {    var rangeOffset = _lineFragments[startLineForDOMRemoval] - _lineFragmentsForRescue[startLineForDOMRemoval];
@@ -546,10 +545,6 @@ return NO;
             _lineFragmentsForRescue[i]._range.location += rangeOffset;
         //    _lineFragmentsForRescue[i].elem.top += verticalOffset;
             _lineFragments.push(_lineFragmentsForRescue[i]);
-        }
-    } else
-    {    for (var i = startLineForDOMRemoval; i < l; i++)
-        {    [_lineFragmentsForRescue[i] _removeFromDOM];
         }
     }
     return isIdentical;
