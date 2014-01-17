@@ -481,7 +481,7 @@ var _objectsInRange = function(aList, aRange)
             }
         }
         if (startIndex == CPNotFound && CPMaxRange (_lineFragments[l - 1]._range) < [_textStorage length])
-            startIndex =  CPMaxRange(_lineFragments[l - 1]._range);
+            startIndex =  CPMaxRange(_lineFragments[l - 1]._range);	// start one line above current line to make sure that a word can jump up
     }
     else startIndex = 0;
 
@@ -504,6 +504,21 @@ var _objectsInRange = function(aList, aRange)
     _isValidatingLayoutAndGlyphs = NO;
 }
 
+- (BOOL)_fragment: oldLineFragment identicalToFragment: newLineFragment
+{   var newFragmentRuns= newLineFragment._runs;
+    var oldFragmentRuns= oldLineFragment._runs;
+    if (!oldFragmentRuns || !newFragmentRuns || oldFragmentRuns.length !== newFragmentRuns.length) return NO;
+    for (var i = 0; i < oldFragmentRuns.length; i++)
+    {
+        if (newFragmentRuns[i].string !== oldFragmentRuns[i].string || 
+            !CPRectEqualToRect(newLineFragment._fragmentRect, oldLineFragment._fragmentRect))
+//newFragmentRuns[i].elem.style.left !== oldFragmentRuns[i].elem.style.left && compare CSS-strings
+        {    return NO;
+        }
+    }
+    return YES;
+}
+
 - (BOOL)_rescuingInvalidFragmentsWasPossibleForGlyphRange:(CPRange)aRange
 {
     var l = _lineFragments.length,
@@ -517,33 +532,32 @@ var _objectsInRange = function(aList, aRange)
             break;
         }
     }
+debugger
+    if (!found)
+	return NO;
+
     if (!_lineFragmentsForRescue[i])
 	return NO;
-    var newLineFragment= _lineFragments[i],
-        oldLineFragment= _lineFragmentsForRescue[i];
-    var newFragmentRuns= newLineFragment._runs;
-    var oldFragmentRuns= oldLineFragment._runs;
-    var startLineForDOMRemoval=i;
-    if (!oldFragmentRuns || !newFragmentRuns || oldFragmentRuns.length !== newFragmentRuns.length) return NO;
-    var isIdentical = YES;
-    for (var i = 0; i < oldFragmentRuns.length; i++)
-    {
-        if (newFragmentRuns[i].string !== oldFragmentRuns[i].string || 
-            !CPRectEqualToRect(newLineFragment._fragmentRect, oldLineFragment._fragmentRect))
-//newFragmentRuns[i].elem.style.left !== oldFragmentRuns[i].elem.style.left && compare CSS-strings
-        {    isIdentical=NO;
-            break;
-        }
-    }
-isIdentical = NO;
 
-    var l = _lineFragmentsForRescue.length;
+    var startLineForDOMRemoval=i;
+    var l = _lineFragments.length;
+    var  isIdentical = YES;
+    var newLineFragment= _lineFragments[i],
+    oldLineFragment = _lineFragmentsForRescue[i];
+    if (![self _fragment: oldLineFragment identicalToFragment: newLineFragment]) // <!> move method to fragment class
+    {    isIdentical = NO;
+    }
+
     if (isIdentical)    // patch and vertically move the dom elements
-    {    var rangeOffset = _lineFragments[startLineForDOMRemoval] - _lineFragmentsForRescue[startLineForDOMRemoval];
-        for (var i = startLineForDOMRemoval; i < l; i++)
-        {    _lineFragmentsForRescue[i]._isInvalid = YES;    // protect them from final removal
+    {   var rangeOffset = _lineFragments[startLineForDOMRemoval]._range.location - _lineFragmentsForRescue[startLineForDOMRemoval]._range.location;
+        var l = _lineFragmentsForRescue.length;
+        for (var i = startLineForDOMRemoval + 1; i < l; i++)
+        {   _lineFragmentsForRescue[i]._isInvalid = NO;    // protect them from final removal
             _lineFragmentsForRescue[i]._range.location += rangeOffset;
-        //    _lineFragmentsForRescue[i].elem.top += verticalOffset;
+            for (var j = 0; j < _lineFragmentsForRescue[i]._runs.length; j++)
+            {    _lineFragmentsForRescue[i]._runs[j]._range.location += rangeOffset;
+         //    _lineFragmentsForRescue[i].elem.top += verticalOffset;
+           }
             _lineFragments.push(_lineFragmentsForRescue[i]);
         }
     }

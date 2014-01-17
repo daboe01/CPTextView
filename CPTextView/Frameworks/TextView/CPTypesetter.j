@@ -126,7 +126,8 @@ var _sharedSimpleTypesetter = nil;
 }
 
 - (BOOL)_flushRange:(CPRange)lineRange lineOrigin:(CPPoint) lineOrigin
-      currentContainerSize:(CPSize) containerSize advancements:(CPArray) advancements isLast:(BOOL) isLast
+      currentContainerSize:(CPSize) containerSize advancements:(CPArray) advancements
+      lineCount:(unsigned) lineCount isLast:(BOOL) isLast
 {
     [_layoutManager setTextContainer: _currentTextContainer forGlyphRange:lineRange];    // creates a new lineFragment
     var rect = CPRectMake(lineOrigin.x, lineOrigin.y, _lineWidth, _lineHeight);
@@ -152,6 +153,7 @@ var _sharedSimpleTypesetter = nil;
         rect = CPRectMake(lineOrigin.x + _lineWidth, lineOrigin.y, containerSize.width - _lineWidth, _lineHeight);
         [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
     }
+    if(! lineCount ) return NO;
     return ([_layoutManager _rescuingInvalidFragmentsWasPossibleForGlyphRange:lineRange]);
 }
 
@@ -245,7 +247,7 @@ var _sharedSimpleTypesetter = nil;
 
             if (isNewline)
             {
-                if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements isLast:NO])
+                if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines isLast:NO])
                     return;
 
                 lineOrigin.y += _lineHeight;
@@ -269,6 +271,6 @@ var _sharedSimpleTypesetter = nil;
 
     // this is to "flush" the remaining characters
     if (lineRange.length)
-        [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements isLast:YES];
+        [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines isLast:YES];
 }
 @end
