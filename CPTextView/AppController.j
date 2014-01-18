@@ -1,7 +1,6 @@
 /*
  * AppController.j
  * fixmes:
- *  selection for newline characters
  *  cursor-up when behind last character and last line is shorter than prev. line
  *  selection drawing 'artifact' between lines
  *  support methods from CPKeyBinding.j

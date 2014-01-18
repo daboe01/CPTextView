@@ -755,8 +755,8 @@ debugger
                 {
                     var nlLoc= CPMaxRange(fragment._range) - 1;
                     var lastFrame = [[fragment glyphFrames] lastObject]; 
-                    if (point.x > CPRectGetMaxX(lastFrame) + 16 &&   // this allows clicking before and after the (invisible) return character
-                        [[_textStorage string] characterAtIndex: nlLoc] === '\n')
+                    if (point.x > CPRectGetMaxX(lastFrame) + 22 &&   // this allows clicking before and after the (invisible) return character
+                        [[_textStorage string] characterAtIndex: nlLoc] === '\n' || i === c -1)
                         return nlLoc + 1;
                     else return nlLoc;
                 }
@@ -1221,22 +1221,13 @@ debugger
                         rect = CPRectUnion(rect, frames[j]);
 
                     if (CPRectGetMaxX(frames[j]) >=  CPRectGetMaxX(fragment._fragmentRect) &&
-                        CPMaxRange(selectedCharRange) > CPMaxRange(fragment._range))
+                        CPMaxRange(selectedCharRange) > CPMaxRange(fragment._range) ||
+                        [[_textStorage string] characterAtIndex:MAX(0, CPMaxRange(selectedCharRange)-1)] === '\n' )
                     {
                          rect.size.width= containerSize.width - rect.origin.x;
                     }
                 }
             }
-
-
-            if (0&& [[_textStorage string] characterAtIndex:CPMaxRange(selectedCharRange)] === '\n' &&
-                CPLocationInRange(CPMaxRange(selectedCharRange), fragment._range))
-            {
-debugger
-                 rect.origin.x+=16;
-                 rect.size.width= containerSize.width - rect.origin.x;
-            }
-
 
             if (rect)
                 rectArray.push(rect);
