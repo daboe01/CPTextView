@@ -1,14 +1,14 @@
 /*
  * AppController.j
  * fixmes:
- *	optimize typesetting when next paragraph is unchanged (copy fragments at top Typesetter to reinstall them later after patching)
- *	selection for newline characters
- *	update demo to use a 2-column-setup
- *	support methods from CPKeyBinding.j
- *	selection drawing 'artifact' between lines
+ *  selection for newline characters
+ *  cursor-up when behind last character and last line is shorter than prev. line
+ *  selection drawing 'artifact' between lines
+ *  support methods from CPKeyBinding.j
  *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based font-sizing for performance and html-robustness
  *  native pasting in safari (try tricking around with contenteditable)
+ *  update demo to use a 2-column-setup
  */
  
 @import <TextView/CPTextView.j>
@@ -47,7 +47,7 @@
     [_textView setBackgroundColor:[CPColor whiteColor]];
   
     var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(20, 20,520,510)];
-//	[scrollView setAutohidesScrollers:YES];
+//  [scrollView setAutohidesScrollers:YES];
     [scrollView setDocumentView:_textView]; 
     
     [contentView addSubview: scrollView];

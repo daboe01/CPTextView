@@ -58,22 +58,18 @@ var CPSystemTypesetterFactory = Nil;
 
 - (CPTypesetterControlCharacterAction)actionForControlCharacterAtIndex:(unsigned)charIndex
 {
-    CPLog.error(@"-[CPTypesetter subclass responsability");
     return CPTypesetterZeroAdvancementAction;
 }
 - (CPLayoutManager)layoutManager
 {
-    CPLog.error(@"-[CPTypesetter subclass responsability");
     return nil;
 }
 - (CPTextContainer)currentTextContainer
 {
-    CPLog.error(@"-[CPTypesetter subclass responsability");
     return nil;
 }
 - (CPArray)textContainers
 {
-    CPLog.error(@"-[CPTypesetter subclass responsability");
     return nil;
 }
 - (void)layoutGlyphsInLayoutManager:(CPLayoutManager)layoutManager startingAtGlyphIndex:(unsigned)startGlyphIndex 
@@ -126,7 +122,8 @@ var _sharedSimpleTypesetter = nil;
 }
 
 - (BOOL)_flushRange:(CPRange)lineRange lineOrigin:(CPPoint) lineOrigin
-      currentContainerSize:(CPSize) containerSize advancements:(CPArray) advancements isLast:(BOOL) isLast
+      currentContainerSize:(CPSize) containerSize advancements:(CPArray) advancements
+      lineCount:(unsigned) lineCount isLast:(BOOL) isLast
 {
     [_layoutManager setTextContainer: _currentTextContainer forGlyphRange:lineRange];    // creates a new lineFragment
     var rect = CPRectMake(lineOrigin.x, lineOrigin.y, _lineWidth, _lineHeight);
@@ -152,6 +149,7 @@ var _sharedSimpleTypesetter = nil;
         rect = CPRectMake(lineOrigin.x + _lineWidth, lineOrigin.y, containerSize.width - _lineWidth, _lineHeight);
         [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
     }
+    if(! lineCount ) return NO;
     return ([_layoutManager _rescuingInvalidFragmentsWasPossibleForGlyphRange:lineRange]);
 }
 
@@ -193,10 +191,11 @@ var _sharedSimpleTypesetter = nil;
          lineOrigin = CPPointMake(0, [_layoutManager extraLineFragmentUsedRect].origin.y);
     else lineOrigin = CPPointMake(0, 0);
 
+
+    [_layoutManager _removeInvalidLineFragments];
     if (![_textStorage length])
         return;
 
-    [_layoutManager _removeInvalidLineFragments];
     do {
             if (!CPLocationInRange(glyphIndex, _attributesRange))
             {
@@ -210,7 +209,8 @@ var _sharedSimpleTypesetter = nil;
                 leading = (ascent - descent) * 0.2; // FAKE leading
             }
             if(_previousFont !== _currentFont)
-            {    measuringRange= CPMakeRange(glyphIndex, 0);
+            {
+                measuringRange= CPMakeRange(glyphIndex, 0);
                 currentAnchor= prevRangeWidth;
                 _previousFont= _currentFont;
             }
@@ -227,13 +227,15 @@ var _sharedSimpleTypesetter = nil;
                 wrapWidth = rangeWidth;
             }
             else if (currentChar == '\n') /* FIXME: should send actionForControlCharacterAtIndex: */
-            {    isNewline = YES;
+            {
+                isNewline = YES;
             }
             _lineWidth = rangeWidth;
             if (lineOrigin.x + rangeWidth > containerSize.width)
             {
                 if (wrapWidth)
-                {    lineRange = wrapRange;
+                {
+                    lineRange = wrapRange;
                     _lineWidth = wrapWidth;
                 }
                 isNewline = YES;
@@ -245,7 +247,7 @@ var _sharedSimpleTypesetter = nil;
 
             if (isNewline)
             {
-                if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements isLast:NO])
+                if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines isLast:NO])
                     return;
 
                 lineOrigin.y += _lineHeight;
@@ -269,6 +271,6 @@ var _sharedSimpleTypesetter = nil;
 
     // this is to "flush" the remaining characters
     if (lineRange.length)
-        [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements isLast:YES];
+        [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines isLast:YES];
 }
 @end
