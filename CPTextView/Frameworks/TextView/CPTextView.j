@@ -333,16 +333,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 - (void) _replaceCharactersInRange: aRange withAttributedString: aString
-{	[_textStorage replaceCharactersInRange: aRange withAttributedString: aString];
-	[self setSelectedRange: CPMakeRange(aRange.location, [aString length])];
-	[self setNeedsDisplay:YES];
-
+{
+    [_textStorage replaceCharactersInRange: aRange withAttributedString: aString];
+    [self setSelectedRange: CPMakeRange(aRange.location, [aString length])];
+    [_layoutManager _validateLayoutAndGlyphs];
+    [self sizeToFit];
+    [self scrollRangeToVisible:_selectionRange];
 }
 - (void) _replaceCharactersInRange: aRange withString: aString
 {
-	[_textStorage replaceCharactersInRange: CPMakeRangeCopy( aRange) withString: aString];
-	[self setSelectedRange: CPMakeRange(aRange.location, aString.length)];
-	[self setNeedsDisplay:YES];
+    [_textStorage replaceCharactersInRange: CPMakeRangeCopy( aRange) withString: aString];
+    [self setSelectedRange: CPMakeRange(aRange.location, aString.length)];
+    [_layoutManager _validateLayoutAndGlyphs];
+    [self sizeToFit];
+    [self scrollRangeToVisible:_selectionRange];
 }
 - (void)insertText:(id)aString
 {
@@ -386,8 +390,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)drawRect:(CPRect)aRect
 {
-	var ctx = [[CPGraphicsContext currentContext] graphicsPort];
-    CGContextClearRect(ctx, aRect);
+    var ctx = [[CPGraphicsContext currentContext] graphicsPort];
+//  CGContextClearRect(ctx, aRect);
 
     var range = [_layoutManager glyphRangeForBoundingRect:aRect inTextContainer:_textContainer];
     if (range.length)
@@ -618,10 +622,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 - (void)_deleteForRange:(CPRange) changedRange
-{	if (![self shouldChangeTextInRange:changedRange replacementString:@""])
+{   if (![self shouldChangeTextInRange:changedRange replacementString:@""])
         return;
 
-	[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRange(_selectionRange.location, 0) withAttributedString:[_textStorage attributedSubstringFromRange: CPMakeRangeCopy(changedRange) ] ]
+    [[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRange(_selectionRange.location, 0) withAttributedString:[_textStorage attributedSubstringFromRange: CPMakeRangeCopy(changedRange) ] ]
     [_textStorage deleteCharactersInRange: CPMakeRangeCopy(changedRange)];
 
     [self setSelectedRange:CPMakeRange(changedRange.location, 0)];
@@ -645,7 +649,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
          changedRange = CPMakeRange(_selectionRange.location, 1);
     else changedRange = _selectionRange;
 
-	[self _deleteForRange: changedRange];
+    [self _deleteForRange: changedRange];
+}
+- (void)cut:(id)sender
+{   [self copy:sender];
+    [self deleteBackward:sender]
 }
 
 - (void)insertLineBreak:(id)sender
