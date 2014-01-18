@@ -438,7 +438,11 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRect)boundingRectForGlyphRange:(CPRange)aRange inTextContainer:(CPTextContainer)container
 {
-    if(![self numberOfGlyphs]) return CPRectMake(0,0,1,12);    // crude hack to give a cursor in an empty doc.
+    if (![self numberOfGlyphs])
+        return CPRectMake(0,0,1,12);    // crude hack to give a cursor in an empty doc.
+
+    if (CPMaxRange(aRange) >= [self numberOfGlyphs])
+        aRange=CPMakeRange([self numberOfGlyphs]-1, 1);
 
     var fragments = _objectsInRange(_lineFragments, aRange),
         rect = nil,
