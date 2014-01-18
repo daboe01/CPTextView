@@ -150,7 +150,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         
         _carretRect = CPRectMake(0,0,1,11);
     }
-	[self registerForDraggedTypes:[CPColorDragType]];
+    [self registerForDraggedTypes:[CPColorDragType]];
 
     return self;
 }
@@ -339,6 +339,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
+    [self setNeedsDisplay:YES];
+
 }
 - (void) _replaceCharactersInRange: aRange withString: aString
 {
@@ -347,7 +349,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
+    [self setNeedsDisplay:YES];
 }
+
 - (void)insertText:(id)aString
 {
    var isAttributed = [aString isKindOfClass:CPAttributedString],
