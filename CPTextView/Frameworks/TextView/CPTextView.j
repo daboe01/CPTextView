@@ -566,9 +566,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 }
 - (void)moveUp:(id)sender
-{	if (_isSelectable)
-    {   var fraction = [];
-		var sindex = [self selectedRange].location;
+{
+    if (_isSelectable)
+    {
+debugger
+        var fraction = [];
+        var sindex = [self selectedRange].location;
 		var rectSource = [_layoutManager boundingRectForGlyphRange: CPMakeRange(sindex, 1) inTextContainer:_textContainer];
         var point = rectSource.origin;
 		if(point.y <= 0) return;
