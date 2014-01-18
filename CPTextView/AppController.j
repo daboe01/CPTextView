@@ -1,9 +1,7 @@
 /*
  * AppController.j
  * fixmes:
- *  cursor-up when behind last character and last line is shorter than prev. line
  *  selection drawing 'artifact' between lines
- *  support methods from CPKeyBinding.j
  *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
  *  revisit canvas-based font-sizing for performance and html-robustness
  *  native pasting in safari (try tricking around with contenteditable)
@@ -15,7 +13,7 @@
 @implementation AppController : CPObject
 {
     CPTextView _textView;    
-	CPTextField _selectionRange;
+    CPTextField _selectionRange;
 }
 
 - (void)updateSelectionRange
@@ -53,11 +51,11 @@
 
 /*
     _selectionRange = [CPTextField labelWithTitle:@"xx"];
-	[_selectionRange setEditable: YES];
-	[_selectionRange setBezeled: YES];
+    [_selectionRange setEditable: YES];
+    [_selectionRange setBezeled: YES];
     [_selectionRange setFrame:CPMakeRect(590,100,100,32)];
-	[contentView addSubview:_selectionRange];
-	[self updateSelectionRange];
+    [contentView addSubview:_selectionRange];
+    [self updateSelectionRange];
 */ 
    [_textView setDelegate:self];
 
@@ -82,26 +80,27 @@
 
     item = [mainMenu insertItemWithTitle:@"Font" action:@selector(orderFrontFontPanel:) keyEquivalent:nil atIndex:1];    
 
-	var centeredParagraph=[CPParagraphStyle new];
-	[centeredParagraph setAlignment: CPCenterTextAlignment];
+    var centeredParagraph=[CPParagraphStyle new];
+    [centeredParagraph setAlignment: CPCenterTextAlignment];
     [_textView insertText:[[CPAttributedString alloc] initWithString:@"Fusce\n" 
                 attributes:[CPDictionary dictionaryWithObjects:[centeredParagraph, [CPFont boldFontWithName:"Arial" size:18],[CPColor redColor] ] forKeys: [CPParagraphStyleAttributeName, CPFontAttributeName, CPForegroundColorAttributeName]]]
                 ];
        
      [_textView insertText: [[CPAttributedString alloc] initWithString:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
-	 [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
+     [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldFontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
-	 [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
+     [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12.0]] forKeys: [CPFontAttributeName]]]];
 
-	[theWindow orderFront:self];
-	[CPMenu setMenuBarVisible:YES];
+    [theWindow orderFront:self];
+    [CPMenu setMenuBarVisible:YES];
 }
 
 //-> CPApplication (?)
-- orderFrontFontPanel:sender
-{	[[CPFontManager sharedFontManager] orderFrontFontPanel:self];
+- (void)orderFrontFontPanel:sender
+{
+   [[CPFontManager sharedFontManager] orderFrontFontPanel:self];
 }
 @end
 
@@ -109,7 +108,7 @@
 // <!> TODO measure the performance against the capp-builtin sizing using this code (could be faster, would be safe against HTML)
 var _measuringContext;
 function _widthOfStringForFont(aString, aFont)
-{	if(!_measuringContext) _measuringContext =CGBitmapGraphicsContextCreate();
+{    if(!_measuringContext) _measuringContext =CGBitmapGraphicsContextCreate();
     _measuringContext.font = [aFont cssString];
     return _measuringContext.measureText(aString);
 }

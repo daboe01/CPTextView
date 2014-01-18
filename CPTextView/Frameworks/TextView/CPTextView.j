@@ -101,7 +101,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     CPSize _minSize;
     CPSize _maxSize;
 
-	BOOL	_scrollingDownward;
+    BOOL    _scrollingDownward;
 
     /* use bit mask ? */
     BOOL _isRichText;
@@ -110,14 +110,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     BOOL _isHorizontallyResizable;
     BOOL _isVerticallyResizable;
 
-	var _carretDOM;
-	int  _stickyXLocation;
+    var _carretDOM;
+    int  _stickyXLocation;
 }
 -(id) initWithFrame:(CPRect)aFrame textContainer:(CPTextContainer)aContainer
 {
     self = [super initWithFrame:aFrame];
     if (self)
-    {	_DOMElement.style.cursor="text";
+    {    _DOMElement.style.cursor="text";
         _textContainerInset = CPSizeMake(2,0);
         _textContainerOrigin = CPPointMake(_bounds.origin.x, _bounds.origin.y);
         [aContainer setTextView:self];
@@ -135,7 +135,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _insertionPointColor = [CPColor blackColor];
         _textColor = [CPColor blackColor];
         _font = [CPFont systemFontOfSize:12.0];
-		[self setFont: _font];
+        [self setFont: _font];
         
         _typingAttributes = [[CPDictionary alloc] initWithObjects:[_font, _textColor] forKeys:[CPFontAttributeName, CPForegroundColorAttributeName]];
         
@@ -156,10 +156,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 -(void) undo: sender
-{	if(_allowsUndo)
-	{
-		[[[self window] undoManager] undo];
-	}
+{    if(_allowsUndo)
+    {
+        [[[self window] undoManager] undo];
+    }
 }
 -(void) redo: sender
 {    if(_allowsUndo) [[[self window] undoManager] redo];
@@ -212,18 +212,18 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 }
 - (CPString)string
-{	return [_textStorage string];
+{    return [_textStorage string];
 }
 - (void)setString:(CPString)aString
-{	[_textStorage replaceCharactersInRange: CPMakeRange(0, [_layoutManager numberOfGlyphs]) withString:aString];
+{    [_textStorage replaceCharactersInRange: CPMakeRange(0, [_layoutManager numberOfGlyphs]) withString:aString];
     [self didChangeText];
-	[_layoutManager _validateLayoutAndGlyphs];
-	[self sizeToFit];
+    [_layoutManager _validateLayoutAndGlyphs];
+    [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
 }
 // KVO support
 -(void)setValue:someVal
-{	[self setString: [someVal description]]
+{    [self setString: [someVal description]]
 }
 -(id)value {[self string]}
 
@@ -360,30 +360,31 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (![self shouldChangeTextInRange:CPMakeRangeCopy(_selectionRange) replacementString:string])
         return;
 
-	if(_selectionRange.length === 0)
-	{	[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRange(_selectionRange.location, [string length]) withString:@""];
-		[[[self window] undoManager] setActionName:@"Insert text"];
-	}
-	if (isAttributed)
-	{	if(_selectionRange.length > 0)
-		{	[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange: _selectionRange ] ];
-			[[[self window] undoManager] setActionName:@"Replace rich text"];
-		}
-		[_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:aString];
-	} else
-	{	if(_selectionRange.length > 0)
-		{
-			[[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: [[self string] substringWithRange: CPMakeRangeCopy(_selectionRange) ] ];
-			[[[self window] undoManager] setActionName:@"Replace plain text"];
-		}
-		[_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: aString];
-	}
-	[self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
+    if(_selectionRange.length === 0)
+    {    [[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRange(_selectionRange.location, [string length]) withString:@""];
+        [[[self window] undoManager] setActionName:@"Insert text"];
+    }
+    if (isAttributed)
+    {    if(_selectionRange.length > 0)
+        {    [[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange: _selectionRange ] ];
+            [[[self window] undoManager] setActionName:@"Replace rich text"];
+        }
+        [_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:aString];
+    } else
+    {    if(_selectionRange.length > 0)
+        {
+            [[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: [[self string] substringWithRange: CPMakeRangeCopy(_selectionRange) ] ];
+            [[[self window] undoManager] setActionName:@"Replace plain text"];
+        }
+        [_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: aString];
+    }
+    [self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
 
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
+    _stickyXLocation= _carretRect.origin.x;
 }
 
 - (void)_blinkCarret:(CPTimer)aTimer
@@ -435,15 +436,15 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 - (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity /* unused */ )affinity stillSelecting:(BOOL)selecting
-{	var maxRange=CPMakeRange(0, [_layoutManager numberOfGlyphs]);
-	range= CPIntersectionRange(maxRange, range);
+{    var maxRange=CPMakeRange(0, [_layoutManager numberOfGlyphs]);
+    range= CPIntersectionRange(maxRange, range);
     if (!selecting && (_delegateRespondsToSelectorMask & kDelegateRespondsTo_textView_willChangeSelectionFromCharacterRange_toCharacterRange))
         _selectionRange = [_delegate textView:self willChangeSelectionFromCharacterRange:_selectionRange toCharacterRange:range];
     else
-    {	_selectionRange = CPMakeRangeCopy(range);
-		_selectionRange=[self selectionRangeForProposedRange:_selectionRange granularity:[self selectionGranularity]];
+    {    _selectionRange = CPMakeRangeCopy(range);
+        _selectionRange=[self selectionRangeForProposedRange:_selectionRange granularity:[self selectionGranularity]];
 
-	}
+    }
     if (_selectionRange.length)
         [_layoutManager invalidateDisplayForGlyphRange:_selectionRange];
     else
@@ -480,13 +481,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)mouseDown:(CPEvent)event
 {
-	var fraction = [],
-	point = [self convertPoint:[event locationInWindow] fromView:nil];
+    var fraction = [],
+    point = [self convertPoint:[event locationInWindow] fromView:nil];
     
     /* stop _carretTimer */
     [_carretTimer invalidate];
     _carretTimer = nil;
-	[self _hideCarret];
+    [self _hideCarret];
     // convert to container coordinate
     point.x -= _textContainerOrigin.x;
     point.y -= _textContainerOrigin.y;
@@ -494,21 +495,21 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     _startTrackingLocation = [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
     if (_startTrackingLocation == CPNotFound)
         _startTrackingLocation = [_layoutManager numberOfGlyphs];
-	var granularities=[-1, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
-	[self setSelectionGranularity:granularities[[event clickCount]]];
+    var granularities=[-1, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
+    [self setSelectionGranularity:granularities[[event clickCount]]];
     [self setSelectedRange:CPMakeRange(_startTrackingLocation, 0) affinity:0 stillSelecting:YES];
 }
 
 - (void)_clearRange:(var)range
-{	var rects = [_layoutManager rectArrayForCharacterRange: nil withinSelectedCharacterRange: range 
+{    var rects = [_layoutManager rectArrayForCharacterRange: nil withinSelectedCharacterRange: range 
                         inTextContainer:_textContainer rectCount:nil];
-	var l=rects.length;
-	for (var i = 0; i < l ; i++)
-	{
-		rects[i].origin.x += _textContainerOrigin.x;
-		rects[i].origin.y += _textContainerOrigin.y;
-		[self setNeedsDisplayInRect:rects[i]];
-	}
+    var l=rects.length;
+    for (var i = 0; i < l ; i++)
+    {
+        rects[i].origin.x += _textContainerOrigin.x;
+        rects[i].origin.y += _textContainerOrigin.y;
+        [self setNeedsDisplayInRect:rects[i]];
+    }
 }
 
 - (void)mouseDragged:(CPEvent)event
@@ -520,52 +521,56 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     point.x -= _textContainerOrigin.x;
     point.y -= _textContainerOrigin.y;
     
- 	var oldRange=[self selectedRange];
+     var oldRange=[self selectedRange];
 
-	var index = [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
-    if ( index == CPNotFound)
+    var index = [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
+    if (index == CPNotFound)
         index = _scrollingDownward? CPMaxRange(oldRange): oldRange.location;
  
-	if (index> oldRange.location)
-	{	[self _clearRange: _MakeRangeFromAbs(oldRange.location,index) ];
-		_scrollingDownward=YES;
-	}
-	if(index< CPMaxRange(oldRange) )
-	{	[self _clearRange: _MakeRangeFromAbs(index, CPMaxRange(oldRange)) ];
-		_scrollingDownward=NO;
-	}
+    if (index> oldRange.location)
+    {
+        [self _clearRange: _MakeRangeFromAbs(oldRange.location,index) ];
+        _scrollingDownward=YES;
+    }
+    if (index< CPMaxRange(oldRange) )
+    {
+       [self _clearRange: _MakeRangeFromAbs(index, CPMaxRange(oldRange)) ];
+        _scrollingDownward=NO;
+    }
 
     if (index < _startTrackingLocation)
         [self setSelectedRange: CPMakeRange(index, _startTrackingLocation - index) affinity:0 stillSelecting:YES];
     else
         [self setSelectedRange: CPMakeRange(_startTrackingLocation, index - _startTrackingLocation) affinity:0 stillSelecting:YES];
-	[self  scrollRangeToVisible:CPMakeRange(index, 0)];
+    [self  scrollRangeToVisible:CPMakeRange(index, 0)];
 }
 
 - (void)mouseUp:(CPEvent)event
 {
     /* will post CPTextViewDidChangeSelectionNotification */
-	[self setSelectionGranularity: CPSelectByCharacter];
+    [self setSelectionGranularity: CPSelectByCharacter];
     [self setSelectedRange:[self selectedRange] affinity:0 stillSelecting:NO];
-	var point = [_layoutManager locationForGlyphAtIndex: [self selectedRange].location];
-	_stickyXLocation= point.x;
+    var point = [_layoutManager locationForGlyphAtIndex: [self selectedRange].location];
+    _stickyXLocation= point.x;
 }
 
+// <!> FIXME handle all the other methods from CPKeyBinding.j
+
 - (void)moveDown:(id)sender
-{	if (_isSelectable)
+{   if (_isSelectable)
     {   var fraction = [];
-		var nglyphs= [_layoutManager numberOfGlyphs];
-		var sindex = CPMaxRange([self selectedRange]);
-		var rectSource = [_layoutManager boundingRectForGlyphRange: CPMakeRange(sindex, 1) inTextContainer:_textContainer];
-		var rectEnd = nglyphs? [_layoutManager boundingRectForGlyphRange: CPMakeRange(nglyphs-1, 1) inTextContainer:_textContainer]: rectSource;
+        var nglyphs= [_layoutManager numberOfGlyphs];
+        var sindex = CPMaxRange([self selectedRange]);
+        var rectSource = [_layoutManager boundingRectForGlyphRange: CPMakeRange(sindex, 1) inTextContainer:_textContainer];
+        var rectEnd = nglyphs? [_layoutManager boundingRectForGlyphRange: CPMakeRange(nglyphs-1, 1) inTextContainer:_textContainer]: rectSource;
         var point = rectSource.origin;
-		if(point.y >= rectEnd.origin.y) return;
-		if(_stickyXLocation) point.x = _stickyXLocation;
-		point.y+=2+ rectSource.size.height;
-		point.x+=2;
-		var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
-		[self setSelectedRange: CPMakeRange(dindex,0) ];
-		[self scrollRangeToVisible: CPMakeRange(dindex, 0)]
+        if(point.y >= rectEnd.origin.y) return;
+        if(_stickyXLocation) point.x = _stickyXLocation;
+        point.y+=2+ rectSource.size.height;
+        point.x+=2;
+        var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
+        [self setSelectedRange: CPMakeRange(dindex,0) ];
+        [self scrollRangeToVisible: CPMakeRange(dindex, 0)]
 
     }
 }
@@ -573,18 +578,17 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-debugger
         var fraction = [];
         var sindex = [self selectedRange].location;
-		var rectSource = [_layoutManager boundingRectForGlyphRange: CPMakeRange(sindex, 1) inTextContainer:_textContainer];
+        var rectSource = [_layoutManager boundingRectForGlyphRange: CPMakeRange(sindex, 1) inTextContainer:_textContainer];
         var point = rectSource.origin;
-		if(point.y <= 0) return;
-		if(_stickyXLocation) point.x = _stickyXLocation;
-		point.y-=2;
-		point.x+=2;
-		var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
-		[self setSelectedRange: CPMakeRange(dindex,0) ];
-		[self scrollRangeToVisible: CPMakeRange(dindex, 0)]
+        if(point.y <= 0) return;
+        if(_stickyXLocation) point.x = _stickyXLocation;
+        point.y-=2;
+        point.x+=2;
+        var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
+        [self setSelectedRange: CPMakeRange(dindex,0) ];
+        [self scrollRangeToVisible: CPMakeRange(dindex, 0)]
     }
 }
 
@@ -593,12 +597,34 @@ debugger
 {
     if (_isSelectable)
     {
-        /* TODO: handle modifiers */
         if (_selectionRange.location > 0)
-        {	[self setSelectedRange:CPMakeRange(_selectionRange.location - 1, 0)];
-        	var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location - 1];
-			_stickyXLocation= point.x;
-		}
+        {    [self setSelectedRange:CPMakeRange(_selectionRange.location - 1, 0)];
+            var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location - 1];
+            _stickyXLocation= point.x;
+        }
+    }
+}
+- (void) moveToEndOfParagraph:(id)sender
+{
+    if (_isSelectable)
+    {
+         var parRange = [self _characterRangeForUnitAtIndex: _selectionRange.location inString: [self stringValue] asDefinedByCharArray: ['\n']];       
+         [self setSelectedRange:CPMakeRange(CPMaxRange(parRange) , 0)];
+         var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location];
+         _stickyXLocation= point.x;
+    }
+}
+- (void) moveToBeginningOfParagraph:(id)sender
+{
+    if (_isSelectable)
+    {
+        if (_selectionRange.location > 0)
+        {
+             var parRange = [self _characterRangeForUnitAtIndex: _selectionRange.location inString: [self stringValue] asDefinedByCharArray: ['\n']];       
+             [self setSelectedRange:CPMakeRange(parRange.location , 0)];
+             var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location];
+             _stickyXLocation= point.x;
+        }
     }
 }
 
@@ -606,12 +632,11 @@ debugger
 {
     if (_isSelectable)
     {
-        /* TODO: handle modifiers */
         if (_selectionRange.location < [_layoutManager numberOfGlyphs])
-        {	[self setSelectedRange:CPMakeRange(_selectionRange.location + 1, 0)];
-			var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location + 1];
-			_stickyXLocation= point.x;
-		}
+        {    [self setSelectedRange:CPMakeRange(_selectionRange.location + 1, 0)];
+            var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location + 1];
+            _stickyXLocation= point.x;
+        }
     }
 }
 
@@ -639,18 +664,19 @@ debugger
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
+    _stickyXLocation= _carretRect.origin.x;
 }
 
 - (void)deleteBackward:(id)sender
-{	var changedRange;
+{    var changedRange;
 
     if (CPEmptyRange(_selectionRange) && _selectionRange.location > 0)
          changedRange = CPMakeRange(_selectionRange.location - 1, 1);
     else changedRange = _selectionRange;
-	[self _deleteForRange: changedRange];
+    [self _deleteForRange: changedRange];
 }
 - (void)deleteForward:(id)sender
-{	var changedRange = nil;
+{    var changedRange = nil;
 
     if (CPEmptyRange(_selectionRange) && _selectionRange.location < [_layoutManager numberOfGlyphs])
          changedRange = CPMakeRange(_selectionRange.location, 1);
@@ -670,7 +696,7 @@ debugger
 
 - (BOOL)acceptsFirstResponder
 {
-	if (_isSelectable)
+    if (_isSelectable)
         return YES;
     return NO;
 }
@@ -729,14 +755,14 @@ debugger
 }
 
 - (void)delete:(id)sender
-{	[self deleteBackward: sender];
+{    [self deleteBackward: sender];
 }
 
 - stringValue
-{	return _textStorage._string;
+{    return _textStorage._string;
 }
 - objectValue
-{	return [self stringValue];
+{    return [self stringValue];
 }
 - (void)setFont:(CPFont)font
 {
@@ -744,7 +770,7 @@ debugger
     var length = [_layoutManager numberOfGlyphs];
     [_textStorage addAttribute:CPFontAttributeName value:_font range:CPMakeRange(0, length)];
     [_textStorage setFont:_font];
-	[self scrollRangeToVisible:CPMakeRange(length, 0)];
+    [self scrollRangeToVisible:CPMakeRange(length, 0)];
 }
 
 - (void)setFont:(CPFont)font range:(CPRange)range
@@ -758,8 +784,8 @@ debugger
         [_textStorage setFont:_font];
     }
     [_textStorage addAttribute:CPFontAttributeName value:font range:CPMakeRangeCopy(range)];
-	[_layoutManager _validateLayoutAndGlyphs];
-	[self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
+    [_layoutManager _validateLayoutAndGlyphs];
+    [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
 }
 
 - (CPFont)font
@@ -776,7 +802,7 @@ debugger
 {
     var attributes = [_textStorage attributesAtIndex:_selectionRange.location effectiveRange:nil],
         oldFont = [attributes objectForKey:CPFontAttributeName],
-		scrollRange=CPMakeRange(CPMaxRange(_selectionRange), 0);
+        scrollRange=CPMakeRange(CPMaxRange(_selectionRange), 0);
 
     if (!oldFont)
         oldFont = [self font];
@@ -789,8 +815,8 @@ debugger
         [self setFont:[sender convertFont:oldFont] range:CPMakeRange(0,length)];
         scrollRange = CPMakeRange(length, 0);
     }
-	[_layoutManager _validateLayoutAndGlyphs];
-	[self scrollRangeToVisible:scrollRange];
+    [_layoutManager _validateLayoutAndGlyphs];
+    [self scrollRangeToVisible:scrollRange];
 }
 
 - (void)underline:(id)sender
@@ -831,7 +857,7 @@ debugger
         [_textStorage addAttribute:CPForegroundColorAttributeName value:_textColor range:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
     else
         [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
-	[_layoutManager _validateLayoutAndGlyphs];
+    [_layoutManager _validateLayoutAndGlyphs];
     [self scrollRangeToVisible:CPMakeRange([_layoutManager numberOfGlyphs], 0)];
 }
 
@@ -850,7 +876,7 @@ debugger
     else
         [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRangeCopy(range)];
 
-	[_layoutManager _validateLayoutAndGlyphs];
+    [_layoutManager _validateLayoutAndGlyphs];
     [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
 }
 
@@ -882,7 +908,7 @@ debugger
 - (void)replaceCharactersInRange:(CPRange)aRange withString:(CPString)aString
 {
 
-	[_textStorage replaceCharactersInRange: aRange withString:aString];
+    [_textStorage replaceCharactersInRange: aRange withString:aString];
 }
 
 - (CPString)string
@@ -933,15 +959,15 @@ debugger
 
 - (void)setConstrainedFrameSize:(CPSize)desiredSize
 {
-	[self setFrameSize:desiredSize];
+    [self setFrameSize:desiredSize];
 }
 - (void)sizeToFit
-{	[self setFrameSize:[self frameSize]]
+{    [self setFrameSize:[self frameSize]]
 
 }
 
 - (void)setFrameSize:(CPSize) aSize
-{	[_textContainer setContainerSize:aSize];
+{    [_textContainer setContainerSize:aSize];
 
     var minSize = [self minSize],
         maxSize = [self maxSize];
@@ -952,20 +978,20 @@ debugger
         rect = CPRectUnion(rect, [_layoutManager extraLineFragmentRect]);
 
     if (_isHorizontallyResizable)
-    {	desiredSize.width = rect.size.width + 2 * _textContainerInset.width;
+    {    desiredSize.width = rect.size.width + 2 * _textContainerInset.width;
         if (desiredSize.width < minSize.width)
             desiredSize.width = minSize.width;
         else if (desiredSize.width > maxSize.width)
             desiredSize.width = maxSize.width;
     }
-	if (_isVerticallyResizable)
-    {	desiredSize.height = rect.size.height + 2 * _textContainerInset.height;
+    if (_isVerticallyResizable)
+    {    desiredSize.height = rect.size.height + 2 * _textContainerInset.height;
         if (desiredSize.height < minSize.height)
             desiredSize.height = minSize.height;
         else if (desiredSize.height > maxSize.height)
             desiredSize.height = maxSize.height;
     }
-	[super setFrameSize: desiredSize];
+    [super setFrameSize: desiredSize];
 }
 
 - (void)scrollRangeToVisible:(CPRange)aRange
@@ -995,16 +1021,16 @@ debugger
         searchIndex = 0;
 
     if ((characterSet.join("")).indexOf(string.charAt(index)) !== CPNotFound)
-		return CPMakeRange(index, 1);
+        return CPMakeRange(index, 1);
 
     do
     {
         var peek = string.lastIndexOf(characterSet[searchIndex++], index);
         if (peek !== CPNotFound)
-		{	if (lastIndex === CPNotFound)
-				lastIndex = peek;
-			else lastIndex = MAX(lastIndex, peek);
-		}
+        {    if (lastIndex === CPNotFound)
+                lastIndex = peek;
+            else lastIndex = MAX(lastIndex, peek);
+        }
     } while (searchIndex < characterSet.length);
 
     if (lastIndex !== CPNotFound)
@@ -1016,10 +1042,10 @@ debugger
     {
         var peek= string.indexOf(characterSet[searchIndex++], index);
         if (peek !== CPNotFound)
-		{	if (lastIndex === CPNotFound)
-				lastIndex = peek;
-			else lastIndex = MIN(lastIndex, peek);
-		}
+        {    if (lastIndex === CPNotFound)
+                lastIndex = peek;
+            else lastIndex = MIN(lastIndex, peek);
+        }
     } while (searchIndex < characterSet.length);
 
     if (lastIndex != CPNotFound)
@@ -1032,9 +1058,9 @@ debugger
 - (CPRange)_characterRangeForWordAtIndex:(unsigned)index inString:(CPString)string
 {
  /* <!> FIXME
-	just a testing characterSet 
-	all of this depend of the current language.
-	Need some CPLocale support and maybe even a FSM...
+    just a testing characterSet 
+    all of this depend of the current language.
+    Need some CPLocale support and maybe even a FSM...
   */
 
     var characterSet = ['\n', ' ', '\t', ',', ';', '.', '!', '?', '\'', '"', '-', ':'];
@@ -1053,19 +1079,19 @@ debugger
     if (CPMaxRange(proposedRange) > textStorageLength)
         proposedRange.length = textStorageLength - proposedRange.location;
 
-	var string = [_textStorage string];
+    var string = [_textStorage string];
     switch(granularity)
     {
         case CPSelectByWord:
-        {	var wordRange = [self _characterRangeForWordAtIndex:proposedRange.location inString:string];
-			if (proposedRange.length)
+        {    var wordRange = [self _characterRangeForWordAtIndex:proposedRange.location inString:string];
+            if (proposedRange.length)
                 wordRange = CPUnionRange(wordRange, [self _characterRangeForWordAtIndex:CPMaxRange(proposedRange) inString:string]);       
             return wordRange;
         } break;
 
         case CPSelectByParagraph:
-        {	var parRange = [self _characterRangeForUnitAtIndex: proposedRange.location inString: string asDefinedByCharArray: ['\n']];       
-			if (proposedRange.length)
+        {    var parRange = [self _characterRangeForUnitAtIndex: proposedRange.location inString: string asDefinedByCharArray: ['\n']];       
+            if (proposedRange.length)
                 parRange = CPUnionRange(parRange, [self _characterRangeForUnitAtIndex: CPMaxRange(proposedRange) inString: string asDefinedByCharArray: ['\n']]);       
             return parRange;
         } break;
@@ -1099,37 +1125,37 @@ debugger
 }
 
 - (void)drawInsertionPointInRect:(CPRect)aRect color:(CPColor)aColor turnedOn:(BOOL)flag
-{	var style;
-	if(!_carretDOM)
-	{	_carretDOM = document.createElement("span");
-		style = _carretDOM.style;
-		style.position = "absolute";
-		style.visibility = "visible";
-		style.padding = "0px";
-		style.margin = "0px";
-		style.whiteSpace = "pre";
-		style.backgroundColor = "black";
-		_carretDOM.style.width= "1px";
-		self._DOMElement.appendChild(_carretDOM);
-	}
-	_carretDOM.style.left=(aRect.origin.x)+"px";
-	_carretDOM.style.top= (aRect.origin.y)+"px";
-	_carretDOM.style.height= (aRect.size.height)+"px";
-	_carretDOM.style.visibility = flag ? "visible":"hidden";
+{    var style;
+    if(!_carretDOM)
+    {    _carretDOM = document.createElement("span");
+        style = _carretDOM.style;
+        style.position = "absolute";
+        style.visibility = "visible";
+        style.padding = "0px";
+        style.margin = "0px";
+        style.whiteSpace = "pre";
+        style.backgroundColor = "black";
+        _carretDOM.style.width= "1px";
+        self._DOMElement.appendChild(_carretDOM);
+    }
+    _carretDOM.style.left=(aRect.origin.x)+"px";
+    _carretDOM.style.top= (aRect.origin.y)+"px";
+    _carretDOM.style.height= (aRect.size.height)+"px";
+    _carretDOM.style.visibility = flag ? "visible":"hidden";
 }
 - (void) _hideCarret
-{	if(_carretDOM) _carretDOM.style.visibility ="hidden";
+{    if(_carretDOM) _carretDOM.style.visibility ="hidden";
 }
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
-{	if(_selectionRange.length) [self _hideCarret];
-    if (_selectionRange.location >= [_layoutManager numberOfGlyphs])	// cursor is "behind" the last chacacter
-    {	_carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
-		_carretRect.origin.x += _carretRect.size.width;
-		if (_selectionRange.location > 0 && [[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')
-		{	_carretRect.origin.y += _carretRect.size.height;
-			_carretRect.origin.x = 0;
-		}
-	}
+{    if(_selectionRange.length) [self _hideCarret];
+    if (_selectionRange.location >= [_layoutManager numberOfGlyphs])    // cursor is "behind" the last chacacter
+    {    _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
+        _carretRect.origin.x += _carretRect.size.width;
+        if (_selectionRange.location > 0 && [[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')
+        {    _carretRect.origin.y += _carretRect.size.height;
+            _carretRect.origin.x = 0;
+        }
+    }
     else _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
     _carretRect.origin.x += _textContainerOrigin.x;

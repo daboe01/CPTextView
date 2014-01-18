@@ -283,7 +283,7 @@ var _objectsInRange = function(aList, aRange)
     {
         if (newFragmentRuns[i].string !== oldFragmentRuns[i].string || 
             ! _RectEqualToRectHorizontally(newLineFragment._fragmentRect, _fragmentRect))
-//newFragmentRuns[i].elem.style.left !== oldFragmentRuns[i].elem.style.left && compare CSS-strings
+// FIXME <!>  newFragmentRuns[i].elem.style.left !== oldFragmentRuns[i].elem.style.left && compare CSS-strings
         {    return NO;
         }
     }
@@ -579,7 +579,6 @@ var _objectsInRange = function(aList, aRange)
     if (![oldLineFragment isVisuallyIdenticalToFragment: newLineFragment])
     {    isIdentical = NO;
     }
-debugger
 
     if (isIdentical)    // patch and, if applicable, patch the linefragments
     {
