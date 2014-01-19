@@ -343,7 +343,7 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
     if (sel === "Italic") return kTypefaceIndex_Italic;
     if (sel === "Bold") return kTypefaceIndex_Bold;
     if (sel === "Bold Italic") return kTypefaceIndex_BoldItalic;
-    return ret=kTypefaceIndex_Normal;
+    return kTypefaceIndex_Normal;
 }
 
 /*!
