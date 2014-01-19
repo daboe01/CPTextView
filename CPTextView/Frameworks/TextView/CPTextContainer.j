@@ -19,9 +19,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
- 
+
 @import "CPLayoutManager.j"
- 
+
 /*
     @global
     @group CPLineSweepDirection
@@ -69,7 +69,7 @@ CPLineMovesDown = 3;
 */
 CPLineMovesUp = 4;
 
-/*! 
+/*!
     @ingroup appkit
     @class CPTextContainer
 */
@@ -80,17 +80,21 @@ CPLineMovesUp = 4;
     CPLayoutManager _layoutManager;
     float _lineFragmentPadding;
 }
--(id)initWithContainerSize:(CPSize)aSize
+
+- (id)initWithContainerSize:(CPSize)aSize
 {
     self = [super init];
+
     if (self)
     {
         _size = aSize;
         _lineFragmentPadding = 0.0;
     }
+
     return self;
 }
-- (id) init
+
+- (id)init
 {
     return [self initWithContainerSize:CPMakeSize(1e7, 1e7)];
 }
@@ -99,18 +103,25 @@ CPLineMovesUp = 4;
 {
     return _size;
 }
-- (void)setContainerSize:(CPSize) someSize
-{	var oldSize=_size;
-	_size=someSize;
-	if(oldSize.width!=_size.width)
-		[_layoutManager invalidateLayoutForCharacterRange:CPMakeRange(0,[[_layoutManager textStorage] length]) isSoft: NO actualCharacterRange:NULL];
+
+- (void)setContainerSize:(CPSize)someSize
+{
+    var oldSize = _size;
+
+    _size = someSize;
+
+    if (oldSize.width != _size.width)
+        [_layoutManager invalidateLayoutForCharacterRange:CPMakeRange(0,[[_layoutManager textStorage] length])
+                        isSoft:NO
+                        actualCharacterRange:NULL];
 
 }
 
 - (void)setWidthTracksTextView:(BOOL)flag
 {
-	//<!> fixme: Controls whether the receiver adjusts the width of its bounding rectangle when its text view is resized.
+    //<!> fixme: Controls whether the receiver adjusts the width of its bounding rectangle when its text view is resized.
 }
+
 - (void)setTextView:(CPTextView)aTextView
 {
     if (_textView)
@@ -118,27 +129,29 @@ CPLineMovesUp = 4;
         [self _removeAllLines];
         [_textView setTextContainer:nil];
     }
+
     _textView = aTextView;
-    
+
     if (_textView != nil)
         [_textView setTextContainer:self];
 
     [_layoutManager textContainerChangedTextView:self];
 }
 
--(CPTextView)textView
+- (CPTextView)textView
 {
     return _textView;
 }
 
--(void)setLayoutManager:(CPLayoutManager)aManager
+- (void)setLayoutManager:(CPLayoutManager)aManager
 {
     if (_layoutManager === aManager)
         return;
+
     _layoutManager = aManager;
 }
 
--(CPLayoutManager)layoutManager
+- (CPLayoutManager)layoutManager
 {
     return _layoutManager;
 }
@@ -163,21 +176,25 @@ CPLineMovesUp = 4;
     return YES;
 }
 
-- (CPRect)lineFragmentRectForProposedRect:(CPRect)proposedRect sweepDirection:(CPLineSweepDirection)sweep 
-    movementDirection:(CPLineMovementDirection)movement remainingRect:(CPRectPointer)remainingRect
+- (CPRect)lineFragmentRectForProposedRect:(CPRect)proposedRect
+                           sweepDirection:(CPLineSweepDirection)sweep
+                        movementDirection:(CPLineMovementDirection)movement
+                            remainingRect:(CPRectPointer)remainingRect
 {
     var resultRect = CPRectCreateCopy(proposedRect);
+
     if (sweep != CPLineSweepRight || movement != CPLineMovesDown)
     {
         CPLog.trace(@"FIXME: unsupported sweep ("+sweep+") or movement ("+movement+")");
         return CPRectMakeZero();
     }
+
     if (resultRect.origin.x + resultRect.size.width > _size.width)
         resultRect.size.width = _size.width - resultRect.origin.x;
-        
+
     if (resultRect.size.width < 0)
         resultRect = CPRectMakeZero();
-        
+
     if (remainingRect)
     {
         remainingRect.origin.x = resultRect.origin.x + resultRect.size.width;
@@ -185,6 +202,8 @@ CPLineMovesUp = 4;
         remainingRect.size.height =  resultRect.size.height;
         remainingRect.size.width = _size.width - (resultRect.origin.x + resultRect.size.width);
     }
+
     return resultRect;
 }
+
 @end
