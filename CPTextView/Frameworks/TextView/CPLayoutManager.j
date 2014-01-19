@@ -409,7 +409,12 @@ var _objectsInRange = function(aList, aRange)
     return _textContainers;
 }
 
+// <!> fixme
 - (int)numberOfGlyphs
+{
+    return [_textStorage length];
+}
+- (int)numberOfCharacters
 {
     return [_textStorage length];
 }

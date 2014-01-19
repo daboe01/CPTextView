@@ -215,7 +215,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {    return [_textStorage string];
 }
 - (void)setString:(CPString)aString
-{    [_textStorage replaceCharactersInRange: CPMakeRange(0, [_layoutManager numberOfGlyphs]) withString:aString];
+{    [_textStorage replaceCharactersInRange: CPMakeRange(0, [_layoutManager numberOfCharacters]) withString:aString];
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
@@ -436,7 +436,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 - (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity /* unused */ )affinity stillSelecting:(BOOL)selecting
-{    var maxRange=CPMakeRange(0, [_layoutManager numberOfGlyphs]);
+{    var maxRange=CPMakeRange(0, [_layoutManager numberOfCharacters]);
     range= CPIntersectionRange(maxRange, range);
     if (!selecting && (_delegateRespondsToSelectorMask & kDelegateRespondsTo_textView_willChangeSelectionFromCharacterRange_toCharacterRange))
         _selectionRange = [_delegate textView:self willChangeSelectionFromCharacterRange:_selectionRange toCharacterRange:range];
@@ -494,7 +494,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     
     _startTrackingLocation = [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
     if (_startTrackingLocation == CPNotFound)
-        _startTrackingLocation = [_layoutManager numberOfGlyphs];
+        _startTrackingLocation = [_layoutManager numberOfCharacters];
     var granularities=[-1, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
     [self setSelectionGranularity:granularities[[event clickCount]]];
     [self setSelectedRange:CPMakeRange(_startTrackingLocation, 0) affinity:0 stillSelecting:YES];
@@ -559,7 +559,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)moveDown:(id)sender
 {   if (_isSelectable)
     {   var fraction = [];
-        var nglyphs= [_layoutManager numberOfGlyphs];
+        var nglyphs= [_layoutManager numberOfCharacters];
         var sindex = CPMaxRange([self selectedRange]);
         var rectSource = [_layoutManager boundingRectForGlyphRange: CPMakeRange(sindex, 1) inTextContainer:_textContainer];
         var rectEnd = nglyphs? [_layoutManager boundingRectForGlyphRange: CPMakeRange(nglyphs-1, 1) inTextContainer:_textContainer]: rectSource;
@@ -632,7 +632,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        if (_selectionRange.location < [_layoutManager numberOfGlyphs])
+        if (_selectionRange.location < [_layoutManager numberOfCharacters])
         {    [self setSelectedRange:CPMakeRange(_selectionRange.location + 1, 0)];
             var point = [_layoutManager locationForGlyphAtIndex: _selectionRange.location + 1];
             _stickyXLocation= point.x;
@@ -649,7 +649,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             [_carretTimer invalidate];
             _carretTimer = nil;
         }
-        [self setSelectedRange:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
+        [self setSelectedRange:CPMakeRange(0, [_layoutManager numberOfCharacters])];
     }
 }
 
@@ -678,7 +678,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)deleteForward:(id)sender
 {    var changedRange = nil;
 
-    if (CPEmptyRange(_selectionRange) && _selectionRange.location < [_layoutManager numberOfGlyphs])
+    if (CPEmptyRange(_selectionRange) && _selectionRange.location < [_layoutManager numberOfCharacters])
          changedRange = CPMakeRange(_selectionRange.location, 1);
     else changedRange = _selectionRange;
 
@@ -767,7 +767,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)setFont:(CPFont)font
 {
     _font = font;
-    var length = [_layoutManager numberOfGlyphs];
+    var length = [_layoutManager numberOfCharacters];
     [_textStorage addAttribute:CPFontAttributeName value:_font range:CPMakeRange(0, length)];
     [_textStorage setFont:_font];
     [self scrollRangeToVisible:CPMakeRange(length, 0)];
@@ -778,7 +778,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (!_isRichText)
         return;
 
-    if (CPMaxRange(range) >= [_layoutManager numberOfGlyphs])
+    if (CPMaxRange(range) >= [_layoutManager numberOfCharacters])
     {
         _font = font;
         [_textStorage setFont:_font];
@@ -854,11 +854,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     _textColor = aColor;
     if (_textColor)
-        [_textStorage addAttribute:CPForegroundColorAttributeName value:_textColor range:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
+        [_textStorage addAttribute:CPForegroundColorAttributeName value:_textColor range:CPMakeRange(0, [_layoutManager numberOfCharacters])];
     else
-        [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRange(0, [_layoutManager numberOfGlyphs])];
+        [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRange(0, [_layoutManager numberOfCharacters])];
     [_layoutManager _validateLayoutAndGlyphs];
-    [self scrollRangeToVisible:CPMakeRange([_layoutManager numberOfGlyphs], 0)];
+    [self scrollRangeToVisible:CPMakeRange([_layoutManager numberOfCharacters], 0)];
 }
 
 - (void)setTextColor:(CPColor)aColor range:(CPRange)range
@@ -866,7 +866,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (!_isRichText)
         return;
 
-    if (CPMaxRange(range) >= [_layoutManager numberOfGlyphs])
+    if (CPMaxRange(range) >= [_layoutManager numberOfCharacters])
     {
         _textColor = aColor;
         [_textStorage setForegroundColor:_textColor];
@@ -972,7 +972,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var minSize = [self minSize],
         maxSize = [self maxSize];
     var desiredSize = aSize,
-        rect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(0, [_layoutManager numberOfGlyphs]) inTextContainer:_textContainer];
+        rect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(0, [_layoutManager numberOfCharacters]) inTextContainer:_textContainer];
 
     if ([_layoutManager extraLineFragmentTextContainer] === _textContainer)
         rect = CPRectUnion(rect, [_layoutManager extraLineFragmentRect]);
@@ -1000,7 +1000,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var rect;
     if (CPEmptyRange(aRange))
     {
-        if (aRange.location >= [_layoutManager numberOfGlyphs])
+        if (aRange.location >= [_layoutManager numberOfCharacters])
             rect = [_layoutManager extraLineFragmentRect];
         else
             rect = [_layoutManager lineFragmentRectForGlyphAtIndex:aRange.location effectiveRange:nil];
@@ -1069,7 +1069,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (CPRange)selectionRangeForProposedRange:(CPRange)proposedRange granularity:(CPSelectionGranularity)granularity
 {
-    var textStorageLength = [_layoutManager numberOfGlyphs];    
+    var textStorageLength = [_layoutManager numberOfCharacters];    
     if (textStorageLength == 0)
         return CPMakeRange(0, 0);
 
@@ -1148,7 +1148,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
 {    if(_selectionRange.length) [self _hideCarret];
-    if (_selectionRange.location >= [_layoutManager numberOfGlyphs])    // cursor is "behind" the last chacacter
+    if (_selectionRange.location >= [_layoutManager numberOfCharacters])    // cursor is "behind" the last chacacter
     {    _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
         _carretRect.origin.x += _carretRect.size.width;
         if (_selectionRange.location > 0 && [[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')

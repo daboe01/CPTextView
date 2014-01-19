@@ -1,9 +1,9 @@
 /*
  * AppController.j
  * fixmes:
+ *  revisit canvas-based font-sizing for performance and html-robustness (use classical sizing as fallback)
  *  selection drawing 'artifact' between lines
  *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
- *  revisit canvas-based font-sizing for performance and html-robustness
  *  native pasting in safari (try tricking around with contenteditable)
  *  update demo to use a 2-column-setup
  */
