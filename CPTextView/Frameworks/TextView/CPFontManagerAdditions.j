@@ -11,29 +11,40 @@
 @import "CPFontDescriptor.j"
 
 
-
 @implementation CPFont(DescriptorAdditions)
 
 - (id)_initWithFontDescriptor:(CPFontDescriptor)fontDescriptor
-{	var aName=   [fontDescriptor objectForKey: CPFontNameAttribute] ,
-		aSize=   [fontDescriptor pointSize],
-		isBold=  [fontDescriptor symbolicTraits] & CPFontBoldTrait,
-		isItalic=[fontDescriptor symbolicTraits] & CPFontItalicTrait;
-    return [self _initWithName: aName size: aSize bold: isBold italic: isItalic system: NO];
+{
+    var aName = [fontDescriptor objectForKey: CPFontNameAttribute] ,
+        aSize = [fontDescriptor pointSize],
+        isBold = [fontDescriptor symbolicTraits] & CPFontBoldTrait,
+        isItalic = [fontDescriptor symbolicTraits] & CPFontItalicTrait;
+
+    return [self _initWithName:aName size:aSize bold:isBold italic:isItalic system:NO];
 }
 
 + (CPFont)fontWithDescriptor:(CPFontDescriptor)fontDescriptor size:(float)aSize
-{	var aName=   [fontDescriptor objectForKey: CPFontNameAttribute],
-		isBold=  [fontDescriptor symbolicTraits] & CPFontBoldTrait,
-		isItalic=[fontDescriptor symbolicTraits] & CPFontItalicTrait;
-	return [self _fontWithName: aName size: aSize || [fontDescriptor pointSize] bold: isBold italic: isItalic];
+{
+    var aName = [fontDescriptor objectForKey: CPFontNameAttribute],
+        isBold = [fontDescriptor symbolicTraits] & CPFontBoldTrait,
+        isItalic = [fontDescriptor symbolicTraits] & CPFontItalicTrait;
+
+    return [self _fontWithName:aName size:aSize || [fontDescriptor pointSize] bold:isBold italic:isItalic];
 }
+
 - (CPFontDescriptor)fontDescriptor
-{	var traits=0;
-	if([self isBold]) traits|= CPFontBoldTrait;
-	if([self isItalic]) traits|= CPFontItalicTrait;
-	var descriptor=[[CPFontDescriptor fontDescriptorWithName: _name size: _size] fontDescriptorWithSymbolicTraits: traits ];
-	return descriptor;
+{
+    var traits = 0;
+
+    if ([self isBold])
+        traits |= CPFontBoldTrait;
+
+    if ([self isItalic])
+        traits |= CPFontItalicTrait;
+
+    var descriptor = [[CPFontDescriptor fontDescriptorWithName:_name size:_size] fontDescriptorWithSymbolicTraits:traits];
+
+    return descriptor;
 }
 
 @end
@@ -73,10 +84,10 @@ CPRemoveTraitFontAction = 7;
 - (id)init
 {
     self = [super init];
+
     if (self)
-    {
         _action = @selector(changeFont:);
-    }
+
     return self;
 }
 
@@ -88,8 +99,10 @@ CPRemoveTraitFontAction = 7;
 {
     var panel = nil,
         panelExists = [CPFontPanelFactory sharedFontPanelExists];
+
     if ((panelExists) || (!panelExists && createIt))
         panel = [CPFontPanelFactory sharedFontPanel];
+
     return panel;
 }
 
@@ -104,10 +117,10 @@ CPRemoveTraitFontAction = 7;
 {
     var attributes = [[[aFont fontDescriptor] fontAttributes] copy],
         symbolicTrait = [[aFont fontDescriptor] symbolicTraits];
-  
+
     if (fontTrait & CPBoldFontMask)
         symbolicTrait |= CPFontBoldTrait;
-    
+
     if (fontTrait & CPItalicFontMask)
         symbolicTrait |= CPFontItalicTrait;
 
@@ -124,10 +137,12 @@ CPRemoveTraitFontAction = 7;
         symbolicTrait |= CPFontSmallCapsTrait;
 
     if (![attributes containsKey:CPFontTraitsAttribute])
-        [attributes setObject:[CPDictionary dictionaryWithObject:[CPNumber numberWithUnsignedInt:symbolicTrait] forKey:CPFontSymbolicTrait] forKey:CPFontTraitsAttribute];
+        [attributes setObject:[CPDictionary dictionaryWithObject:[CPNumber numberWithUnsignedInt:symbolicTrait]
+                    forKey:CPFontSymbolicTrait] forKey:CPFontTraitsAttribute];
     else
-        [[attributes objectForKey:CPFontTraitsAttribute] setObject:[CPNumber numberWithUnsignedInt:symbolicTrait] forKey:CPFontSymbolicTrait];
-    
+        [[attributes objectForKey:CPFontTraitsAttribute] setObject:[CPNumber numberWithUnsignedInt:symbolicTrait]
+                     forKey:CPFontSymbolicTrait];
+
     return [[aFont class] fontWithDescriptor:[CPFontDescriptor fontDescriptorWithFontAttributes:attributes] size:0.0];
 }
 
@@ -141,16 +156,16 @@ CPRemoveTraitFontAction = 7;
 {
     var attributes = [[[aFont fontDescriptor] fontAttributes] copy],
         symbolicTrait = [[aFont fontDescriptor] symbolicTraits];
-  
+
     if ((fontTrait & CPBoldFontMask) || (fontTrait & CPUnboldFontMask)) /* FIXME: see convertFont:toHaveTrait: about CPFontWeightTrait */
         symbolicTrait &= ~CPFontBoldTrait;
-    
+
     if ((fontTrait & CPItalicFontMask) || (fontTrait & CPUnitalicFontMask))
         symbolicTrait &= ~CPFontItalicTrait;
-        
+
     if (fontTrait & CPExpandedFontMask)
         symbolicTrait &= ~CPFontExpandedTrait;
-        
+
     if (fontTrait & CPSmallCapsFontMask)
         symbolicTrait &= ~CPFontSmallCapsTrait;
 
@@ -158,7 +173,7 @@ CPRemoveTraitFontAction = 7;
         [attributes setObject:[CPDictionary dictionaryWithObject:[CPNumber numberWithUnsignedInt:symbolicTrait] forKey:CPFontSymbolicTrait] forKey:CPFontTraitsAttribute];
     else
         [[attributes objectForKey:CPFontTraitsAttribute] setObject:[CPNumber numberWithUnsignedInt:symbolicTrait] forKey:CPFontSymbolicTrait];
-    
+
     return [[aFont class] fontWithDescriptor:[CPFontDescriptor fontDescriptorWithFontAttributes:attributes] size:0.0];
 }
 
@@ -169,8 +184,10 @@ CPRemoveTraitFontAction = 7;
     @result The converted font or \c aFont if the conversion failed.
 */
 - (CPFont)convertFont:(CPFont)aFont toSize:(float)aSize
-{	var descriptor= [aFont fontDescriptor];
-	return [[aFont class] fontWithDescriptor: descriptor size:aSize]
+{
+    var descriptor = [aFont fontDescriptor];
+
+    return [[aFont class] fontWithDescriptor: descriptor size:aSize]
 }
 
 - (void)orderFrontFontPanel:(id)sender
@@ -184,7 +201,7 @@ CPRemoveTraitFontAction = 7;
     [self sendAction];
 
     if (_selectedFont)
-        [self setSelectedFont:[self convertFont:_selectedFont] isMultiple: NO];
+        [self setSelectedFont:[self convertFont:_selectedFont] isMultiple:NO];
 }
 
 /*!
@@ -197,7 +214,7 @@ CPRemoveTraitFontAction = 7;
     [self sendAction];
 
     if (_selectedFont)
-        [self setSelectedFont:[self convertFont:_selectedFont] isMultiple: NO];
+        [self setSelectedFont:[self convertFont:_selectedFont] isMultiple:NO];
 }
 
 /*!
@@ -231,9 +248,9 @@ CPRemoveTraitFontAction = 7;
                 newFont = [self convertFont:aFont toSize:[aFont size] - 1.0];
             /* else CPBeep() :-p */
             break;
-            
+
         default:
-            CPLog.trace(@"-["+[self className]+" "+_cmd+"] unsupporter font action: "+_fontAction+" aFont unchanged");
+            CPLog.trace(@"-[" + [self className] + " " + _cmd + "] unsupported font action: " + _fontAction + " aFont unchanged");
             newFont = aFont;
             break;
     }
@@ -242,6 +259,7 @@ CPRemoveTraitFontAction = 7;
 }
 
 @end
+
 // why is +initialize not called in this category?
 [CPFontManager setFontManagerFactory:[CPFontManager class]];
 [CPFontManager setFontPanelFactory:[CPFontPanel class]];
