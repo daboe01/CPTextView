@@ -879,7 +879,7 @@
     var i,
         l = _rangeEntries.length;
 
-    for(i = 0; i < l; i++)
+    for (i = 0; i < l; i++)
     {
         ranges_for_encoding.push(_rangeEntries[i].range);
         dicts_for_encoding.push(_rangeEntries[i].attributes);
