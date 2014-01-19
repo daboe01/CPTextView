@@ -40,7 +40,7 @@ CPBackspaceCharacter          = 0x0008;
 CPBackTabCharacter            = 0x0019;
 CPDeleteCharacter             = 0x007f;
 
-CPRichStringPboardType="CPRichStringPboardType";
+CPRichStringPboardType = "CPRichStringPboardType";
 
 
 /*!
@@ -53,150 +53,186 @@ CPRichStringPboardType="CPRichStringPboardType";
 
 - (void)changeFont:(id)sender
 {
-    CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
+    CPLog.error(@"-[CPText " + _cmd + "] subclass responsibility");
 }
 
 - (void)copy:(id)sender
-{	var selectedRange = [self selectedRange];
+{
+    var selectedRange = [self selectedRange];
 
-	if (selectedRange.length < 1)
+    if (selectedRange.length < 1)
             return;
 
-	var pasteboard = [CPPasteboard generalPasteboard],
+    var pasteboard = [CPPasteboard generalPasteboard],
         stringForPasting = [[self stringValue] substringWithRange:selectedRange];
-	[pasteboard declareTypes:[self isRichText]? [CPStringPboardType, CPRichStringPboardType]:[CPStringPboardType] owner:nil];
-	[pasteboard setString:stringForPasting forType:CPStringPboardType];
 
-	if([self isRichText])
-    {   var richData = [CPKeyedArchiver archivedDataWithRootObject:[[self textStorage] attributedSubstringFromRange:selectedRange]];
-	    [pasteboard setData:richData forType:CPRichStringPboardType];
+    [pasteboard declareTypes:[self isRichText] ? [CPStringPboardType, CPRichStringPboardType] : [CPStringPboardType] owner:nil];
+    [pasteboard setString:stringForPasting forType:CPStringPboardType];
+
+    if ([self isRichText])
+    {
+        var richData = [CPKeyedArchiver archivedDataWithRootObject:[[self textStorage] attributedSubstringFromRange:selectedRange]];
+        [pasteboard setData:richData forType:CPRichStringPboardType];
     }
+
 }
+
 - (void)copyFont:(id)sender
 {
-    CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
+    CPLog.error(@"-[CPText " + _cmd + "] subclass responsibility");
 }
+
 - (void)cut:(id)sender
-{	[self copy:sender];
-	var loc= [self selectedRange].location;
-	[self replaceCharactersInRange: [self selectedRange] withString:""];
-	[self setSelectedRange: CPMakeRange(loc,0) ];
+{
+    [self copy:sender];
+
+    var loc = [self selectedRange].location;
+
+    [self replaceCharactersInRange:[self selectedRange] withString:""];
+    [self setSelectedRange:CPMakeRange(loc,0) ];
 }
+
 - (void)delete:(id)sender
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (CPFont)font:(CPFont)aFont
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return nil;
 }
+
 - (BOOL)isHorizontallyResizable
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return NO;
 }
+
 - (BOOL)isRichText
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return NO;
 }
+
 - (BOOL)isRulerVisible
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return NO;
 }
+
 - (BOOL)isVerticallyResizable
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return NO;
 }
+
 - (CPSize)maxSize
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return CPMakeSize(0,0);
 }
+
 - (CPSize)minSize
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return CPMakeSize(0,0);
 }
+
 - (void)paste:(id)sender
 {
-	var pasteboard = [CPPasteboard generalPasteboard],
-		dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
-		stringForPasting = [pasteboard stringForType:CPStringPboardType];
-	if (dataForPasting)
-        stringForPasting=[CPKeyedUnarchiver unarchiveObjectWithData:dataForPasting];
-	if (stringForPasting)
-	{	[self insertText:stringForPasting];
-	}
+    var pasteboard = [CPPasteboard generalPasteboard],
+        dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
+        stringForPasting = [pasteboard stringForType:CPStringPboardType];
+
+    if (dataForPasting)
+        stringForPasting = [CPKeyedUnarchiver unarchiveObjectWithData:dataForPasting];
+
+    if (stringForPasting)
+        [self insertText:stringForPasting];
 }
+
 - (void)pasteFont:(id)sender
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)replaceCharactersInRange:(CPRange)aRange withString:(CPString)aString
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)scrollRangeToVisible:(CPRange)aRange
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)selectedAll:(id)sender
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (CPRange)selectedRange
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return CPMakeRange(CPNotFound, 0);
 }
+
 - (void)setFont:(CPFont)aFont
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)setFont:(CPFont)aFont rang:(CPRange)aRange
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)setHorizontallyResizable:(BOOL)flag
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)setMaxSize:(CPSize)aSize
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)setMinSize:(CPSize)aSize
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)setString:(CPString)aString
 {
-	[self replaceCharactersInRange: CPMakeRange(0, [[self string] length]) withString:aString];
+    [self replaceCharactersInRange: CPMakeRange(0, [[self string] length]) withString:aString];
 }
+
 - (void)setUsesFontPanel:(BOOL)flag
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (void)setVerticallyResizable:(BOOL)flag
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (CPString)string
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return nil;
 }
+
 - (void)underline:(id)sender
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
+
 - (BOOL)usesFontPanel
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return NO;
 }
+
 @end
