@@ -26,45 +26,53 @@
 */
 
 /*
-    CPFontNameAttribute contains a CPString that specified the font name (may be an name list like: 'Marker Felt, Lucida Grande, Helvetica')
+    CPFontNameAttribute contains a CPString that specified the font name
+    (may be an name list like: 'Marker Felt, Lucida Grande, Helvetica')
 */
 CPFontNameAttribute = @"CPFontNameAttribute";
 /*
-    CPFontSizeAttribute contains a CPString that specified the font size (as a float value)
+    CPFontSizeAttribute contains a CPString that specified the font size
+    (as a float value)
 */
 CPFontSizeAttribute = @"CPFontSizeAttribute";
 /*
-    CPFontTraitsAttribute a CPDictionary that contains font traits keys (CPFontSymbolicTrait or CPFontWeightTrait)
+    CPFontTraitsAttribute a CPDictionary that contains font traits keys
+    (CPFontSymbolicTrait or CPFontWeightTrait)
 */
 CPFontTraitsAttribute = @"CPFontTraitsAttribute";
 
+// Font traits dictionary keys
 /*
-    Font traits dictionary keys
-*/
-/*
-    CPFontSymbolicTrait a CPNumber that contains CPFontFamilyClass and typeface information flags. 
+    CPFontSymbolicTrait a CPNumber that contains CPFontFamilyClass and
+    typeface information flags. 
 */
 CPFontSymbolicTrait = @"CPFontSymbolicTrait";
 
 /*
     CPFontWeightTrait
-    We use CPString with CSS string values for font weight (normal | bold | bolder | lighter | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900)
-    NOTE: Cocoa compatibility issue: NSFontWeightTrait are NSNumber for font weight (from -1.0 to 1.0, 0.0 for normal weight).
+    We use CPString with CSS string values for font weight
+    (normal | bold | bolder | lighter | 100 | 200 | 300 | 400 
+    | 500 | 600 | 700 | 800 | 900)
+    NOTE: Cocoa compatibility issue: NSFontWeightTrait are NSNumber for
+    font weight (from -1.0 to 1.0, 0.0 for normal weight).
 */
 CPFontWeightTrait = @"CPFontWeightTrait";
 
 /*
     CPFontFamilyClass
 */
-CPFontUnknownClass = (0 << 28);
-CPFontOldStyleSerifsClass = (1 << 28);
-CPFontTransitionalSerifsClass = (2 << 28);
-CPFontModernSerifsClass = (3 << 28);
-CPFontClarendonSerifsClass = (4 << 28);
-CPFontSlabSerifsClass = (5 << 28);
-CPFontFreeformSerifsClass = (7 << 28);
-CPFontSansSerifClass = (8 << 28);
-CPFontSerifClass = (CPFontOldStyleSerifsClass | CPFontTransitionalSerifsClass | CPFontModernSerifsClass | CPFontClarendonSerifsClass | CPFontSlabSerifsClass | CPFontFreeformSerifsClass);
+CPFontUnknownClass              = (0 << 28);
+CPFontOldStyleSerifsClass       = (1 << 28);
+CPFontTransitionalSerifsClass   = (2 << 28);
+CPFontModernSerifsClass         = (3 << 28);
+CPFontClarendonSerifsClass      = (4 << 28);
+CPFontSlabSerifsClass           = (5 << 28);
+CPFontFreeformSerifsClass       = (7 << 28);
+CPFontSansSerifClass            = (8 << 28);
+
+CPFontSerifClass = (CPFontOldStyleSerifsClass | CPFontTransitionalSerifsClass |
+                    CPFontModernSerifsClass | CPFontClarendonSerifsClass |
+                    CPFontSlabSerifsClass | CPFontFreeformSerifsClass);
 
 CPFontFamilyClassMask = 0xF0000000;
 
@@ -87,8 +95,10 @@ CPFontSmallCapsTrait    = (1 << 7);
 {
     CPDictionary _attributes;
 }
+
 /*!
     Returns a font descriptor with the specified attributes.
+
     @param attributes a dictionary that describe the desired font descriptor
     @return the requested font descriptor
 */
@@ -96,36 +106,44 @@ CPFontSmallCapsTrait    = (1 << 7);
 {
     return [[CPFontDescriptor alloc] initWithFontAttributes:attributes];
 }
+
 /*!
     Returns a font descriptor with the specified name and size.
+
     @param fontName the name of the font
     @param aSize the size of the font (in points)
     @return the requested font descriptor
 */
 + (CPFontDescriptor)fontDescriptorWithName:(CPString)fontName size:(float)size
 {
-    return [[CPFontDescriptor alloc] initWithFontAttributes:[CPDictionary dictionaryWithObjects:[fontName,[CPString stringWithString:size + '']] forKeys:[CPFontNameAttribute,CPFontSizeAttribute]]];
+    return [[CPFontDescriptor alloc] initWithFontAttributes:[CPDictionary dictionaryWithObjects:[fontName, [CPString stringWithString:size + '']] forKeys:[CPFontNameAttribute,CPFontSizeAttribute]]];
 }
 
 /*!
     Initialize a font descriptor with the specified attributes.
+
     @param attributes a dictionary that describe the desired font descriptor
     @return the requested font descriptor
 */
 - (id)initWithFontAttributes:(CPDictionary)attributes
 {
     self = [super init];
+
     if (self)
     {
         _attributes = [[CPMutableDictionary alloc] init];
+
         if (attributes)
             [_attributes addEntriesFromDictionary:attributes];
     }
+
     return self;
 }
 
 /*!
-    Returns a new font descriptor that is the same as the receiver but with the specified attributes taking precedence over the existing ones.
+    Returns a new font descriptor that is the same as the receiver but with the
+    specified attributes taking precedence over the existing ones.
+
     @param attributes a dictionary that describe the desired font descriptor
     @return the new font descriptor
 */
@@ -133,11 +151,13 @@ CPFontSmallCapsTrait    = (1 << 7);
 {
     var attrib = [_attributes copy];
     [attrib addEntriesFromDictionary:attributes];
+
     return [[CPFontDescriptor alloc] initWithFontAttributes:attrib];
 }
 
 /*!
     Returns a new font descriptor that is the same as the receiver but with the specified size taking precedence over the existing ones.
+
     @param aSize the new size
     @return the new font descriptor
 */
@@ -145,21 +165,27 @@ CPFontSmallCapsTrait    = (1 << 7);
 {
     var attrib = [_attributes copy];
     [attrib setObject:[CPString stringWithString:aSize + ''] forKey:CPFontSizeAttribute];
+
     return [[CPFontDescriptor alloc] initWithFontAttributes:attrib];
 }
 
 /*!
-    Returns a new font descriptor that is the same as the receiver but with the specified symbolic traits taking precedence over the existing ones.
+    Returns a new font descriptor that is the same as the receiver but with
+    the specified symbolic traits taking precedence over the existing ones.
+
     @param symbolicTraits the desired new symbolic traits
     @return the new font descriptor
 */
 - (CPFontDescriptor)fontDescriptorWithSymbolicTraits:(CPFontSymbolicTraits)symbolicTraits
 {
     var attrib = [_attributes copy];
+
     if ([attrib objectForKey:CPFontTraitsAttribute])
-        [[attrib objectForKey:CPFontTraitsAttribute] setObject:[CPNumber numberWithUnsignedInt:symbolicTraits] forKey:CPFontSymbolicTrait];
+        [[attrib objectForKey:CPFontTraitsAttribute] setObject:[CPNumber numberWithUnsignedInt:symbolicTraits]
+                                                     forKey:CPFontSymbolicTrait];
     else
-        [attrib setObject:[CPDictionary dictionaryWithObject:[CPNumber numberWithUnsignedInt:symbolicTraits] forKey:CPFontSymbolicTrait] forKey:CPFontTraitsAttribute];
+        [attrib setObject:[CPDictionary dictionaryWithObject:[CPNumber numberWithUnsignedInt:symbolicTraits]
+                forKey:CPFontSymbolicTrait] forKey:CPFontTraitsAttribute];
 
     return [[CPFontDescriptor alloc] initWithFontAttributes:attrib];
 }
@@ -173,21 +199,27 @@ CPFontSmallCapsTrait    = (1 << 7);
 {
     return _attributes;
 }
+
 - (float)pointSize
 {
     var value = [_attributes objectForKey:CPFontSizeAttribute];
+
     if (value)
         return [value floatValue];
+
     return 0.0;
 }
 
 - (CPFontSymbolicTraits)symbolicTraits
 {
     var traits = [_attributes objectForKey:CPFontTraitsAttribute];
+
     if (traits && [traits objectForKey:CPFontSymbolicTrait])
         return [[traits objectForKey:CPFontSymbolicTrait] unsignedIntValue];
+
     return 0;
 }
+
 @end
 
 var CPFontDescriptorAttributesKey = @"CPFontDescriptorAttributesKey";
@@ -196,6 +228,7 @@ var CPFontDescriptorAttributesKey = @"CPFontDescriptorAttributesKey";
 
 /*!
     Initializes the font descriptor from a coder.
+
     @param aCoder the coder from which to read the font descriptor data
     @return the initialized font
 */
@@ -206,12 +239,14 @@ var CPFontDescriptorAttributesKey = @"CPFontDescriptorAttributesKey";
 
 /*!
     Writes the font descriptor to a coder.
+
     @param aCoder the coder to which the data will be written
 */
 - (void)encodeWithCoder:(CPCoder)aCoder
 {
     [aCoder encodeObject:_attributes forKey:CPFontDescriptorAttributesKey];
 }
+
 @end
 
 var _wrapNameRegEx = new RegExp(/(\w+\s+\w+)(,*)/g);
@@ -220,15 +255,19 @@ var _wrapNameRegEx = new RegExp(/(\w+\s+\w+)(,*)/g);
     Helper methods to CPFont for generating CSS font style
 */
 @implementation CPFontDescriptor (CPFontCSSHelper)
+
 - (CPString)fontStyleCSSString
 {
     if ([self symbolicTraits] & CPFontItalicTrait)
             return @"italic";
+
     return @"normal";
 }
+
 - (CPString)fontWeightCSSString
 {
     var traitsAttributes = [_attributes objectForKey:CPFontTraitsAttribute];
+
     if (traitsAttributes)
     {
         /* give preference to CPFontWeightTrait */
@@ -238,21 +277,27 @@ var _wrapNameRegEx = new RegExp(/(\w+\s+\w+)(,*)/g);
         if ([self symbolicTraits] & CPFontBoldTrait)
             return @"bold";
     }
+
     return @"normal";
 }
+
 - (CPString)fontSizeCSSString
 {
     if ([_attributes objectForKey:CPFontSizeAttribute])
         return [[_attributes objectForKey:CPFontSizeAttribute] intValue] + "px";
+
     return @"";
 }
+
 - (CPString)fontFamilyCSSString
 {
     var aName = @"";
+
     if ([_attributes objectForKey:CPFontNameAttribute])
         aName += [_attributes objectForKey:CPFontNameAttribute].replace(_wrapNameRegEx, '"$1"$2');
-        
+
     var symbolicTraits = [self symbolicTraits];
+
     if (symbolicTraits)
     {
         if ((symbolicTraits & CPFontFamilyClassMask) & CPFontSansSerifClass)
@@ -260,14 +305,18 @@ var _wrapNameRegEx = new RegExp(/(\w+\s+\w+)(,*)/g);
         else if ((symbolicTraits & CPFontFamilyClassMask) & CPFontSerifClass)
             aName += @", serif";
     }
+
     return aName;
 }
+
 - (CPString)fontVariantCSSString
 {
     if ([self symbolicTraits] & CPFontSmallCapsTrait)
         return @"small-caps";
+
     return @"normal";
 }
+
 - (CPString)cssString
 {
     return [CPString stringWithString:[self fontStyleCSSString] + " "
@@ -276,4 +325,5 @@ var _wrapNameRegEx = new RegExp(/(\w+\s+\w+)(,*)/g);
                                 + [self fontSizeCSSString] + " "
                                 + [self fontFamilyCSSString]]; 
 }
+
 @end
