@@ -42,26 +42,28 @@ CPBackgroundColorAttributeName = @"CPBackgroundColorAttributeName";
 CPShadowAttributeName = @"CPShadowAttributeName";
 CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
 
-/*! 
+/*!
     @ingroup appkit
     @class CPTextStorage
 */
 @implementation CPTextStorage : CPAttributedString
 {
     CPMutableArray _layoutManagers;
-    id _delegate;
-    
-    int _changeInLength;
-    unsigned _editedMask;
-    CPRange _editedRange;
-    int _editCount; // {begin,end}Editing counter
-    
-    CPFont _font;
-    CPColor _foregroundColor;
+    id             _delegate;
+
+    int            _changeInLength;
+    unsigned       _editedMask;
+    CPRange        _editedRange;
+    int            _editCount; // {begin,end}Editing counter
+
+    CPFont         _font;
+    CPColor        _foregroundColor;
 }
+
 - (id)initWithString:(CPString)aString attributes:(CPDictionary)attributes
 {
     self = [super initWithString:aString attributes:attributes];
+
     if (self)
     {
         _layoutManagers = [[CPMutableArray alloc] init];
@@ -69,6 +71,7 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
         _changeInLength = 0;
         _editedMask = 0;
     }
+
     return self;
 }
 
@@ -91,8 +94,9 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
 {
     if (_delegate === aDelegate)
         return;
-        
+
     var notificationCenter = [CPNotificationCenter defaultCenter];
+
     if (_delegate && aDelegate === nil)
     {
         [notificationCenter removeObserver:_delegate name:CPTextStorageWillProcessEditingNotification object:self];
@@ -100,17 +104,18 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
     }
 
     _delegate = aDelegate;
+
     if (_delegate)
     {
         if ([_delegate respondsToSelector:@selector(textStorageWillProcessEditing:)])
             [notificationCenter addObserver:_delegate selector:@selector(textStorageWillProcessEditing:) name:CPTextStorageWillProcessEditingNotification object:self];
-            
+
         if ([_delegate respondsToSelector:@selector(textStorageDidProcessEditing:)])
             [notificationCenter addObserver:_delegate selector:@selector(textStorageDidProcessEditing:) name:CPTextStorageDidProcessEditingNotification object:self];
     }
 }
 
--(void)addLayoutManager:(CPLayoutManager)aManager
+- (void)addLayoutManager:(CPLayoutManager)aManager
 {
     if (![_layoutManagers containsObject:aManager])
     {
@@ -126,6 +131,7 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
         [_layoutManagers removeObject:aManager];
     }
 }
+
 - (CPArray)layoutManagers
 {
     return _layoutManagers;
@@ -135,13 +141,14 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
 {
     return _editedRange;
 }
+
 - (int)changeInLength
-{ 
+{
     return _changeInLength;
 }
 
 - (unsigned)editedMask
-{ 
+{
     return _editedMask;
 }
 
@@ -152,16 +159,25 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
 
 - (void)processEditing
 {
-    [[CPNotificationCenter defaultCenter] postNotificationName:CPTextStorageWillProcessEditingNotification object:self];
+    [[CPNotificationCenter defaultCenter] postNotificationName:CPTextStorageWillProcessEditingNotification
+                                          object:self];
 
     [self invalidateAttributesInRange:[self editedRange]];
-    
-    [[CPNotificationCenter defaultCenter] postNotificationName:CPTextStorageDidProcessEditingNotification object:self];
+
+    [[CPNotificationCenter defaultCenter] postNotificationName:CPTextStorageDidProcessEditingNotification
+                                          object:self];
 
     var c = [_layoutManagers count];
 
     for (var i = 0; i < c; i++)
-        [[_layoutManagers objectAtIndex:i] textStorage: self edited:_editedMask range:_editedRange changeInLength:_changeInLength invalidatedRange:_editedRange];  
+    {
+        [[_layoutManagers objectAtIndex:i] textStorage:self
+                                           edited:_editedMask
+                                           range:_editedRange
+                                           changeInLength:_changeInLength
+                                           invalidatedRange:_editedRange];
+    }
+
     _editedRange.location = CPNotFound;
     _editedMask = 0;
     _changeInLength = 0;
@@ -170,18 +186,17 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
 - (void)beginEditing
 {
     if (_editCount == 0)
-    {
         _editedRange = CPMakeRange(CPNotFound, 0);
-    }
+
     _editCount++;
 }
+
 - (void)endEditing
 {
     _editCount--;
+
     if (_editCount == 0)
-    {
         [self processEditing];
-    }
 }
 
 - (void)edited:(unsigned)editedMask range:(CPRange)aRange changeInLength:(int)lengthChange
@@ -192,7 +207,6 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
         _changeInLength = lengthChange;
         aRange.length += lengthChange;
         _editedRange = aRange;
-        
         [self processEditing];
     }
     else
@@ -212,16 +226,14 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
 {
     [self beginEditing];
     [super removeAttribute:anAttribute range:aRange];
-    
     [self edited:CPTextStorageEditedAttributes range:aRange changeInLength:0];
     [self endEditing];
 }
 
 - (void)addAttributes:(CPDictionary)aDictionary range:(CPRange)aRange
-{    
+{
     [self beginEditing];
     [super addAttributes:aDictionary range:aRange];
-
     [self edited:CPTextStorageEditedAttributes range:aRange changeInLength:0];
     [self endEditing];
 }
@@ -230,23 +242,22 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
 {
     [self beginEditing];
     [super deleteCharactersInRange:aRange];
-    
     [self edited:CPTextStorageEditedCharacters range:aRange changeInLength:-aRange.length];
     [self endEditing];
 }
 
 - (void)replaceCharactersInRange:(CPRange)aRange withString:(CPString)aString
-{	[self beginEditing];
-	[super replaceCharactersInRange: aRange withString: aString];
+{
+    [self beginEditing];
+    [super replaceCharactersInRange: aRange withString: aString];
     [self edited: CPTextStorageEditedCharacters range:aRange changeInLength:([aString length] - aRange.length)];
- 
-	[self endEditing];
+    [self endEditing];
 }
 
 - (void)replaceCharactersInRange:(CPRange)aRange withAttributedString:(CPAttributedString)aString
-{   [self beginEditing];
+{
+    [self beginEditing];
     [super replaceCharactersInRange: aRange withAttributedString:aString];
-    
     [self edited:(CPTextStorageEditedAttributes | CPTextStorageEditedCharacters) range:aRange changeInLength:([aString length] - aRange.length)];
     [self endEditing];
 }
@@ -270,4 +281,5 @@ CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
 {
     return _foregroundColor;
 }
+
 @end
