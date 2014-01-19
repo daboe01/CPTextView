@@ -86,8 +86,7 @@ CPFontCondensedTrait    = (1 << 6);
 
 CPFontSmallCapsTrait    = (1 << 7);
 
-
-/*! 
+/*!
     @ingroup appkit
     @class CPFontDescriptor
 */
@@ -323,7 +322,7 @@ var _wrapNameRegEx = new RegExp(/(\w+\s+\w+)(,*)/g);
                                 + [self fontVariantCSSString] + " "
                                 + [self fontWeightCSSString] + " "
                                 + [self fontSizeCSSString] + " "
-                                + [self fontFamilyCSSString]]; 
+                                + [self fontFamilyCSSString]];
 }
 
 @end
