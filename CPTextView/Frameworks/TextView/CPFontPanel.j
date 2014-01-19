@@ -325,27 +325,27 @@ var _availableTraits= [@"Normal", @"Italic", @"Bold", @"Bold Italic"],
     return newFont;
 }
 
-- (void) setCurrentSize: aSize
+- (void)setCurrentSize: aSize
 {
     [_sizeBrowser selectRow: [_availableSizes indexOfObject: aSize]  inColumn:0];
 }
 
-- (CPString) currentSize
+- (CPString)currentSize
 {
     return [_sizeBrowser selectedItem];
 }
 
-- (void) setCurrentFont: aFont
+- (void)setCurrentFont: aFont
 {
     [_fontBrowser selectRow: [_availableFonts indexOfObject: [aFont familyName]]  inColumn:0];
 }
 
-- (CPString) currentFont
+- (CPString)currentFont
 {
     return [_fontBrowser selectedItem];
 }
 
-- (void) setCurrentTrait: aTrait
+- (void)setCurrentTrait: aTrait
 {
     var row = 0;
 
