@@ -54,7 +54,7 @@ var CPSharedFontManager     = nil,
     CPFontManagerFactory    = Nil,
     CPFontPanelFactory      = Nil;
 
-/* 
+/*
     modifyFont: sender's tag
 */
 CPNoFontChangeAction    = 0;
