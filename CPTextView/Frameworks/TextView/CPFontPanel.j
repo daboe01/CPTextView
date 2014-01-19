@@ -60,34 +60,39 @@ var _sharedFontPanel = nil;
 
 
 // FIXME<!> Locale support
-var _availableTraits= [@"Normal",@"Italic",@"Bold",@"Bold Italic"];
-var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48",@"72",@"96"];
+var _availableTraits= [@"Normal", @"Italic", @"Bold", @"Bold Italic"],
+    _availableSizes = [@"9", @"10", @"11", @"12", @"13", @"14", @"18", @"24", @"36", @"48", @"72", @"96"];
 
 @implementation _CPFontPanelSampleView : CPView
 {
     CPLayoutManager _layoutManager;
-    CPTextStorage _textStorage;
+    CPTextStorage   _textStorage;
     CPTextContainer _textContainer;
 }
+
 - (id)initWithFrame:(CPRect)rect
 {
     self = [super initWithFrame:rect];
+
     if (self)
     {
-        _textStorage = [[CPTextStorage alloc] init];   
+        _textStorage = [[CPTextStorage alloc] init];
         _layoutManager = [[CPLayoutManager alloc] init];
 
         _textContainer = [[CPTextContainer alloc] init];
         [_layoutManager addTextContainer:_textContainer];
-    
+
         [_textStorage addLayoutManager:_layoutManager];
     }
+
     return self;
 }
 
 - (void)setAttributedString:(CPAttributedString)aSting
 {
-    [_textStorage replaceCharactersInRange:CPMakeRange(0, [_textStorage length]) withAttributedString:aSting];
+    [_textStorage replaceCharactersInRange:CPMakeRange(0, [_textStorage length])
+                  withAttributedString:aSting];
+
     [self setNeedsDisplay:YES];
 }
 
@@ -103,9 +108,10 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
     CGContextSetFillColor(ctx, [CPColor whiteColor]);
     CGContextFillRect(ctx, bounds);
     CGContextRestoreGState(ctx);
-    
+
     [_layoutManager drawGlyphsForGlyphRange:glyphRange atPoint:pos];
 }
+
 @end
 
 /*!
@@ -114,22 +120,18 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 */
 @implementation CPFontPanel : CPPanel
 {
-    CPView _toolbarView;
-    id        _fontBrowser;
-    id        _traitBrowser;
-    id        _sizeBrowser;
-    
-    _CPFontPanelSampleView _sampleView;
-    
+    CPView  _toolbarView;
+    id      _fontBrowser;
+    id      _traitBrowser;
+    id      _sizeBrowser;
     CPArray _availableFonts;
-    
-    id        _textColorWell;
-        
+    id      _textColorWell;
     CPColor _textColor;
-    int        _currentColorButtonTag;
+    int     _currentColorButtonTag;
     BOOL    _setupDone;
-    
-    int        _fontChanges;
+    int     _fontChanges;
+
+    _CPFontPanelSampleView _sampleView;
 }
 
 /*!
@@ -147,6 +149,7 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 {
     if (!_sharedFontPanel)
         _sharedFontPanel = [[CPFontPanel alloc] init];
+
     return _sharedFontPanel;
 }
 
@@ -154,25 +157,27 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 - (id)init
 {
     self = [super initWithContentRect:CGRectMake(100, 90, 450, 394) styleMask:(CPTitledWindowMask | CPClosableWindowMask /*| CPResizableWindowMask*/ )];
+
     if (self)
     {
         [[self contentView] setBackgroundColor:[CPColor colorWithWhite:0.95 alpha:1.0]];
 
         [self setTitle:@"Font Panel"];
         [self setLevel:CPFloatingWindowLevel];
-        
+
         [self setFloatingPanel:YES];
         [self setBecomesKeyOnlyIfNeeded:YES];
-        
+
         [self setMinSize:CGSizeMake(378, 394)];
-        
+
         _availableFonts = [[CPFontManager sharedFontManager] availableFonts];
-        
+
         _textColor = [CPColor blackColor];
-        
+
         _setupDone = NO;
         _fontChanges = kNothingChanged;
     }
+
     return self;
 }
 
@@ -181,45 +186,52 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 {
     _toolbarView = [[CPView alloc] initWithFrame:CGRectMake(0, kBorderSpacing, CGRectGetWidth([self frame]), kToolbarHeight)];
     [_toolbarView setAutoresizingMask: CPViewWidthSizable];
- 
+
    /* text  color */
     _textColorWell = [[CPColorWell alloc] initWithFrame:CGRectMake(10, 0, 25, 25)];
-    [_textColorWell setColor:_textColor];    // <!> fime: use bindings
+    [_textColorWell setColor:_textColor];    // <!> FIXME: use bindings
     [_toolbarView addSubview:_textColorWell];
     var colorPanel = [CPColorPanel sharedColorPanel];
     [colorPanel setTarget:self];
     [colorPanel setAction:@selector(changeColor:)];
 }
+
 - (void)_setupBrowser: aBrowser
-{    [aBrowser setTarget:self];
-    [aBrowser setAction: @selector(browserClicked:)];
+{
+    [aBrowser setTarget:self];
+    [aBrowser setAction:@selector(browserClicked:)];
     [aBrowser setDoubleAction:@selector(dblClicked:)];
     [aBrowser setAllowsEmptySelection:NO];
     [aBrowser setAllowsMultipleSelection: NO];
-    [aBrowser setDelegate: self];    
-    [[self contentView] addSubview: aBrowser];
+    [aBrowser setDelegate:self];
+    [[self contentView] addSubview:aBrowser];
 }
 
 - (void)_setupContents
 {
-    if (_setupDone) return;
+    if (_setupDone)
+        return;
+
     _setupDone = YES;
-    
+
     [self _setupToolbarView];
-        
+
     var contentView = [self contentView],
         label = [CPTextField labelWithTitle:@"Font name"],
         contentBounds = [contentView bounds],
         upperView = [[CPView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(contentBounds), CGRectGetHeight(contentBounds) - (kBorderSpacing + kToolbarHeight + kInnerSpacing))];
-    
+
     [contentView addSubview:_toolbarView];
-    _fontBrowser= [[CPBrowser alloc] initWithFrame:CGRectMake(10,  35, 150, 350)];
-    _traitBrowser=[[CPBrowser alloc] initWithFrame:CGRectMake(155, 35, 150, 350)];
-    _sizeBrowser= [[CPBrowser alloc] initWithFrame:CGRectMake(300, 35, 140, 350)];
-    [self _setupBrowser: _fontBrowser];
-    [self _setupBrowser: _traitBrowser];
-    [self _setupBrowser: _sizeBrowser];
-    [[CPNotificationCenter defaultCenter] addObserver: self selector:@selector(textViewDidChangeSelection:) name:CPTextViewDidChangeSelectionNotification object:nil];
+    _fontBrowser = [[CPBrowser alloc] initWithFrame:CGRectMake(10,  35, 150, 350)];
+    _traitBrowser = [[CPBrowser alloc] initWithFrame:CGRectMake(155, 35, 150, 350)];
+    _sizeBrowser = [[CPBrowser alloc] initWithFrame:CGRectMake(300, 35, 140, 350)];
+    [self _setupBrowser:_fontBrowser];
+    [self _setupBrowser:_traitBrowser];
+    [self _setupBrowser:_sizeBrowser];
+    [[CPNotificationCenter defaultCenter] addObserver:self
+                                          selector:@selector(textViewDidChangeSelection:)
+                                          name:CPTextViewDidChangeSelectionNotification
+                                          object:nil];
 }
 
 - (void)textViewDidChangeSelection:(CPNotification)notification
@@ -232,22 +244,23 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 {
     if ([self isVisible])
     {
-        var attribs = [[textView textStorage] attributesAtIndex: [textView selectedRange].location effectiveRange:nil];
-        var font=[attribs objectForKey:CPFontAttributeName] || [[textView textStorage] font] || [CPFont systemFontOfSize:12.0];
+        var attribs = [[textView textStorage] attributesAtIndex:[textView selectedRange].location effectiveRange:nil],
+            font = [attribs objectForKey:CPFontAttributeName] || [[textView textStorage] font] || [CPFont systemFontOfSize:12.0];
 
         if (font)
         {
-            var trait= kTypefaceIndex_Normal;
+            var trait = kTypefaceIndex_Normal;
+
             if ([font isItalic] && [font isBold])
-                trait=kTypefaceIndex_BoldItalic;
+                trait = kTypefaceIndex_BoldItalic;
             else if ([font isItalic])
-                trait=kTypefaceIndex_Italic;
+                trait = kTypefaceIndex_Italic;
             else if ([font isBold])
-                trait= kTypefaceIndex_Bold;
+                trait = kTypefaceIndex_Bold;
 
             [self setCurrentFont: font];
             [self setCurrentTrait: trait];
-            [self setCurrentSize: [font size]+""]; //cast to string
+            [self setCurrentSize: [font size] + ""];  //cast to string
         }
     }
 }
@@ -277,72 +290,97 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 {
     var newFont = aFont,
         index = 0;
+
     switch (_fontChanges)
     {
         case kFontNameChanged:
             newFont = [CPFont fontWithDescriptor:[[aFont fontDescriptor] fontDescriptorByAddingAttributes:
                       [CPDictionary dictionaryWithObject: [self currentFont] forKey:CPFontNameAttribute]] size:0.0];
             break;
+
         case kTypefaceChanged:
             index = [self currentTrait];
             if (index == kTypefaceIndex_BoldItalic)
-                newFont = [[CPFontManager sharedFontManager] convertFont:aFont toHaveTrait:CPBoldFontMask|CPItalicFontMask];
+                newFont = [[CPFontManager sharedFontManager] convertFont:aFont toHaveTrait:CPBoldFontMask | CPItalicFontMask];
             else if (index == kTypefaceIndex_Bold)
                 newFont = [[CPFontManager sharedFontManager] convertFont:aFont toHaveTrait:CPBoldFontMask];
             else if (index == kTypefaceIndex_Italic)
                 newFont = [[CPFontManager sharedFontManager] convertFont:aFont toHaveTrait:CPItalicFontMask];
             else
-                newFont = [[CPFontManager sharedFontManager] convertFont:aFont toNotHaveTrait:CPBoldFontMask|CPItalicFontMask];
+                newFont = [[CPFontManager sharedFontManager] convertFont:aFont toNotHaveTrait:CPBoldFontMask | CPItalicFontMask];
             break;
-            
+
         case kSizeChanged:
             newFont = [[CPFontManager sharedFontManager] convertFont:aFont toSize:[self currentSize]];
             break;
-            
+
          case kNothingChanged:
             break;
+
         default:
-            CPLog.trace(@"FIXME: -["+[self className]+" "+_cmd+"] unhandled _fontChanges: "+_fontChanges);
-           break;
+            CPLog.trace(@"FIXME: -[" + [self className] + " " + _cmd + "] unhandled _fontChanges: " + _fontChanges);
+            break;
     }
+
     return newFont;
 }
 
--(void) setCurrentSize: aSize
-{    [_sizeBrowser selectRow: [_availableSizes indexOfObject: aSize]  inColumn:0];
+- (void) setCurrentSize: aSize
+{
+    [_sizeBrowser selectRow: [_availableSizes indexOfObject: aSize]  inColumn:0];
 }
--(CPString) currentSize
-{    return [_sizeBrowser selectedItem];
+
+- (CPString) currentSize
+{
+    return [_sizeBrowser selectedItem];
 }
--(void) setCurrentFont: aFont
+
+- (void) setCurrentFont: aFont
 {
     [_fontBrowser selectRow: [_availableFonts indexOfObject: [aFont familyName]]  inColumn:0];
 }
--(CPString) currentFont
-{    return [_fontBrowser selectedItem];
+
+- (CPString) currentFont
+{
+    return [_fontBrowser selectedItem];
 }
 
--(void) setCurrentTrait: aTrait
-{    var row=0;
-    switch(aTrait)
-    {    case kTypefaceIndex_Italic:
-            row=1;
-        break;
+- (void) setCurrentTrait: aTrait
+{
+    var row = 0;
+
+    switch (aTrait)
+    {
+        case kTypefaceIndex_Italic:
+            row = 1;
+            break;
+
         case kTypefaceIndex_Bold:
-            row=2;
-        break;
+            row = 2;
+            break;
+
         case kTypefaceIndex_BoldItalic:
-            row=3;
-        break;
+            row = 3;
+            break;
     }
+
     [_traitBrowser selectRow: row  inColumn:0];
 }
+
 // FIXME<!> Locale support
--(void) currentTrait
-{    var sel=[_traitBrowser selectedItem];
-    if (sel === "Italic") return kTypefaceIndex_Italic;
-    if (sel === "Bold") return kTypefaceIndex_Bold;
-    if (sel === "Bold Italic") return kTypefaceIndex_BoldItalic;
+- (void)currentTrait
+{
+    var sel = [_traitBrowser selectedItem];
+
+    if (sel === "Italic")
+        return kTypefaceIndex_Italic;
+
+    if (sel === "Bold")
+        return kTypefaceIndex_Bold;
+
+    if (sel === "Bold Italic")
+        return kTypefaceIndex_BoldItalic;
+
     return kTypefaceIndex_Normal;
 }
 
@@ -356,31 +394,31 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
     [self _setupContents];
 
     if ([self currentFont] !== [font familyName])
-        [self setCurrentFont:  [font familyName] ];
+        [self setCurrentFont:[font familyName]];
 
     if ([self currentSize] != [font size])
-    {    [self setCurrentSize: [font size] ];
-    }
+        [self setCurrentSize:[font size]];
+
     var typefaceIndex = kTypefaceIndex_Normal,
-    symbolicTraits = [[font fontDescriptor] symbolicTraits];
+        symbolicTraits = [[font fontDescriptor] symbolicTraits];
+
     if ((symbolicTraits & CPFontItalicTrait) && (symbolicTraits & CPFontBoldTrait))
         typefaceIndex = kTypefaceIndex_BoldItalic;
     else if (symbolicTraits & CPFontItalicTrait)
         typefaceIndex = kTypefaceIndex_Italic;
     else if (symbolicTraits & CPFontBoldTrait)
         typefaceIndex = kTypefaceIndex_Bold;
-        
+
     if ([self currentTrait] != typefaceIndex)
         [self setCurrentTrait: typefaceIndex ];
 
     [_sampleView setAttributedString:
-                [[CPAttributedString alloc] initWithString:[font familyName] 
-                                                attributes:[CPDictionary dictionaryWithObjects:[font, [CPColor blackColor]] forKeys:[CPFontAttributeName, CPForegroundColorAttributeName]]]
+                [[CPAttributedString alloc] initWithString:[font familyName]
+                                            attributes:[CPDictionary dictionaryWithObjects:[font, [CPColor blackColor]] forKeys:[CPFontAttributeName, CPForegroundColorAttributeName]]]
                                 ];
+
     _fontChanges = kNothingChanged;
 }
-
-
 
 - (void)changeColor:(id)sender
 {
@@ -391,7 +429,6 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 
 ////////////////////////////////////////////////////////////////////
 // TODO: ask CPFontManager for traits //
-
 - (void)browserClicked:(id)aBrowser
 {
     if (aBrowser === _fontBrowser)
@@ -405,20 +442,22 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
         [[CPFontManager sharedFontManager] modifyFontViaPanel:self];
     }
     else if (aBrowser === _sizeBrowser)
-    {    _fontChanges = kSizeChanged;
+    {
+        _fontChanges = kSizeChanged;
         [[CPFontManager sharedFontManager] modifyFontViaPanel:self];
     }
 }
 
 - (void)dblClicked:(id)sender
 {
- //   alert("DOUBLE");
+    //   alert("DOUBLE");
 }
 
 - (id)browser:(id)aBrowser numberOfChildrenOfItem:(id)anItem
 {
     if (aBrowser === _fontBrowser)
         return [_availableFonts count];
+
     if (aBrowser === _traitBrowser)
         return [_availableTraits count]
     else
@@ -429,8 +468,10 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 {
     if (aBrowser === _fontBrowser)
         return [_availableFonts objectAtIndex:index];
+
     if (aBrowser === _traitBrowser)
         return [_availableTraits objectAtIndex:index];
+
     return [_availableSizes objectAtIndex:index];
 }
 
@@ -440,7 +481,8 @@ var _availableSizes = [@"9",@"10",@"11",@"12",@"13",@"14",@"18",@"24",@"36",@"48
 }
 
 - (BOOL)browser:(id)aBrowser isLeafItem:(id)anItem
-{    return YES;
+{
+    return YES;
 }
 
 @end
