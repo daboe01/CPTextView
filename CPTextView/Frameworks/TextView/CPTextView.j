@@ -95,9 +95,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     BOOL            _isEditable;
     BOOL            _isSelectable;
 
-    BOOL            _drawCarret;
-    CPTimer         _carretTimer;
-    CPRect          _carretRect;
+    BOOL            _drawCaret;
+    CPTimer         _caretTimer;
+    CPRect          _caretRect;
 
     CPFont          _font;
     CPColor         _textColor;
@@ -114,7 +114,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     BOOL            _isHorizontallyResizable;
     BOOL            _isVerticallyResizable;
 
-    var             _carretDOM;
+    var             _caretDOM;
     int             _stickyXLocation;
 }
 
@@ -156,7 +156,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _isVerticallyResizable = YES;
         _isHorizontallyResizable = NO;
 
-        _carretRect = CPRectMake(0,0,1,11);
+        _caretRect = CPRectMake(0,0,1,11);
     }
 
     [self registerForDraggedTypes:[CPColorDragType]];
@@ -418,13 +418,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
-    _stickyXLocation = _carretRect.origin.x;
+    _stickyXLocation = _caretRect.origin.x;
 }
 
-- (void)_blinkCarret:(CPTimer)aTimer
+- (void)_blinkCaret:(CPTimer)aTimer
 {
-    _drawCarret = !_drawCarret;
-    [self setNeedsDisplayInRect:_carretRect];
+    _drawCaret = !_drawCaret;
+    [self setNeedsDisplayInRect:_caretRect];
 }
 
 - (void)drawRect:(CPRect)aRect
@@ -463,7 +463,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if ([self shouldDrawInsertionPoint])
     {
         [self updateInsertionPointStateAndRestartTimer:NO];
-        [self drawInsertionPointInRect:_carretRect color:_insertionPointColor turnedOn:_drawCarret];
+        [self drawInsertionPointInRect:_caretRect color:_insertionPointColor turnedOn:_drawCaret];
     }
 }
 
@@ -493,7 +493,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (!selecting)
     {
         if (_isFirstResponder)
-            [self updateInsertionPointStateAndRestartTimer:((_selectionRange.length === 0) && ![_carretTimer isValid])];
+            [self updateInsertionPointStateAndRestartTimer:((_selectionRange.length === 0) && ![_caretTimer isValid])];
 
         [[CPNotificationCenter defaultCenter] postNotificationName:CPTextViewDidChangeSelectionNotification object:self];
 
@@ -525,10 +525,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var fraction = [],
         point = [self convertPoint:[event locationInWindow] fromView:nil];
 
-    /* stop _carretTimer */
-    [_carretTimer invalidate];
-    _carretTimer = nil;
-    [self _hideCarret];
+    /* stop _caretTimer */
+    [_caretTimer invalidate];
+    _caretTimer = nil;
+    [self _hideCaret];
 
     // convert to container coordinate
     point.x -= _textContainerOrigin.x;
@@ -723,10 +723,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        if (_carretTimer)
+        if (_caretTimer)
         {
-            [_carretTimer invalidate];
-            _carretTimer = nil;
+            [_caretTimer invalidate];
+            _caretTimer = nil;
         }
 
         [self setSelectedRange:CPMakeRange(0, [_layoutManager numberOfCharacters])];
@@ -745,7 +745,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
-    _stickyXLocation = _carretRect.origin.x;
+    _stickyXLocation = _caretRect.origin.x;
 }
 
 - (void)deleteBackward:(id)sender
@@ -801,8 +801,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (BOOL)resignFirstResponder
 {
-    [_carretTimer invalidate];
-    _carretTimer = nil;
+    [_caretTimer invalidate];
+    _caretTimer = nil;
     _isFirstResponder = NO;
     return YES;
 }
@@ -1249,59 +1249,59 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)drawInsertionPointInRect:(CPRect)aRect color:(CPColor)aColor turnedOn:(BOOL)flag
 {
     var style;
-    if (!_carretDOM)
+    if (!_caretDOM)
     {
-        _carretDOM = document.createElement("span");
-        style = _carretDOM.style;
+        _caretDOM = document.createElement("span");
+        style = _caretDOM.style;
         style.position = "absolute";
         style.visibility = "visible";
         style.padding = "0px";
         style.margin = "0px";
         style.whiteSpace = "pre";
         style.backgroundColor = "black";
-        _carretDOM.style.width = "1px";
-        self._DOMElement.appendChild(_carretDOM);
+        _caretDOM.style.width = "1px";
+        self._DOMElement.appendChild(_caretDOM);
     }
 
-    _carretDOM.style.left = (aRect.origin.x) + "px";
-    _carretDOM.style.top = (aRect.origin.y) + "px";
-    _carretDOM.style.height = (aRect.size.height) + "px";
-    _carretDOM.style.visibility = flag ? "visible" : "hidden";
+    _caretDOM.style.left = (aRect.origin.x) + "px";
+    _caretDOM.style.top = (aRect.origin.y) + "px";
+    _caretDOM.style.height = (aRect.size.height) + "px";
+    _caretDOM.style.visibility = flag ? "visible" : "hidden";
 }
 
-- (void)_hideCarret
+- (void)_hideCaret
 {
-    if (_carretDOM)
-        _carretDOM.style.visibility = "hidden";
+    if (_caretDOM)
+        _caretDOM.style.visibility = "hidden";
 }
 
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
 {
     if (_selectionRange.length)
-        [self _hideCarret];
+        [self _hideCaret];
 
     if (_selectionRange.location >= [_layoutManager numberOfCharacters])    // cursor is "behind" the last chacacter
     {
-        _carretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
-        _carretRect.origin.x += _carretRect.size.width;
+        _caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
+        _caretRect.origin.x += _caretRect.size.width;
 
         if (_selectionRange.location > 0 && [[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')
         {
-            _carretRect.origin.y += _carretRect.size.height;
-            _carretRect.origin.x = 0;
+            _caretRect.origin.y += _caretRect.size.height;
+            _caretRect.origin.x = 0;
         }
     }
     else
-        _carretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
+        _caretRect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
-    _carretRect.origin.x += _textContainerOrigin.x;
-    _carretRect.origin.y += _textContainerOrigin.y;
-    _carretRect.size.width = 1;
+    _caretRect.origin.x += _textContainerOrigin.x;
+    _caretRect.origin.y += _textContainerOrigin.y;
+    _caretRect.size.width = 1;
 
     if (flag)
     {
-        _drawCarret = flag;
-        _carretTimer = [CPTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(_blinkCarret:) userInfo:nil repeats:YES];
+        _drawCaret = flag;
+        _caretTimer = [CPTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(_blinkCaret:) userInfo:nil repeats:YES];
     }
 }
 

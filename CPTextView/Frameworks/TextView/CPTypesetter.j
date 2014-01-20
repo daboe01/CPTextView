@@ -292,6 +292,10 @@ var _sharedSimpleTypesetter = nil;
                     return;
 
                 lineOrigin.y += _lineHeight;
+                if (0&& lineOrigin.y > [_currentTextContainer containerSize].height)	// <!> FIXME: fix sizing mechanics in CPTextView
+                {
+                    _currentTextContainer = [[_layoutManager textContainers] objectAtIndex: ++_indexOfCurrentContainer];
+                }
                 _lineHeight    = 0;
                 _lineBase      = 0;
                 _lineWidth     = 0;
