@@ -39,9 +39,10 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
 
 @implementation CPTextTab : CPObject
 {
-    int _type @accessors(property=type);
+    int    _type     @accessors(property=type);
     double _location @accessors(property=location);
 }
+
 - (id)initWithType:(CPTabStopType) aType location:(double) aLocation
 {
     if ([self = [super init]])
@@ -49,34 +50,38 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
         _type = aType;
         _location = aLocation;
     }
+
     return self;
 }
+
 - (id)initWithCoder:(id)aCoder
 {
-    self=[self init];
+    self = [self init];
+
     if (self)
     {
-		_type = [aCoder decodeIntForKey:"_type"];
-		_location = [aCoder decodeDoubleForKey:"_location"];
+        _type = [aCoder decodeIntForKey:"_type"];
+        _location = [aCoder decodeDoubleForKey:"_location"];
     }
+
     return self;
 }
 
 - (void)encodeWithCoder:(id)aCoder
 {
-    [aCoder encodeInt: _type forKey:"_type"];
-    [aCoder encodeDouble: _location forKey:"_location"];
+    [aCoder encodeInt:_type forKey:"_type"];
+    [aCoder encodeDouble:_location forKey:"_location"];
 }
 
 @end
 
 @implementation CPParagraphStyle : CPObject
 {
-    CPArray _tabStops @accessors(property = tabStops);
-    CPTextAlignment    _alignment @accessors(property = alignment);
+    CPArray         _tabStops  @accessors(property = tabStops);
+    CPTextAlignment _alignment @accessors(property = alignment);
 }
 
-+(CPParagraphStyle)defaultParagraphStyle
++ (CPParagraphStyle)defaultParagraphStyle
 {
   if (!_sharedDefaultParagraphStyle)
        _sharedDefaultParagraphStyle = [self new];
@@ -84,57 +89,61 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
    return _sharedDefaultParagraphStyle;
 }
 
-+(CPArray)_defaultTabStops
++ (CPArray)_defaultTabStops
 {
    if (!_defaultTabStopArray)
     {
         var i;
-        _defaultTabStopArray=[];
+        _defaultTabStopArray = [];
 
-         for(i = 1; i < 13 ; i++)
+        // <!> FIXME: Define constants for these magick numbers: 13, 28
+         for (i = 1; i < 13 ; i++)
          {
-            _defaultTabStopArray.push([[CPTextTab alloc] initWithType:CPLeftTabStopType location: i * 28]);
+            _defaultTabStopArray.push([[CPTextTab alloc] initWithType:CPLeftTabStopType location:i * 28]);
          }
     }
+
     return _defaultTabStopArray;
 }
 
 - (void)_initWithDefaults
 {
-   _alignment=CPLeftTextAlignment;
-   _tabStops=[[self class] _defaultTabStops];
+    _alignment = CPLeftTextAlignment;
+    _tabStops = [[self class] _defaultTabStops];
 }
 
-
-- init
+- (id)init
 {
     [self _initWithDefaults];
+
     return self;
 }
 
 - initWithParagraphStyle:(CPParagraphStyle) other
 {
-   _alignment=[other alignment];
-   _tabStops=[[other tabStops] copy];
-   return self;
+    _alignment = [other alignment];
+    _tabStops = [[other tabStops] copy];
+
+    return self;
 }
 
 - (id)initWithCoder:(id)aCoder
 {
-    self=[self init];
+    self = [self init];
+
     if (self)
     {
-		_tabStops = [aCoder decodeObjectForKey:"_tabStops"];
-		_alignment = [aCoder decodeIntForKey:"_alignment"];
+        _tabStops = [aCoder decodeObjectForKey:"_tabStops"];
+        _alignment = [aCoder decodeIntForKey:"_alignment"];
     }
+
     return self;
 }
 
 - (void)encodeWithCoder:(id)aCoder
 {
-    [aCoder encodeInt: _alignment forKey:"_alignment"];
-    [aCoder encodeObject: _tabStops forKey:"_tabStops"];
+    [aCoder encodeInt:_alignment forKey:"_alignment"];
+    [aCoder encodeObject:_tabStops forKey:"_tabStops"];
 }
-
 
 @end

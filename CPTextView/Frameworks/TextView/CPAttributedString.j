@@ -459,7 +459,7 @@
 {
     if (!aRange || CPMaxRange(aRange) > _string.length || aRange.location < 0)
         [CPException raise:CPRangeException
-                    reason:"tried to get attributedSubstring for an invalid range: "+(aRange?CPStringFromRange(aRange):"nil")];
+                     reason:"tried to get attributedSubstring for an invalid range: " + (aRange ? CPStringFromRange(aRange) : "nil")];
 
     var newString = [[CPAttributedString alloc] initWithString:_string.substring(aRange.location, CPMaxRange(aRange))],
         entryIndex = [self _indexOfEntryWithIndex:aRange.location];
@@ -526,16 +526,19 @@
     if (!aString)
         aString = @"";
 
-    var    lastValidIndex= MAX(_rangeEntries.length-1, 0);
-    var startingIndex = [self _indexOfEntryWithIndex: aRange.location];
+    var lastValidIndex = MAX(_rangeEntries.length - 1, 0),
+        startingIndex = [self _indexOfEntryWithIndex:aRange.location];
 
-    if (startingIndex < 0) startingIndex = lastValidIndex;
-    var endingIndex = [self _indexOfEntryWithIndex: CPMaxRange(aRange)];
+    if (startingIndex < 0)
+        startingIndex = lastValidIndex;
 
-    if (endingIndex < 0) endingIndex = lastValidIndex;
+    var endingIndex = [self _indexOfEntryWithIndex:CPMaxRange(aRange)];
 
-    var additionalLength = aString.length - aRange.length;
-    var patchPosition = startingIndex;
+    if (endingIndex < 0)
+        endingIndex = lastValidIndex;
+
+    var additionalLength = aString.length - aRange.length,
+        patchPosition = startingIndex;
 
    _string = _string.substring(0, aRange.location) + aString + _string.substring(CPMaxRange(aRange));
     var originalLength= _rangeEntries[patchPosition].range.length;
@@ -551,27 +554,35 @@
 
         if (endingIndex > startingIndex)
         {
-            var originalOffset= _rangeEntries[startingIndex].range.location;
-            var offsetFromSplicing = CPMaxRange(_rangeEntries[endingIndex].range)-originalOffset
+            var originalOffset= _rangeEntries[startingIndex].range.location,
+                offsetFromSplicing = CPMaxRange(_rangeEntries[endingIndex].range) - originalOffset;
+
             _rangeEntries.splice(startingIndex, endingIndex - startingIndex);
             _rangeEntries[startingIndex].range = CPMakeRange(originalOffset, offsetFromSplicing);
         }
 
-		if(patchPosition !== startingIndex)
-        {   var lhsOffset=aString.length -CPIntersectionRange(_rangeEntries[patchPosition].range, aRange).length;
-            _rangeEntries[patchPosition].range.length = originalLength+lhsOffset;
-            var rhsOffset=aString.length -CPIntersectionRange(_rangeEntries[startingIndex].range, aRange).length;
+        if (patchPosition !== startingIndex)
+        {
+            var lhsOffset = aString.length -CPIntersectionRange(_rangeEntries[patchPosition].range, aRange).length;
+            _rangeEntries[patchPosition].range.length = originalLength + lhsOffset;
+
+            var rhsOffset = aString.length -CPIntersectionRange(_rangeEntries[startingIndex].range, aRange).length;
             _rangeEntries[startingIndex].range.location += lhsOffset;
             _rangeEntries[startingIndex].range.length += rhsOffset;
-            patchPosition= startingIndex;
-        } else
-        {   _rangeEntries[patchPosition].range.length += additionalLength;
+            patchPosition = startingIndex;
+        }
+        else
+        {
+            _rangeEntries[patchPosition].range.length += additionalLength;
         }
     }
 
-    var l= _rangeEntries.length;
-    for (var patchIndex= patchPosition+1; patchIndex < l; patchIndex++)
+    var l = _rangeEntries.length;
+
+    for (var patchIndex= patchPosition + 1; patchIndex < l; patchIndex++)
+    {
         _rangeEntries[patchIndex].range.location += additionalLength;
+    }
 }
 
 /*!
@@ -627,7 +638,8 @@
         endingEntryIndex = [self _indexOfRangeEntryForIndex:CPMaxRange(aRange) splitOnMaxIndex:YES],
         current = startingEntryIndex;
 
-    if (current < 0) current = MAX(_rangeEntries.length-1, 0);
+    if (current < 0)
+        current = MAX(_rangeEntries.length - 1, 0);
 
     if (endingEntryIndex === CPNotFound)
         endingEntryIndex = _rangeEntries.length;
@@ -709,7 +721,7 @@
 - (void)insertAttributedString:(CPAttributedString)aString atIndex:(unsigned)anIndex
 {
     if (anIndex < 0 || anIndex > [self length])
-        [CPException raise:CPRangeException reason:"tried to insert attributed string at an invalid index: "+anIndex];
+        [CPException raise:CPRangeException reason:"tried to insert attributed string at an invalid index: " + anIndex];
 
     var entryIndexOfNextEntry = [self _indexOfRangeEntryForIndex:anIndex splitOnMaxIndex:YES],
         otherRangeEntries = aString._rangeEntries,
@@ -834,35 +846,47 @@
 
 - (id)initWithCoder:(id)aCoder
 {
-    self=[self init];
+    self = [self init];
+
     if (self != nil)
     {
-		_string=[aCoder decodeObjectForKey:"_string"];
-		var decoded_ranges = [aCoder decodeObjectForKey:"ranges"],
-            decoded_attribs = [aCoder decodeObjectForKey:"attributes"];
-		_rangeEntries=[];
+        _string = [aCoder decodeObjectForKey:"_string"];
 
-		var i, l= decoded_ranges.length;
-		for(i=0; i<l; i++)
-		{
-			_rangeEntries.push( makeRangeEntry(decoded_ranges[i], decoded_attribs[i]));
-		}
+        var decoded_ranges = [aCoder decodeObjectForKey:"ranges"],
+            decoded_attribs = [aCoder decodeObjectForKey:"attributes"];
+
+        _rangeEntries = [];
+
+        var i,
+            l = decoded_ranges.length;
+
+        for (i = 0; i < l; i++)
+        {
+            _rangeEntries.push( makeRangeEntry(decoded_ranges[i], decoded_attribs[i]));
+        }
     }
+
     return self;
 }
 
 - (void)encodeWithCoder:(id)aCoder
 {
     [aCoder encodeObject: _string forKey:"_string"];
-	var ranges_for_encoding=[],
-        dicts_for_encoding=[];
-	var i, l= _rangeEntries.length;
-	for(i=0; i<l; i++)
-	{	ranges_for_encoding.push(_rangeEntries[i].range);
-		dicts_for_encoding.push(_rangeEntries[i].attributes);
-	}
-    [aCoder encodeObject: ranges_for_encoding forKey:"ranges"];
-    [aCoder encodeObject: dicts_for_encoding forKey:"attributes"];
+
+    var ranges_for_encoding = [],
+        dicts_for_encoding = [];
+
+    var i,
+        l = _rangeEntries.length;
+
+    for (i = 0; i < l; i++)
+    {
+        ranges_for_encoding.push(_rangeEntries[i].range);
+        dicts_for_encoding.push(_rangeEntries[i].attributes);
+    }
+
+    [aCoder encodeObject:ranges_for_encoding forKey:"ranges"];
+    [aCoder encodeObject:dicts_for_encoding forKey:"attributes"];
 }
 
 @end
