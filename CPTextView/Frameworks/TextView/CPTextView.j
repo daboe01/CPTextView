@@ -662,15 +662,42 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 }
 
+- (void)_establishSelection:(CPSelection)aSel byExtending:(BOOL)flag
+{
+    if (aSel)
+        aSel = CPUnionRange(aSel, _selectionRange);
+    [self setSelectedRange:aSel];
+    var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
+    _stickyXLocation = point.x;
+}
+
+- (void)moveLeftAndModifySelection:(id)sender
+{
+    if (_isSelectable)
+    {
+        if (_selectionRange.location > 0)
+        {
+            [self _establishSelection:CPMakeRange(_selectionRange.location - 1, 0) byExtending:YES];
+        }
+    }
+}
+- (void)moveRightAndModifySelection:(id)sender
+{
+    if (_isSelectable)
+    {
+        if (_selectionRange.location < [_layoutManager numberOfCharacters])
+        {
+            [self _establishSelection:CPMakeRange(_selectionRange.location + 1, 0) byExtending:YES];
+        }
+    }
+}
 - (void)moveLeft:(id)sender
 {
     if (_isSelectable)
     {
         if (_selectionRange.location > 0)
         {
-            [self setSelectedRange:CPMakeRange(_selectionRange.location - 1, 0)];
-            var point = [_layoutManager locationForGlyphAtIndex:_selectionRange.location - 1];
-            _stickyXLocation= point.x;
+            [self _establishSelection:CPMakeRange(_selectionRange.location - 1, 0) byExtending:NO];
         }
     }
 }
@@ -683,39 +710,27 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
                               inString:[self stringValue]
                               asDefinedByCharArray:['\n']];
 
-         [self setSelectedRange:CPMakeRange(CPMaxRange(parRange) , 0)];
-         var point = [_layoutManager locationForGlyphAtIndex:_selectionRange.location];
-         _stickyXLocation= point.x;
+         [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:NO];
     }
 }
 
 - (void)moveToBeginningOfParagraph:(id)sender
 {
-    if (_isSelectable)
+    if (_isSelectable && _selectionRange.location > 0)
     {
-        if (_selectionRange.location > 0)
-        {
-             var parRange = [self _characterRangeForUnitAtIndex:_selectionRange.location
+        var parRange = [self _characterRangeForUnitAtIndex:_selectionRange.location
                                   inString:[self stringValue]
                                   asDefinedByCharArray: ['\n']];
 
-             [self setSelectedRange:CPMakeRange(parRange.location , 0)];
-             var point = [_layoutManager locationForGlyphAtIndex:_selectionRange.location];
-             _stickyXLocation= point.x;
-        }
+        [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:NO];
     }
 }
 
 - (void)moveRight:(id)sender
 {
-    if (_isSelectable)
+    if (_isSelectable && _selectionRange.location < [_layoutManager numberOfCharacters])
     {
-        if (_selectionRange.location < [_layoutManager numberOfCharacters])
-        {
-            [self setSelectedRange:CPMakeRange(_selectionRange.location + 1, 0)];
-            var point = [_layoutManager locationForGlyphAtIndex:_selectionRange.location + 1];
-            _stickyXLocation= point.x;
-        }
+        [self _establishSelection:CPMakeRange(_selectionRange.location + 1, 0) byExtending:NO];
     }
 }
 
