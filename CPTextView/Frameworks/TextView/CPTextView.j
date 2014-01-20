@@ -1068,12 +1068,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setFrameSize:(CPSize) aSize
 {
-    [_textContainer setContainerSize:aSize];
-
     var minSize = [self minSize],
         maxSize = [self maxSize],
         desiredSize = aSize,
-        rect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(0, [_layoutManager numberOfCharacters]) inTextContainer:_textContainer];
+        rect = [_layoutManager boundingRectForGlyphRange: CPMakeRange(0, MAX(0, [_layoutManager numberOfCharacters] - 1)) inTextContainer:_textContainer];
 
     if ([_layoutManager extraLineFragmentTextContainer] === _textContainer)
         rect = CPRectUnion(rect, [_layoutManager extraLineFragmentRect]);
