@@ -164,13 +164,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     return self;
 }
 
-- (void)undo:sender
+- (void)undo:(id)sender
 {
     if (_allowsUndo)
         [[[self window] undoManager] undo];
 }
 
-- (void)redo:sender
+- (void)redo:(id)sender
 {
     if (_allowsUndo)
         [[[self window] undoManager] redo];
@@ -240,7 +240,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 // KVO support
-- (void)setValue:aValue
+- (void)setValue:(CPString)aValue
 {
     [self setString:[someVal description]]
 }
@@ -1061,12 +1061,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 - (void)sizeToFit
-{    [self setFrameSize:[self frameSize]]
+{
+    [self setFrameSize:[self frameSize]]
 
 }
 
 - (void)setFrameSize:(CPSize) aSize
-{    [_textContainer setContainerSize:aSize];
+{
+    [_textContainer setContainerSize:aSize];
 
     var minSize = [self minSize],
         maxSize = [self maxSize],

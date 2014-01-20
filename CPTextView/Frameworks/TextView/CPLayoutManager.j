@@ -149,7 +149,7 @@ var _objectsInRange = function(aList, aRange)
     CPArray _glyphsFrames;
 }
 
-- createDOMElementWithText:aString andFont:aFont andColor:aColor
+- (id)createDOMElementWithText:aString andFont:aFont andColor:aColor
 {
     var style,
         span = document.createElement("span");
@@ -181,8 +181,8 @@ var _objectsInRange = function(aList, aRange)
 
     if (self)
     {
-        _fragmentRect = CPRectMakeZero();
-        _usedRect = CPRectMakeZero();
+        _fragmentRect = CGRectMakeZero();
+        _usedRect = CGRectMakeZero();
         _location = CPPointMakeZero();
         _range = CPMakeRangeCopy(aRange);
         _textContainer = aContainer;
@@ -314,7 +314,7 @@ var _objectsInRange = function(aList, aRange)
     return [CPColor clearColor];
 }
 
-- (BOOL)isVisuallyIdenticalToFragment:newLineFragment
+- (BOOL)isVisuallyIdenticalToFragment:(_CPLineFragment)newLineFragment
 {
     var newFragmentRuns= newLineFragment._runs,
         oldFragmentRuns= _runs;
@@ -536,7 +536,7 @@ var _objectsInRange = function(aList, aRange)
             }
         }
     }
-    return (rect) ? rect : CPRectMakeZero();
+    return (rect) ? rect : CGRectMakeZero();
 }
 
 - (CPRange)glyphRangeForTextContainer:(CPTextContainer)aTextContainer
@@ -1144,7 +1144,7 @@ var _objectsInRange = function(aList, aRange)
     }
 }
 
-- (void) _setAdvancements: someAdvancements forGlyphRange:(CPRange)glyphRange
+- (void) _setAdvancements:(CPArray)someAdvancements forGlyphRange:(CPRange)glyphRange
 {
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphRange.location);
 
@@ -1164,7 +1164,7 @@ var _objectsInRange = function(aList, aRange)
     if (_extraLineFragment)
         return CPRectCreateCopy(_extraLineFragment._fragmentRect);
 
-    return CPRectMakeZero();
+    return CGRectMakeZero();
 }
 
 - (CPTextContainer)extraLineFragmentTextContainer
@@ -1180,7 +1180,7 @@ var _objectsInRange = function(aList, aRange)
     if (_extraLineFragment)
         return CPRectCreateCopy(_extraLineFragment._usedRect);
 
-    return CPRectMakeZero();
+    return CGRectMakeZero();
 }
 
 - (void)setExtraLineFragmentRect:(CPRect)rect usedRect:(CPRect)usedRect textContainer:(CPTextContainer)textContainer
@@ -1214,7 +1214,7 @@ var _objectsInRange = function(aList, aRange)
         }
     }
 
-    return (rect)?rect:CPRectMakeZero();
+    return (rect)?rect:CGRectMakeZero();
 }
 
 - (CPRect)lineFragmentRectForGlyphAtIndex:(unsigned)glyphIndex effectiveRange:(CPRangePointer)effectiveGlyphRange
@@ -1222,7 +1222,7 @@ var _objectsInRange = function(aList, aRange)
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphIndex);
 
     if (!lineFragment)
-        return CPRectMakeZero();
+        return CGRectMakeZero();
 
     if (effectiveGlyphRange)
     {
@@ -1238,7 +1238,7 @@ var _objectsInRange = function(aList, aRange)
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphIndex);
 
     if (!lineFragment)
-        return CPRectMakeZero();
+        return CGRectMakeZero();
 
     if (effectiveGlyphRange)
     {
