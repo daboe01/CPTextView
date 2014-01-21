@@ -717,10 +717,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-         var parRange = [self _characterRangeForUnitAtIndex:_selectionRange.location
+         var parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(_selectionRange)
                               inString:[self stringValue]
                               asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES];
 
+         parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES]
          [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
     }
 }
@@ -728,11 +731,15 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-         var parRange = [self _characterRangeForUnitAtIndex:_selectionRange.location
+         var parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(_selectionRange)
                               inString:[self stringValue]
                               asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES];
 
-         [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:NO];
+         parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES]
+        [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:NO];
+        [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:NO];
     }
 }
 
@@ -751,10 +758,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable && _selectionRange.location > 0)
     {
-        var parRange = [self _characterRangeForUnitAtIndex:_selectionRange.location
+        var parRange = [self _characterRangeForUnitAtIndex:MAX(0, _selectionRange.location - 1)
                                   inString:[self stringValue]
                                   asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES];
 
+        parRange = [self _characterRangeForUnitAtIndex:MAX(0,parRange.location - 1)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES]
         [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:YES];
     }
 }
@@ -762,10 +772,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable && _selectionRange.location > 0)
     {
-        var parRange = [self _characterRangeForUnitAtIndex:_selectionRange.location
+        var parRange = [self _characterRangeForUnitAtIndex:MAX(0, _selectionRange.location - 1)
                                   inString:[self stringValue]
                                   asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES];
 
+        parRange = [self _characterRangeForUnitAtIndex:MAX(0,parRange.location - 1)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES]
         [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:NO];
     }
 }
@@ -1178,14 +1191,28 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self scrollRectToVisible:rect];
 }
 
-- (CPRange)_characterRangeForUnitAtIndex:(unsigned)index inString:(CPString)string asDefinedByCharArray: characterSet skip:(BOOL) flag
+- (CPRange)_characterRangeForUnitAtIndex:(unsigned)index inString:(CPString)string asDefinedByCharArray: characterSet skip:(BOOL)flag
 {
     var wordRange = CPMakeRange(0, 0),
         lastIndex = CPNotFound,
-        searchIndex = 0;
+        searchIndex = 0,
+        setString = characterSet.join("");
 
-    if ((characterSet.join("")).indexOf(string.charAt(index)) !== CPNotFound)
-        return CPMakeRange(index, 1);
+    if (setString.indexOf(string.charAt(index)) !== CPNotFound)
+    {
+        wordRange = CPMakeRange(index, 1);
+        while(setString.indexOf(string.charAt(--index)) !== CPNotFound)
+        {
+             wordRange = CPMakeRange(index, 1);
+
+        }
+        for(index = wordRange.location; setString.indexOf(string.charAt(++index)) !== CPNotFound; )
+        {
+             wordRange = _MakeRangeFromAbs(wordRange.location, index+1);
+
+        }
+        return wordRange;
+    }
 
     do
     {
