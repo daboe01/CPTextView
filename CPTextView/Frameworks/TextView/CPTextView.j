@@ -653,7 +653,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         if (_stickyXLocation)
             point.x = _stickyXLocation;
 
-        point.y -= 2;
+        point.y -= 2;	// FIXME <!> these should not be constants
         point.x += 2;
 
         var dindex= [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
@@ -713,6 +713,17 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
          [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:NO];
     }
 }
+- (void) moveToEndOfParagraphAndModifySelection:(id)sender
+{
+    if (_isSelectable)
+    {
+         var parRange = [self _characterRangeForUnitAtIndex:_selectionRange.location
+                              inString:[self stringValue]
+                              asDefinedByCharArray:['\n'] skip:YES];
+
+         [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
+    }
+}
 - (void) moveWordRightAndModifySelection:(id)sender
 {
     if (_isSelectable)
@@ -754,6 +765,18 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:NO];
     }
 }
+- (void) moveToBeginningOfParagraphAndModifySelection:(id)sender
+{
+    if (_isSelectable && _selectionRange.location > 0)
+    {
+        var parRange = [self _characterRangeForUnitAtIndex:_selectionRange.location
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: ['\n'] skip:YES];
+
+        [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:YES];
+    }
+}
+
 - (void) moveWordLeftAndModifySelection:(id)sender
 {
     if (_isSelectable && _selectionRange.location > 0)
@@ -853,6 +876,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)insertLineBreak:(id)sender
 {
     [self insertText:@"\n"];
+}
+
+- (void) insertNewlineIgnoringFieldEditor:(id)sender
+{
+    [self insertLineBreak:sender];
+}
+
+- (void) insertNewline:(id)sender
+{
+    [self insertLineBreak:sender];
 }
 
 - (BOOL)acceptsFirstResponder
