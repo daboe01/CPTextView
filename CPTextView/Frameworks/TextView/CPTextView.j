@@ -1234,12 +1234,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (setString.indexOf(string.charAt(index)) !== CPNotFound)
     {
         wordRange = CPMakeRange(index, 1);
-        while(setString.indexOf(string.charAt(--index)) !== CPNotFound)
+        while(setString.indexOf(string.charAt(--index)) !== CPNotFound && index > -1)
         {
              wordRange = CPMakeRange(index, 1);
 
         }
-        for(index = wordRange.location; setString.indexOf(string.charAt(++index)) !== CPNotFound; )
+        for(index = wordRange.location; setString.indexOf(string.charAt(++index)) !== CPNotFound && index < string.length; )
         {
              wordRange = _MakeRangeFromAbs(wordRange.location, index+1);
 
