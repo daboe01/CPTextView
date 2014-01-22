@@ -500,13 +500,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         // TODO: check multiple font in selection
         var attributes = [_textStorage attributesAtIndex:_selectionRange.location effectiveRange:nil];
         [self setTypingAttributes:attributes];
-
-        if (_usesFontPanel)
-        {
-            var font = [attributes objectForKey:CPFontAttributeName];
-            [[CPFontManager sharedFontManager] setSelectedFont:(font)?font:[self font] isMultiple:NO];
-        }
-
     }
 }
 
@@ -748,6 +741,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void) moveWordRight:(id)sender
 {
+debugger
     if (_isSelectable)
     {
          var parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(_selectionRange)
@@ -757,7 +751,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
          parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
                                   inString:[self stringValue]
                                   asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES]
-        [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:NO];
         [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:NO];
     }
 }
