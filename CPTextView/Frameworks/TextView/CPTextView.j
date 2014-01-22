@@ -536,12 +536,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     _startTrackingLocation = [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
 
-    if (_startTrackingLocation == CPNotFound)
+    if (_startTrackingLocation === CPNotFound)
         _startTrackingLocation = [_layoutManager numberOfCharacters];
 
     var granularities = [-1, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
     [self setSelectionGranularity:granularities[[event clickCount]]];
-    [self setSelectedRange:CPMakeRange(_startTrackingLocation, 0) affinity:0 stillSelecting:YES];
+
+    var setRange = CPMakeRange(_startTrackingLocation, 0);
+
+// FIXME
+    if ([event modifierFlags] & CPShiftKeyMask)
+    {   setRange = _MakeRangeFromAbs(_selectionRange.location, _startTrackingLocation);
+        _startTrackingLocation = _selectionRange.location;
+    }
+    [self setSelectedRange:setRange affinity:0 stillSelecting:YES];
 }
 
 - (void)_clearRange:(var)range
@@ -653,7 +661,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         if (_stickyXLocation)
             point.x = _stickyXLocation;
 
-        point.y -= 2;	// FIXME <!> these should not be constants
+        point.y -= 2;    // FIXME <!> these should not be constants
         point.x += 2;
 
         var dindex= [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
@@ -1228,7 +1236,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     var wordRange = CPMakeRange(0, 0),
         lastIndex = CPNotFound,
-        searchIndex = 0,
+        searchIndex,
         setString = characterSet.join("");
 
     if (setString.indexOf(string.charAt(index)) !== CPNotFound)
@@ -1247,9 +1255,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         return wordRange;
     }
 
-    do
+    for (searchIndex = 0; searchIndex < characterSet.length; searchIndex++)
     {
-        var peek = string.lastIndexOf(characterSet[searchIndex++], index);
+        var peek = string.lastIndexOf(characterSet[searchIndex], index);
 
         if (peek !== CPNotFound)
         {
@@ -1258,17 +1266,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             else
                 lastIndex = MAX(lastIndex, peek);
         }
-    } while (searchIndex < characterSet.length);
+    }
 
     if (lastIndex !== CPNotFound)
         wordRange.location = lastIndex + 1;
 
     lastIndex = CPNotFound;
-    searchIndex = 0;
 
-    do
+    for (searchIndex = 0 ; searchIndex < characterSet.length; searchIndex++)
     {
-        var peek= string.indexOf(characterSet[searchIndex++], index);
+        var peek= string.indexOf(characterSet[searchIndex], index);
 
         if (peek !== CPNotFound)
         {
@@ -1278,7 +1285,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
                 lastIndex = MIN(lastIndex, peek);
         }
 
-    } while (searchIndex < characterSet.length);
+    }
 
     if (lastIndex != CPNotFound)
         wordRange.length = lastIndex - wordRange.location;

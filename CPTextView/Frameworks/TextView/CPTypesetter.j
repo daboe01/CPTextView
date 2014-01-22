@@ -38,6 +38,20 @@ CPTypesetterParagraphBreakAction  = (1 << 4);
 CPTypesetterContainerBreakAction  = (1 << 5);
 
 
+var _measuringContext;
+function _widthOfStringForFont(aString, aFont)
+{
+    if (!CPFeatureIsCompatible(CPHTMLCanvasFeature))  // measuring with canvas is _much_ faster
+        return [aString sizeWithFont:aFont];
+ 
+    if (!_measuringContext)
+        _measuringContext = CGBitmapGraphicsContextCreate();
+
+    _measuringContext.font = [aFont cssString];
+
+    return _measuringContext.measureText(aString);
+}
+
 var CPSystemTypesetterFactory = Nil;
 
 @implementation CPTypesetter : CPObject
@@ -136,7 +150,7 @@ var _sharedSimpleTypesetter = nil;
              writingDirection:(CPWritingDirection)direction
              maxLocation:(double)maxLocation
 {
-    // <!> TODO
+    // <!> FIXME TODO
 }
 
 - (BOOL)_flushRange:(CPRange)lineRange
@@ -227,7 +241,8 @@ var _sharedSimpleTypesetter = nil;
     if (![_textStorage length])
         return;
 
-    do {
+    for (; numLines != maxNumLines && glyphIndex < numberOfGlyphs; glyphIndex++)
+    {
             if (!CPLocationInRange(glyphIndex, _attributesRange))
             {
                 _currentAttributes = [_textStorage attributesAtIndex:glyphIndex effectiveRange:_attributesRange];
@@ -237,7 +252,7 @@ var _sharedSimpleTypesetter = nil;
                 if (!_currentFont)
                     _currentFont = [_textStorage font];
 
-                ascent = ["x" sizeWithFont:_currentFont].height;
+                ascent = ["x" sizeWithFont:_currentFont].height; //FIXME
                 descent = 0;    //FIXME
                 leading = (ascent - descent) * 0.2; // FAKE leading
             }
@@ -253,7 +268,8 @@ var _sharedSimpleTypesetter = nil;
             measuringRange.length++;
 
             var currentChar = [theString characterAtIndex: glyphIndex],
-                rangeWidth = [[theString substringWithRange: measuringRange] sizeWithFont:_currentFont].width + currentAnchor;
+                rangeWidth = _widthOfStringForFont([theString substringWithRange: measuringRange], _currentFont).width  + currentAnchor;
+                          // [[theString substringWithRange: measuringRange] sizeWithFont:_currentFont].width + currentAnchor;
 
             advancements.push(rangeWidth - prevRangeWidth);
             prevRangeWidth= rangeWidth;
@@ -311,10 +327,7 @@ var _sharedSimpleTypesetter = nil;
                 isWordWrapped  = NO;
                 numLines++;
             }
-
-        glyphIndex++;
-
-    } while (numLines != maxNumLines && glyphIndex < numberOfGlyphs);
+    }
 
     // this is to "flush" the remaining characters
     if (lineRange.length)

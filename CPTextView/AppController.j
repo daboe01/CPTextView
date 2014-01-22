@@ -1,12 +1,11 @@
 /*
  * AppController.j
  * fixmes:
- *  handle all the other methods from CPKeyBinding.j
+ *  click left to centered text does not work
+ *  drag scrolling over newlines
  *  justified text
- *  revisit canvas-based font-sizing for performance and html-robustness (use classical sizing as fallback)
  *  selection drawing 'artifact' between lines
  *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
- *  native pasting in safari (try tricking around with contenteditable)
  *  update demo to use a 2-column-setup
  */
  
@@ -52,14 +51,6 @@
     
     [contentView addSubview: scrollView];
 
-    /*
-        _selectionRange = [CPTextField labelWithTitle:@"xx"];
-        [_selectionRange setEditable: YES];
-        [_selectionRange setBezeled: YES];
-        [_selectionRange setFrame:CPMakeRect(590,100,100,32)];
-        [contentView addSubview:_selectionRange];
-        [self updateSelectionRange];
-    */
    [_textView setDelegate:self];
 
     /* build our menu */
@@ -107,17 +98,3 @@
    [[CPFontManager sharedFontManager] orderFrontFontPanel:self];
 }
 @end
-
-
-// <!> TODO measure the performance against the capp-builtin sizing using this code (could be faster, would be safe against HTML)
-var _measuringContext;
-function _widthOfStringForFont(aString, aFont)
-{
-    if (!_measuringContext)
-        _measuringContext = CGBitmapGraphicsContextCreate();
-
-    _measuringContext.font = [aFont cssString];
-
-    return _measuringContext.measureText(aString);
-}
-
