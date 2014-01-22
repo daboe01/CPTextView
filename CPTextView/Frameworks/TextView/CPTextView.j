@@ -776,6 +776,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:YES];
     }
 }
+- (void) deleteToEndOfParagraph:(id)sender
+{
+}
 
 - (void) moveWordLeftAndModifySelection:(id)sender
 {
