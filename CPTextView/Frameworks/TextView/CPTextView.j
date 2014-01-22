@@ -1241,7 +1241,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         }
         for(index = wordRange.location; setString.indexOf(string.charAt(++index)) !== CPNotFound && index < string.length; )
         {
-             wordRange = _MakeRangeFromAbs(wordRange.location, index+1);
+             wordRange = _MakeRangeFromAbs(wordRange.location, MIN(string.length - 1, index + 1));
 
         }
         return wordRange;
