@@ -741,7 +741,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void) moveWordRight:(id)sender
 {
-debugger
     if (_isSelectable)
     {
          var parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(_selectionRange)
@@ -1232,7 +1231,7 @@ debugger
         searchIndex,
         setString = characterSet.join("");
 
-    if (setString.indexOf(string.charAt(index)) !== CPNotFound)
+    if (string.charAt(index) && setString.indexOf(string.charAt(index)) !== CPNotFound)
     {
         wordRange = CPMakeRange(index, 1);
         while(setString.indexOf(string.charAt(--index)) !== CPNotFound && index > -1)
