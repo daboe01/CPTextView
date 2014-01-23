@@ -52,7 +52,6 @@ function _widthOfStringForFont(aString, aFont)
         _measuringContext.font = [aFont cssString];
         _isCanvasSizingInvalid = [teststring sizeWithFont:aFont].width != _measuringContext.measureText(teststring).width;
     }
-debugger;
     if (!CPFeatureIsCompatible(CPHTMLCanvasFeature) || _isCanvasSizingInvalid)  // measuring with canvas is _much_ faster on chrome
         return [aString sizeWithFont:aFont];
  

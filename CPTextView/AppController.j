@@ -2,7 +2,7 @@
  * AppController.j
  * fixmes:
  *  research/debug on rescuing newlines+ possibility on rescuing failures
- *  click left to centered text does not work
+ *  extending selection via shift clicking is incorrectly implemented
  *  justified text
  *  selection drawing 'artifact' between lines
  *  update demo to use a 2-column-setup
