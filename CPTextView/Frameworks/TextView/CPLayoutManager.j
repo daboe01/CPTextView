@@ -858,8 +858,9 @@ var _objectsInRange = function(aList, aRange)
                     var nlLoc = CPMaxRange(fragment._range) - 1,
                         lastFrame = [[fragment glyphFrames] lastObject];
 
-                    if (point.x > CPRectGetMaxX(lastFrame) + 22 &&   // this allows clicking before and after the (invisible) return character
-                        [[_textStorage string] characterAtIndex: nlLoc] === '\n' || i === c -1)
+			        // this allows clicking before and after the (invisible) return character
+                    if (point.x > CPRectGetMaxX(lastFrame) && fragment.length > 0 &&
+                        [[_textStorage string] characterAtIndex: nlLoc] === '\n' || i === c - 1)
                         return nlLoc + 1;
                     else
                         return nlLoc;

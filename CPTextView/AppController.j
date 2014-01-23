@@ -3,9 +3,9 @@
  * fixmes:
  *  click left to centered text does not work
  *  drag scrolling over newlines
+ *  
  *  justified text
  *  selection drawing 'artifact' between lines
- *  proper baseline-alignment (hint: collect heights in the same way as the advancements)
  *  update demo to use a 2-column-setup
  */
  
@@ -14,23 +14,6 @@
 @implementation AppController : CPObject
 {
     CPTextView  _textView;
-    CPTextField _selectionRange;
-}
-
-- (void)updateSelectionRange
-{
-    [_selectionRange setStringValue:CPStringFromRange([_textView selectedRange])];
-    [_selectionRange sizeToFit];
-}
-
-- (void)textViewDidChangeSelection:(CPNotification)aNotification
-{
-    [self updateSelectionRange];
-}
-
-- (void)changeColor:(id)sender
-{
-    [_textView setTextColor:[sender color] range:[_textView selectedRange]];
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
@@ -48,7 +31,7 @@
     var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(20, 20,520,510)];
     //  [scrollView setAutohidesScrollers:YES];
     [scrollView setDocumentView:_textView]; 
-    
+
     [contentView addSubview: scrollView];
 
    [_textView setDelegate:self];
