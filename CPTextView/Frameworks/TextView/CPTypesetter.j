@@ -39,16 +39,24 @@ CPTypesetterContainerBreakAction  = (1 << 5);
 
 
 var _measuringContext;
+var _isCanvasSizingInvalid = 0;
+var _didTestCanvasSizingValid;
 function _widthOfStringForFont(aString, aFont)
 {
-    if (!CPFeatureIsCompatible(CPHTMLCanvasFeature))  // measuring with canvas is _much_ faster
-        return [aString sizeWithFont:aFont];
- 
     if (!_measuringContext)
         _measuringContext = CGBitmapGraphicsContextCreate();
-
+    if (!_didTestCanvasSizingValid && CPFeatureIsCompatible(CPHTMLCanvasFeature))
+    {
+        var teststring = "0123456879abcdefghiklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.-()";
+        _didTestCanvasSizingValid = YES;
+        _measuringContext.font = [aFont cssString];
+        _isCanvasSizingInvalid = [teststring sizeWithFont:aFont].width != _measuringContext.measureText(teststring).width;
+    }
+debugger;
+    if (!CPFeatureIsCompatible(CPHTMLCanvasFeature) || _isCanvasSizingInvalid)  // measuring with canvas is _much_ faster on chrome
+        return [aString sizeWithFont:aFont];
+ 
     _measuringContext.font = [aFont cssString];
-
     return _measuringContext.measureText(aString);
 }
 

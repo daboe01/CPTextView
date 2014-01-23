@@ -157,7 +157,7 @@ var _objectsInRange = function(aList, aRange)
         span = document.createElement("span");
 
     span.oncontextmenu = span.onmousedown = span.onselectstart = _oncontextmenuhandler;
-	// span.contentEditable = true;   // this unfortunately does not work to make native pasting work on safari
+    // span.contentEditable = true;   // this unfortunately does not work to make native pasting work on safari
 
     style = span.style;
     style.position = "absolute";
@@ -857,18 +857,21 @@ var _objectsInRange = function(aList, aRange)
 
             if (fragment._textContainer === container)
             {
-                if (fragment._range.length > 0 && point.y > fragment._fragmentRect.origin.y &&
-                    point.y <= fragment._fragmentRect.origin.y + fragment._fragmentRect.size.height)
-                {
-                    var nlLoc = CPMaxRange(fragment._range) - 1,
-                        lastFrame = [[fragment glyphFrames] lastObject];
+                    if (fragment._range.length > 0 && point.y > fragment._fragmentRect.origin.y &&
+                        point.y <= fragment._fragmentRect.origin.y + fragment._fragmentRect.size.height)
+                    {
+                        var nlLoc = CPMaxRange(fragment._range) - 1,
+                            lastFrame = [[fragment glyphFrames] lastObject],
+                            firstFrame = [[fragment glyphFrames] firstObject];
 
-			        // this allows clicking before and after the (invisible) return character
-                    if (point.x > CPRectGetMaxX(lastFrame) && fragment.length > 0 &&
-                        [[_textStorage string] characterAtIndex: nlLoc] === '\n' || i === c - 1)
-                        return nlLoc + 1;
-                    else
-                        return nlLoc;
+                    // this allows clicking before and after the (invisible) return character
+                        if (point.x > CPRectGetMaxX(lastFrame) && fragment.length > 0 &&
+                            [[_textStorage string] characterAtIndex: nlLoc] === '\n' || i === c - 1)
+                            return nlLoc + 1;
+                        else if (point.x < CPRectGetMinX(firstFrame))
+                            return fragment._range.location;
+                        else
+                            return nlLoc;
                 }
             }
         }
