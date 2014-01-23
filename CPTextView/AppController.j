@@ -1,6 +1,7 @@
 /*
  * AppController.j
  * fixmes:
+ *  research/debug on rescuing newlines+ possibility on rescuing failures
  *  click left to centered text does not work
  *  justified text
  *  selection drawing 'artifact' between lines
