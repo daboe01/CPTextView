@@ -2,8 +2,6 @@
  * AppController.j
  * fixmes:
  *  click left to centered text does not work
- *  drag scrolling over newlines
- *  
  *  justified text
  *  selection drawing 'artifact' between lines
  *  update demo to use a 2-column-setup

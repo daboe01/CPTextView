@@ -37,6 +37,8 @@ function _RectEqualToRectHorizontally(lhsRect, rhsRect)
             lhsRect.size.height == rhsRect.size.height);
 }
 
+_oncontextmenuhandler = function () { return false; };
+
 
 @implementation CPArray(SortedSearching)
 
@@ -153,6 +155,8 @@ var _objectsInRange = function(aList, aRange)
 {
     var style,
         span = document.createElement("span");
+
+    span.oncontextmenu = span.onmousedown = span.onselectstart = _oncontextmenuhandler;
 
     style = span.style;
     style.position = "absolute";
