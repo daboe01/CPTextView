@@ -157,6 +157,7 @@ var _objectsInRange = function(aList, aRange)
         span = document.createElement("span");
 
     span.oncontextmenu = span.onmousedown = span.onselectstart = _oncontextmenuhandler;
+	// span.contentEditable = true;   // this unfortunately does not work to make native pasting work on safari
 
     style = span.style;
     style.position = "absolute";
