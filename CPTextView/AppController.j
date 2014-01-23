@@ -2,8 +2,7 @@
  * AppController.j
  * fixmes:
  *  research/debug on rescuing newlines+ possibility on rescuing failures
- *  extending selection via shift clicking is incorrectly implemented
- *  justified text
+ *  support tabs
  *  selection drawing 'artifact' between lines
  *  update demo to use a 2-column-setup
  */
@@ -62,12 +61,12 @@
                attributes:[CPDictionary dictionaryWithObjects:[centeredParagraph, [CPFont boldFontWithName:"Arial" size:18], [CPColor redColor]]
                                         forKeys:[CPParagraphStyleAttributeName, CPFontAttributeName, CPForegroundColorAttributeName]]]];
 
-     [_textView insertText: [[CPAttributedString alloc] initWithString:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
+    [_textView insertText: [[CPAttributedString alloc] initWithString:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
 
-     [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldFontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
-     [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12.0]] forKeys: [CPFontAttributeName]]]];
 
     [theWindow orderFront:self];

@@ -35,6 +35,10 @@ _MakeRangeFromAbs = function(a1, a2)
 {
     return (a1 < a2) ? CPMakeRange(a1, a2 - a1) : CPMakeRange(a2, a1 - a2);
 };
+_MidRange = function(a1)
+{
+    return Math.floor((CPMaxRange(a1) + a1.location) / 2);
+};
 
 @implementation CPColor(CPTextViewExtensions)
 
@@ -537,10 +541,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     var setRange = CPMakeRange(_startTrackingLocation, 0);
 
-// FIXME
     if ([event modifierFlags] & CPShiftKeyMask)
-    {   setRange = _MakeRangeFromAbs(_selectionRange.location, _startTrackingLocation);
-        _startTrackingLocation = _selectionRange.location;
+    {
+        setRange = _MakeRangeFromAbs(_startTrackingLocation < _MidRange(_selectionRange)?
+                                     CPMaxRange(_selectionRange) : _selectionRange.location,
+                                     _startTrackingLocation);
+
     }
     [self setSelectedRange:setRange affinity:0 stillSelecting:YES];
 }
