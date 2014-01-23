@@ -242,7 +242,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 // KVO support
 - (void)setValue:(CPString)aValue
 {
-    [self setString:[someVal description]]
+    [self setString:[aValue description]]
 }
 
 - (id)value
