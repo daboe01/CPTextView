@@ -2,8 +2,7 @@
  * AppController.j
  * fixmes:
  *  research/debug on rescuing newlines+ possibility on rescuing failures
- *  support tabs
- *  selection drawing 'artifact' between lines
+ *  make selection gray when not first responder
  *  update demo to use a 2-column-setup
  */
  
@@ -55,6 +54,7 @@
     [mainMenu setSubmenu:editMenu forItem:item];
 
     item = [mainMenu insertItemWithTitle:@"Font" action:@selector(orderFrontFontPanel:) keyEquivalent:nil atIndex:1];    
+    item = [mainMenu insertItemWithTitle:@"RTF" action:@selector(makeRTF:) keyEquivalent:nil atIndex:1];    
 
     var centeredParagraph=[CPParagraphStyle new];
     [centeredParagraph setAlignment: CPCenterTextAlignment];
@@ -79,4 +79,10 @@
 {
    [[CPFontManager sharedFontManager] orderFrontFontPanel:self];
 }
+
+- (void) makeRTF:sender
+{
+   alert("hello");
+}
+
 @end
