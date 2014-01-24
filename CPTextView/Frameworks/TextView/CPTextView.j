@@ -756,18 +756,32 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
          [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
     }
 }
-- (void) moveWordRightAndModifySelection:(id)sender
+- (void) moveParagraphForwardAndModifySelection:(id)sender
 {
     if (_isSelectable)
     {
          var parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(_selectionRange)
                               inString:[self stringValue]
-                              asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES];
+                              asDefinedByCharArray: ['\n'] skip:YES];
 
          parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
                                   inString:[self stringValue]
-                                  asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES]
+                                  asDefinedByCharArray: ['\n'] skip:YES]
          [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
+    }
+}
+- (void) moveParagraphForward:(id)sender
+{
+    if (_isSelectable)
+    {
+         var parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(_selectionRange)
+                              inString:[self stringValue]
+                              asDefinedByCharArray: ['\n'] skip:YES];
+
+         parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: ['\n'] skip:YES]
+         [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:NO];
     }
 }
 - (void) moveWordBackwardAndModifySelection:(id)sender
@@ -853,6 +867,49 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:YES];
     }
 }
+- (void) moveParagraphBackward:(id)sender
+{
+    if (_isSelectable && _selectionRange.location > 0)
+    {
+        var parRange = [self _characterRangeForUnitAtIndex:MAX(0, _selectionRange.location - 1)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: ['\n'] skip:YES];
+
+        parRange = [self _characterRangeForUnitAtIndex:MAX(0,parRange.location - 1)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: ['\n'] skip:YES]
+        [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:NO];
+    }
+}
+- (void) moveParagraphBackwardAndModifySelection:(id)sender
+{
+    if (_isSelectable && _selectionRange.location > 0)
+    {
+        var parRange = [self _characterRangeForUnitAtIndex:MAX(0, _selectionRange.location - 1)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: ['\n'] skip:YES];
+
+        parRange = [self _characterRangeForUnitAtIndex:MAX(0,parRange.location - 1)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: ['\n'] skip:YES]
+        [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:YES];
+    }
+}
+- (void) moveWordRightAndModifySelection:(id)sender
+{
+    if (_isSelectable)
+    {
+         var parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(_selectionRange)
+                              inString:[self stringValue]
+                              asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES];
+
+         parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
+                                  inString:[self stringValue]
+                                  asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:YES]
+         [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
+    }
+}
+
 - (void) deleteToEndOfParagraph:(id)sender
 {
     if (_isSelectable && _isEditable)
@@ -861,6 +918,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self delete:self];
     }
 }
+
 - (void) deleteToBeginningOfParagraph:(id)sender
 {
     if (_isSelectable && _isEditable)
@@ -869,11 +927,35 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self delete:self];
     }
 }
+- (void) deleteToBeginningOfLine:(id)sender
+{
+    if (_isSelectable && _isEditable)
+    {
+        [self moveToLeftEndOfLineAndModifySelection:self];
+        [self delete:self];
+    }
+}
+- (void) deleteToEndOfLine:(id)sender
+{
+    if (_isSelectable && _isEditable)
+    {
+        [self moveToRightEndOfLineAndModifySelection:self];
+        [self delete:self];
+    }
+}
 - (void) deleteWordBackward:(id)sender
 {
     if (_isSelectable && _isEditable)
     {
         [self moveWordLeftAndModifySelection:self];
+        [self delete:self];
+    }
+}
+- (void) deleteWordForward:(id)sender
+{
+    if (_isSelectable && _isEditable)
+    {
+        [self moveWordRightAndModifySelection:self];
         [self delete:self];
     }
 }
