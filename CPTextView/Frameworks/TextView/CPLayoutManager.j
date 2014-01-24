@@ -1142,6 +1142,16 @@ var _objectsInRange = function(aList, aRange)
     _lineFragments.push(lineFragment);
 }
 
+- (id) _lineFragmentForLocation:(unsigned) aLoc
+{
+    var fragments = _objectsInRange(_lineFragments, CPMakeRange(aLoc,0)),
+        l = fragments.length;
+
+    if (l > 0)
+        return fragments[0];
+
+    return nil;
+}
 - (void)setLineFragmentRect:(CPRect)fragmentRect forGlyphRange:(CPRange)glyphRange usedRect:(CPRect)usedRect
 {
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphRange.location);

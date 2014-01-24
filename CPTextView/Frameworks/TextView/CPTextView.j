@@ -607,6 +607,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self scrollRangeToVisible:CPMakeRange(index, 0)];
 }
 
+// handle all the other methods from CPKeyBinding.j
+
 - (void)mouseUp:(CPEvent)event
 {
     /* will post CPTextViewDidChangeSelectionNotification */
@@ -615,8 +617,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var point = [_layoutManager locationForGlyphAtIndex: [self selectedRange].location];
     _stickyXLocation= point.x;
 }
-
-// <!> FIXME handle all the other methods from CPKeyBinding.j
 
 - (void)moveDown:(id)sender
 {
@@ -644,6 +644,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self scrollRangeToVisible: CPMakeRange(dindex, 0)]
     }
 }
+- (void)moveDownAndModifySelection:(id)sender
+{
+    if (_isSelectable)
+    {   var oldSelection = _selectionRange;
+        [self moveDown:sender];
+        [self _establishSelection:CPUnionRange(_selectionRange, oldSelection) byExtending:NO];
+    }
+}
 
 - (void)moveUp:(id)sender
 {
@@ -668,7 +676,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self scrollRangeToVisible: CPMakeRange(dindex, 0)]
     }
 }
-
+- (void)moveUpAndModifySelection:(id)sender
+{
+    if (_isSelectable)
+    {   var oldSelection = _selectionRange;
+        [self moveUp:sender];
+        [self _establishSelection:CPUnionRange(_selectionRange, oldSelection) byExtending:NO];
+    }
+}
 - (void)_establishSelection:(CPSelection)aSel byExtending:(BOOL)flag
 {
     if (flag)
@@ -688,6 +703,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         }
     }
 }
+- (void)moveBackward:(id)sender
+{
+    [self moveLeft:sender];
+}
+
+- (void)moveBackwardAndModifySelection:(id)sender
+{
+    [self moveLeftAndModifySelection:sender];
+}
+
 - (void)moveRightAndModifySelection:(id)sender
 {
     if (_isSelectable)
@@ -745,6 +770,23 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
          [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
     }
 }
+- (void) moveWordBackwardAndModifySelection:(id)sender
+{
+    [self moveWordLeftAndModifySelection:sender];
+}
+- (void) moveWordBackward:(id)sender
+{
+    [self moveWordLeft:sender];
+}
+- (void) moveWordForwardAndModifySelection:(id)sender
+{
+    [self moveWordRightAndModifySelection:sender];
+}
+- (void) moveWordForward:(id)sender
+{
+    [self moveWordRight:sender];
+}
+
 - (void) moveToBeginningOfDocument:(id)sender
 {
     if (_isSelectable)
@@ -813,7 +855,63 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void) deleteToEndOfParagraph:(id)sender
 {
-    //<!> FIXME
+    if (_isSelectable && _isEditable)
+    {
+        [self moveToEndOfParagraphAndModifySelection:self];
+        [self delete:self];
+    }
+}
+- (void) deleteToBeginningOfParagraph:(id)sender
+{
+    if (_isSelectable && _isEditable)
+    {
+        [self moveToBeginningOfParagraphAndModifySelection:self];
+        [self delete:self];
+    }
+}
+- (void) deleteWordBackward:(id)sender
+{
+    if (_isSelectable && _isEditable)
+    {
+        [self moveWordLeftAndModifySelection:self];
+        [self delete:self];
+    }
+}
+- (void) moveToLeftEndOfLine:(id)sender
+{
+    if (_isSelectable && _selectionRange.location > 0)
+    {
+        var fragment = [_layoutManager _lineFragmentForLocation:_selectionRange.location];
+        if (fragment)
+            [self _establishSelection:CPMakeRange(fragment._range.location, 0) byExtending:NO];
+    }
+}
+- (void) moveToLeftEndOfLineAndModifySelection:(id)sender
+{
+    if (_isSelectable && _selectionRange.location > 0)
+    {
+        var fragment = [_layoutManager _lineFragmentForLocation:_selectionRange.location];
+        if (fragment)
+            [self _establishSelection:CPMakeRange(fragment._range.location, 0) byExtending:YES];
+    }
+}
+- (void) moveToRightEndOfLine:(id)sender
+{
+    if (_isSelectable && _selectionRange.location > 0)
+    {
+        var fragment = [_layoutManager _lineFragmentForLocation:_selectionRange.location];
+        if (fragment)
+            [self _establishSelection:CPMakeRange(CPMaxRange(fragment._range), 0) byExtending:NO];
+    }
+}
+- (void) moveToRightEndOfLineAndModifySelection:(id)sender
+{
+    if (_isSelectable && _selectionRange.location > 0)
+    {
+        var fragment = [_layoutManager _lineFragmentForLocation:_selectionRange.location];
+        if (fragment)
+            [self _establishSelection:CPMakeRange(CPMaxRange(fragment._range), 0) byExtending:YES];
+    }
 }
 
 - (void) moveWordLeftAndModifySelection:(id)sender
