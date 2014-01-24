@@ -8,6 +8,7 @@
  */
  
 @import <TextView/CPTextView.j>
+@import <TextView/RTFProducer.j>
 
 @implementation AppController : CPObject
 {
