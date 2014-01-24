@@ -745,6 +745,35 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
          [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
     }
 }
+- (void) moveToBeginningOfDocument:(id)sender
+{
+    if (_isSelectable)
+    {
+         [self _establishSelection:CPMakeRange(0, 0) byExtending:NO];
+    }
+}
+- (void) moveToBeginningOfDocumentAndModifySelection:(id)sender
+{
+    if (_isSelectable)
+    {
+         [self _establishSelection:CPMakeRange(0, 0) byExtending:YES];
+    }
+}
+- (void) moveToEndOfDocument:(id)sender
+{
+    if (_isSelectable)
+    {
+         [self _establishSelection:CPMakeRange([_layoutManager numberOfCharacters], 0) byExtending:NO];
+    }
+}
+- (void) moveToEndOfDocumentAndModifySelection:(id)sender
+{
+    if (_isSelectable)
+    {
+         [self _establishSelection:CPMakeRange([_layoutManager numberOfCharacters], 0) byExtending:YES];
+    }
+}
+
 - (void) moveWordRight:(id)sender
 {
     if (_isSelectable)
@@ -784,6 +813,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void) deleteToEndOfParagraph:(id)sender
 {
+    //<!> FIXME
 }
 
 - (void) moveWordLeftAndModifySelection:(id)sender
@@ -885,6 +915,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)insertLineBreak:(id)sender
 {
     [self insertText:@"\n"];
+}
+- (void)insertTab:(id)sender
+{
+    [self insertText:@"\t"];
+}
+- (void)insertTabIgnoringFieldEditor:(id)sender
+{
+    [self insertTab:sender];
 }
 
 - (void) insertNewlineIgnoringFieldEditor:(id)sender
