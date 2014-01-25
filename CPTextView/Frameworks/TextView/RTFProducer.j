@@ -405,7 +405,7 @@ function _points2twips(a) { return (a)*20.0; }
 	    var color = [attributes objectForKey: CPForegroundColorAttributeName];
 	    if (![color isEqual: fgColor])
 	    {
-	        headerString += [CPString stringWithFormat:@"\\cf%d", [self numberForColor: color]];
+	        headerString += [CPString stringWithFormat:@"\\cf%d", [self numberForColor: color] + 1];
 	        trailerString += @"\\cf0";
 	    }
 	}
