@@ -316,12 +316,12 @@ function _points2twips(a) { return (a)*20.0; }
     twips = _points2twips([paraStyle minimumLineHeight]);
     if (twips != 0.0)
     {
-      headerString += [CPString stringWithFormat:@"\\sl%d", twips];
+        headerString += [CPString stringWithFormat:@"\\sl%d", twips];
     }
     twips = _points2twips([paraStyle maximumLineHeight]);
     if (twips != 0.0)
     {
-      headerString += [CPString stringWithFormat: @"\\sl-%d", twips];
+        headerString += [CPString stringWithFormat: @"\\sl-%d", twips];
     }
   // FIXME: Tab definitions are still missing
   
