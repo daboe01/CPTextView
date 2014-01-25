@@ -85,8 +85,8 @@ function _points2twips(a) { return (a)*20.0; }
     fontDict = [CPMutableDictionary new];
   
     currentFont = nil;
-    fgColor = [CPColor textColor];
-    bgColor= [CPColor textBackgroundColor];
+    fgColor = [CPColor blackColor];
+    bgColor= [CPColor whiteColor];
 
     return self;
 }
@@ -149,7 +149,7 @@ function _points2twips(a) { return (a)*20.0; }
 	    [list insertObject: next atIndex: [cn intValue]-1];
 	}
 
-        result = [CPMutableString stringWithString: @"{\\colortbl;"];
+        result = [CPString stringWithString: @"{\\colortbl;"];
         for (i = 0; i < count; i++)
 	{
 	    var color = [[list objectAtIndex: i] 
@@ -177,7 +177,7 @@ function _points2twips(a) { return (a)*20.0; }
             val,
             num,
 
-        result = [CPMutableString string];
+        result = [CPString string];
 
         val = [docDict objectForKey: PAPERSIZE];
         if (val != nil)
@@ -232,7 +232,7 @@ function _points2twips(a) { return (a)*20.0; }
 {
     var result;
 
-    result = [CPMutableString stringWithString: @"{\\rtf1\\ansi"];
+    result = [CPString stringWithString: @"{\\rtf1\\ansi"];
 
     [result appendString: [self fontTable]];
     [result appendString: [self colorTable]];
@@ -280,7 +280,7 @@ function _points2twips(a) { return (a)*20.0; }
 
 - (CPString) paragraphStyle: (CPParagraphStyle) paraStyle
 {
-    var headerString = [CPMutableString stringWithString:@"\\pard\\plain"],
+    var headerString = [CPString stringWithString:@"\\pard\\plain"],
         twips;
 
     if (paraStyle == nil)
@@ -312,27 +312,27 @@ function _points2twips(a) { return (a)*20.0; }
     twips = _points2twips([paraStyle headIndent]);
     if (twips != 0.0)
     {
-        [headerString appendString: [CPString stringWithFormat:@"\\li%d", twips]];
+        headerString += [CPString stringWithFormat:@"\\li%d", twips];
     }
     twips = _points2twips([paraStyle tailIndent]);
     if (twips != 0.0)
     {
-        [headerString appendString: [CPString stringWithFormat:@"\\ri%d", twips]];
+        headerString += [CPString stringWithFormat:@"\\ri%d", twips];
     }
     twips = _points2twips([paraStyle paragraphSpacing]);
     if (twips != 0.0)
     {
-        [headerString appendString: [CPString stringWithFormat:@"\\sa%d", twips]];
+        headerString += [CPString stringWithFormat:@"\\sa%d", twips];
     }
     twips = _points2twips([paraStyle minimumLineHeight]);
     if (twips != 0.0)
     {
-      [headerString appendString: [CPString stringWithFormat:@"\\sl%d", twips]];
+      headerString += [CPString stringWithFormat:@"\\sl%d", twips];
     }
     twips = _points2twips([paraStyle maximumLineHeight]);
     if (twips != 0.0)
     {
-      [headerString appendString: [CPString stringWithFormat: @"\\sl-%d", twips]];
+      headerString += [CPString stringWithFormat: @"\\sl-%d", twips];
     }
   // FIXME: Tab definitions are still missing
   
@@ -343,16 +343,16 @@ function _points2twips(a) { return (a)*20.0; }
 		     attributes: (CPDictionary) attributes
 		 paragraphStart: (BOOL) first
 {
-    var result = [CPMutableString stringWithCapacity:[substring length]*2],
-        headerString = [CPMutableString stringWithCapacity: 20],
-        trailerString = [CPMutableString stringWithCapacity: 20],
+    var result = "",
+        headerString = "",
+        trailerString = "",
         attribEnum,
         currAttrib;
   
     if (first)
     {
         var paraStyle = [attributes objectForKey:CPParagraphStyleAttributeName];
-        [headerString appendString: [self paragraphStyle: paraStyle]];
+        headerString += [self paragraphStyle: paraStyle];
     }
 
   /*
@@ -385,7 +385,7 @@ function _points2twips(a) { return (a)*20.0; }
 	    if (currentFont == nil || 
 	        ![fontName isEqualToString: [currentFont familyName]])
 	    {
-	        [headerString appendString: [self fontToken: fontName]];
+	        headerString += [self fontToken: fontName];
 	    }
 	  /*
 	   * font size
@@ -397,20 +397,20 @@ function _points2twips(a) { return (a)*20.0; }
 	            pString;
 	      
 	        pString = [CPString stringWithFormat: @"\\fs%d", points];
-	        [headerString appendString: pString];
+	        headerString += pString;
 	    }
 	  /*
 	   * font attributes
 	   */
 	    if (traits & CPItalicFontMask)
 	    {
-	        [headerString appendString: @"\\i"];
-	        [trailerString appendString: @"\\i0"];
+	        headerString += @"\\i";
+	        trailerString += @"\\i0";
 	    }
 	    if (traits & CPBoldFontMask)
 	    {
-	        [headerString appendString: @"\\b"];
-	        [trailerString appendString: @"\\b0"];
+	        headerString += @"\\b";
+	        trailerString += @"\\b0";
 	    }
 
 	    if (first)
@@ -522,7 +522,7 @@ function _points2twips(a) { return (a)*20.0; }
 - (CPString) bodyString
 {
     var string = [text string],
-        result = [CPMutableString string],
+        result = "",
         loc = 0,
         length = [string length];
 
@@ -531,7 +531,7 @@ function _points2twips(a) { return (a)*20.0; }
       // Range of the current run
        var currRange = CPMakeRange(loc, 0),
       // Range of the current paragraph
-        completeRange = [string lineRangeForRange: currRange],
+        completeRange = CPMakeRange(0, length),
         first = YES;
 
         while (CPMaxRange(currRange) < CPMaxRange(completeRange))  // save all "runs"
@@ -542,7 +542,7 @@ function _points2twips(a) { return (a)*20.0; }
 	  
 	    attributes = [text attributesAtIndex: CPMaxRange(currRange)
 			     longestEffectiveRange:currRange
-			     inRange: completeRange];
+			     inRange:currRange];
 	    substring = [string substringWithRange:currRange];
 	  
 	    runString = [self runStringForString:substring
@@ -562,7 +562,7 @@ function _points2twips(a) { return (a)*20.0; }
 - (CPString) RTFDStringFromAttributedString: (CPAttributedString)aText
 	       documentAttributes: (CPDictionary)dict
 {
-    var output = [CPMutableString string],
+    var output = [CPString string],
         headerString,
         trailerString,
         bodyString;

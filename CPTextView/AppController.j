@@ -12,6 +12,7 @@
 @implementation AppController : CPObject
 {
     CPTextView  _textView;
+    CPTextView  _textView2;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
@@ -24,13 +25,18 @@
     [contentView setBackgroundColor:[CPColor colorWithWhite:0.95 alpha:1.0]];
 
     _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
+    _textView2 = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
     [_textView setBackgroundColor:[CPColor whiteColor]];
+    [_textView2 setBackgroundColor:[CPColor whiteColor]];
 
     var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(20, 20,520,510)];
+    var scrollView2 = [[CPScrollView alloc] initWithFrame:CGRectMake(560, 20,520,510)];
     //  [scrollView setAutohidesScrollers:YES];
     [scrollView setDocumentView:_textView]; 
+    [scrollView2 setDocumentView:_textView2]; 
 
     [contentView addSubview: scrollView];
+    [contentView addSubview: scrollView2];
 
    [_textView setDelegate:self];
 
@@ -42,6 +48,8 @@
 
     var item = [mainMenu insertItemWithTitle:@"Edit" action:nil keyEquivalent:nil atIndex:0],
         editMenu = [[CPMenu alloc] initWithTitle:@"Edit Menu"];
+ 
+   [_textView2 insertText:"RTF goes here"];
 
     [editMenu addItemWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"];
     [editMenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"];
@@ -82,7 +90,7 @@
 
 - (void) makeRTF:sender
 {
-   alert("hello");
+   [_textView2 setStringValue: [RTFProducer produceRTF:[_textView textStorage] documentAttributes: @{}] ];
 }
 
 @end

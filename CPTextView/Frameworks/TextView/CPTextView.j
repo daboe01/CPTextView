@@ -96,9 +96,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     BOOL            _isFirstResponder;
 
-    BOOL            _isEditable;
-    BOOL            _isSelectable;
-
     BOOL            _drawCaret;
     CPTimer         _caretTimer;
     CPRect          _caretRect;
@@ -117,6 +114,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     BOOL            _allowsUndo;
     BOOL            _isHorizontallyResizable;
     BOOL            _isVerticallyResizable;
+    BOOL            _isEditable;
+    BOOL            _isSelectable;
 
     var             _caretDOM;
     int             _stickyXLocation;
