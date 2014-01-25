@@ -5,7 +5,7 @@
 
    Copyright (C) 2014 Daniel Boehringer
    This file is based on the RTFProducer from GNUStep
-   (which i co-authored with Fred Kiefer back in 1999)
+   (which i co-authored with Fred Kiefer in 1999)
    
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,6 +34,7 @@ var BUTTOMMARGIN = @"ButtomMargin";
 CPISOLatin1StringEncoding = "CPISOLatin1StringEncoding";
 
 function _points2twips(a) { return (a)*20.0; }
+
 
 @implementation RTFProducer:CPObject
 {
@@ -233,7 +234,7 @@ function _points2twips(a) { return (a)*20.0; }
     return @"}";
 }
 
-- (CPString) fontToken: (CPString) fontName
+- (CPString)fontToken: (CPString) fontName
 {
     var fCount = [fontDict objectForKey: fontName];
 
@@ -248,7 +249,7 @@ function _points2twips(a) { return (a)*20.0; }
     return fCount;
 }
 
-- (int) numberForColor: (CPColor)color
+- (int)numberForColor: (CPColor)color
 {
     var cn,
         num = [colorDict objectForKey: color];
@@ -262,7 +263,7 @@ function _points2twips(a) { return (a)*20.0; }
     }
     var cn = [num intValue];
 
-    return cn;
+    return cn + 1;
 }
 
 - (CPString) paragraphStyle: (CPParagraphStyle) paraStyle
@@ -330,6 +331,7 @@ function _points2twips(a) { return (a)*20.0; }
 
 - (CPString) runStringForString: (CPString) substring
 		     attributes: (CPDictionary) attributes
+		 paragraphStart: (BOOL) first
 {
     var result = "",
         headerString = "",
@@ -337,8 +339,11 @@ function _points2twips(a) { return (a)*20.0; }
         attribEnum,
         currAttrib;
   
-     var paraStyle = [attributes objectForKey:CPParagraphStyleAttributeName];
-     headerString += [self paragraphStyle: paraStyle];
+    if (first)
+    {
+        var paraStyle = [attributes objectForKey:CPParagraphStyleAttributeName];
+        headerString += [self paragraphStyle: paraStyle];
+    }
 
   /*
    * analyze attributes of current run
@@ -398,14 +403,15 @@ function _points2twips(a) { return (a)*20.0; }
 	        trailerString += @"\\b0";
 	    }
 
-	    currentFont = font;
+	    if (first)
+	        currentFont = font;
 	}
         else if ([currAttrib isEqualToString: CPForegroundColorAttributeName])
         {
 	    var color = [attributes objectForKey: CPForegroundColorAttributeName];
 	    if (![color isEqual: fgColor])
 	    {
-	        headerString += [CPString stringWithFormat:@"\\cf%d", [self numberForColor: color] + 1];
+	        headerString += [CPString stringWithFormat:@"\\cf%d", [self numberForColor:color]];
 	        trailerString += @"\\cf0";
 	    }
 	}
@@ -474,6 +480,18 @@ function _points2twips(a) { return (a)*20.0; }
   // FIXME: All characters not in the standard encoding must be
   // replaced by \'xx
   
+    if (!first)
+    {
+        var braces;
+      
+        if ([headerString length])
+	     braces = [CPString stringWithFormat: @"{%@ %@}", headerString, substring];
+        else
+             braces = substring;
+      
+      result += braces;
+    }
+    else
     {
         var nobraces;
 
@@ -497,7 +515,8 @@ function _points2twips(a) { return (a)*20.0; }
         length = [string length];
 
     var currRange = CPMakeRange(loc, 0),
-        completeRange = CPMakeRange(0, length);
+        completeRange = CPMakeRange(0, length),
+        first = YES;
 
      while (CPMaxRange(currRange) < CPMaxRange(completeRange))  // save all "runs"
      {
@@ -511,8 +530,10 @@ function _points2twips(a) { return (a)*20.0; }
 	substring = [string substringWithRange:currRange];
 	  
 	runString = [self runStringForString:substring
-			    attributes:attributes];
+			    attributes:attributes
+			    paragraphStart:NO];
 	result += runString;
+	first = NO;
     }
     return result;
 }
