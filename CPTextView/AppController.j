@@ -90,7 +90,7 @@
 
 - (void) makeRTF:sender
 {
-   [_textView2 setStringValue: [RTFProducer produceRTF:[_textView textStorage] documentAttributes: @{}] ];
+   [_textView2 setString: [RTFProducer produceRTF:[_textView textStorage] documentAttributes: @{}] ];
 }
 
 @end

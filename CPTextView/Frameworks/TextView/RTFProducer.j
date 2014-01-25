@@ -5,7 +5,7 @@
 
    Copyright (C) 2014 Daniel Boehringer
    This file is based on the RTFProducer from GNUStep
-   (which i co-authored with Fred Kiefer in 1999)
+   (which i co-authored with Fred Kiefer back in 1999)
    
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,18 +35,6 @@ CPISOLatin1StringEncoding = "CPISOLatin1StringEncoding";
 
 function _points2twips(a) { return (a)*20.0; }
 
-
-@implementation CPString(Replacing)
-
-- (CPString) stringByReplacingString: (CPString)aString withString: (CPString)other
-{
-    var ret = self;
-    var regex = new RegExp(aString, "g");
-    ret.replace(regex, other);
-    return ret;
-}
-@end
-
 @implementation RTFProducer:CPObject
 {
     CPAttributedString text;
@@ -61,15 +49,13 @@ function _points2twips(a) { return (a)*20.0; }
     CPColor ulColor;
 }
 
-+ (CPData)produceRTF: (CPAttributedString) aText documentAttributes: (CPDictionary)dict
++ (CPString)produceRTF: (CPAttributedString) aText documentAttributes: (CPDictionary)dict
 {
     var mynew = [self new],
         data;
 
-    data = [[mynew RTFDStringFromAttributedString: aText
-	       documentAttributes: dict]
-	       dataUsingEncoding: CPISOLatin1StringEncoding];
-    return data;
+    return [mynew RTFDStringFromAttributedString: aText
+	       documentAttributes: dict];
 }
 
 - (id)init
@@ -301,7 +287,9 @@ function _points2twips(a) { return (a)*20.0; }
         case CPJustifiedTextAlignment:
 	    headerString += @"\\qj";
 	break;
-        default: break;
+        default:
+	    headerString += @"\\ql";
+        break;
     }
 
     // write first line indent and left indent
@@ -342,7 +330,6 @@ function _points2twips(a) { return (a)*20.0; }
 
 - (CPString) runStringForString: (CPString) substring
 		     attributes: (CPDictionary) attributes
-		 paragraphStart: (BOOL) first
 {
     var result = "",
         headerString = "",
@@ -350,11 +337,8 @@ function _points2twips(a) { return (a)*20.0; }
         attribEnum,
         currAttrib;
   
-    if (first)
-    {
-        var paraStyle = [attributes objectForKey:CPParagraphStyleAttributeName];
-        headerString += [self paragraphStyle: paraStyle];
-    }
+     var paraStyle = [attributes objectForKey:CPParagraphStyleAttributeName];
+     headerString += [self paragraphStyle: paraStyle];
 
   /*
    * analyze attributes of current run
@@ -414,8 +398,7 @@ function _points2twips(a) { return (a)*20.0; }
 	        trailerString += @"\\b0";
 	    }
 
-	    if (first)
-	        currentFont = font;
+	    currentFont = font;
 	}
         else if ([currAttrib isEqualToString: CPForegroundColorAttributeName])
         {
@@ -483,26 +466,14 @@ function _points2twips(a) { return (a)*20.0; }
 	}
     }
 
-    var substring = [substring stringByReplacingString: @"\\\\" withString: @"\\\\"];
-    substring = [substring stringByReplacingString: @"\\n" withString: @"\\par\n"];
-    substring = [substring stringByReplacingString: @"\\t" withString: @"\\tab "];
-    substring = [substring stringByReplacingString: @"{" withString: @"\\{"];
-    substring = [substring stringByReplacingString: @"}" withString: @"\\}"];
+    substring = substring.replace(/\\/g, '\\\\');
+    substring = substring.replace(/\n/g, '\\par\n');
+    substring = substring.replace(/\t/g, '\\tab');
+    substring = substring.replace(/{/g, '\\{');
+    substring = substring.replace(/}/g, '\\}');
   // FIXME: All characters not in the standard encoding must be
   // replaced by \'xx
   
-    if (!first)
-    {
-        var braces;
-      
-        if ([headerString length])
-	     braces = [CPString stringWithFormat: @"{%@ %@}", headerString, substring];
-        else
-             braces = substring;
-      
-      result += braces;
-    }
-    else
     {
         var nobraces;
 
@@ -515,7 +486,7 @@ function _points2twips(a) { return (a)*20.0; }
         result += nobraces;
     }
 
-    return result;
+    return result + trailerString;
 }
 
 - (CPString) bodyString
@@ -525,35 +496,24 @@ function _points2twips(a) { return (a)*20.0; }
         loc = 0,
         length = [string length];
 
-    while (loc < length)
-    {
-      // Range of the current run
-       var currRange = CPMakeRange(loc, 0),
-      // Range of the current paragraph
-        completeRange = CPMakeRange(0, length),
-        first = YES;
+    var currRange = CPMakeRange(loc, 0),
+        completeRange = CPMakeRange(0, length);
 
-        while (CPMaxRange(currRange) < CPMaxRange(completeRange))  // save all "runs"
-        {
-	    var attributes,
-	        substring,
-	        runString;
+     while (CPMaxRange(currRange) < CPMaxRange(completeRange))  // save all "runs"
+     {
+	var attributes,
+	    substring,
+	    runString;
 	  
-	    attributes = [text attributesAtIndex: CPMaxRange(currRange)
+	attributes = [text attributesAtIndex: CPMaxRange(currRange)
 			     longestEffectiveRange:currRange
-			     inRange:currRange];
-	    substring = [string substringWithRange:currRange];
+			     inRange:completeRange];
+	substring = [string substringWithRange:currRange];
 	  
-	    runString = [self runStringForString:substring
-			    attributes:attributes
-			    paragraphStart:first];
-	    result += runString;
-	    first = NO;
-	}
-
-        loc = CPMaxRange(completeRange);
+	runString = [self runStringForString:substring
+			    attributes:attributes];
+	result += runString;
     }
-
     return result;
 }
 
