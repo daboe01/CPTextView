@@ -41,6 +41,11 @@ CPForegroundColorAttributeName = @"CPForegroundColorAttributeName";
 CPBackgroundColorAttributeName = @"CPBackgroundColorAttributeName";
 CPShadowAttributeName = @"CPShadowAttributeName";
 CPUnderlineStyleAttributeName = @"CPUnderlineStyleAttributeName";
+CPSuperscriptAttributeName = @"CPSuperscriptAttributeName";
+CPBaselineOffsetAttributeName = @"CPBaselineOffsetAttributeName";
+CPAttachmentAttributeName = @"CPAttachmentAttributeName";
+CPLigatureAttributeName = @"CPLigatureAttributeName";
+CPKernAttributeName = @"CPKernAttributeName";
 
 /*!
     @ingroup appkit

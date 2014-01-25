@@ -38,7 +38,7 @@ function _points2twips(a) { return (a)*20.0; }
 
 @implementation CPString(Replacing)
 
-- (CPString) stringByReplacingEveryOccurrenceOfString: (CPString)aString withString: (CPString)other
+- (CPString) stringByReplacingString: (CPString)aString withString: (CPString)other
 {
     var ret = self;
     var regex = new RegExp(aString, "g");
@@ -54,6 +54,7 @@ function _points2twips(a) { return (a)*20.0; }
     CPMutableDictionary colorDict;
     CPDictionary docDict;
     CPMutableArray attachments;
+    CPFont currentFont;
 
     CPColor fgColor;
     CPColor bgColor;
@@ -123,7 +124,7 @@ function _points2twips(a) { return (a)*20.0; }
 
 	    detail = [CPString stringWithFormat: @"%@\\f%@ %@;",
 	        [fontDict objectForKey: currFont], fontFamily, currFont];
-	    [fontlistString appendString: detail];
+	    fontlistString += detail;
 	}
         return [CPString stringWithFormat: @"{\\fonttbl%@}\n", fontlistString];
     }
@@ -154,14 +155,14 @@ function _points2twips(a) { return (a)*20.0; }
 	{
 	    var color = [[list objectAtIndex: i] 
 			       colorUsingColorSpaceName: CPCalibratedRGBColorSpace];
-	    [result appendString: [CPString stringWithFormat:
+	    result += [CPString stringWithFormat:
 					    @"\\red%d\\green%d\\blue%d;",
 					 ([color redComponent]*255),
 					 ([color greenComponent]*255),
-					 ([color blueComponent]*255)]];
+					 ([color blueComponent]*255)];
 	}
 
-        [result appendString: @"}\n"];
+        result += @"}\n";
         return result;
     }
     else
@@ -186,7 +187,7 @@ function _points2twips(a) { return (a)*20.0; }
 	    detail = [CPString stringWithFormat: @"\\paperw%d \\paperh%d",
 			     _points2twips(size.width), 
 			     _points2twips(size.height)];
-	    [result appendString: detail];
+	    result += detail;
 	}
 
         num = [docDict objectForKey: LEFTMARGIN];
@@ -195,7 +196,7 @@ function _points2twips(a) { return (a)*20.0; }
 	    var f = [num floatValue];
 	    detail = [CPString stringWithFormat: @"\\margl%d",
 			     _points2twips(f)];
-	    [result appendString: detail];
+	    result+= detail;
 	}
         num = [docDict objectForKey: RIGHTMARGIN];
         if (num != nil)
@@ -203,7 +204,7 @@ function _points2twips(a) { return (a)*20.0; }
 	    var f = [num floatValue];
 	    detail = [CPString stringWithFormat: @"\\margr%d",
 			     _points2twips(f)];
-	    [result appendString: detail];
+	    result += detail;
 	}
         num = [docDict objectForKey: TOPMARGIN];
         if (num != nil)
@@ -211,7 +212,7 @@ function _points2twips(a) { return (a)*20.0; }
 	    var f = [num floatValue];
 	    detail = [CPString stringWithFormat: @"\\margt%d",
 			     _points2twips(f)];
-	    [result appendString: detail];
+	    result += detail;
 	}
         num = [docDict objectForKey: BUTTOMMARGIN];
         if (num != nil)
@@ -219,7 +220,7 @@ function _points2twips(a) { return (a)*20.0; }
 	    var f = [num floatValue];
 	    detail = [CPString stringWithFormat: @"\\margb%d",
 			     _points2twips(f)];
-	    [result appendString: detail];
+	    result += detail;
 	}
 
         return result;
@@ -234,9 +235,9 @@ function _points2twips(a) { return (a)*20.0; }
 
     result = [CPString stringWithString: @"{\\rtf1\\ansi"];
 
-    [result appendString: [self fontTable]];
-    [result appendString: [self colorTable]];
-    [result appendString: [self documentAttributes]];
+    result += [self fontTable];
+    result += [self colorTable];
+    result += [self documentAttributes];
 
     return result;
 }
@@ -289,16 +290,16 @@ function _points2twips(a) { return (a)*20.0; }
     switch ([paraStyle alignment])
     {
         case CPRightTextAlignment:
-	    [headerString appendString: @"\\qr"];
+	    headerString += @"\\qr";
 	break;
         case CPCenterTextAlignment:
-	    [headerString appendString: @"\\qc"];
+	    headerString += @"\\qc";
 	break;
         case CPLeftTextAlignment:
-	    [headerString appendString: @"\\ql"];
+	    headerString += @"\\ql";
 	break;
         case CPJustifiedTextAlignment:
-	    [headerString appendString: @"\\qj"];
+	    headerString += @"\\qj";
 	break;
         default: break;
     }
@@ -307,7 +308,7 @@ function _points2twips(a) { return (a)*20.0; }
     var twips = _points2twips([paraStyle firstLineHeadIndent]);
     if (twips != 0.0)
     {
-        [headerString appendString: [CPString stringWithFormat:@"\\fi%d", twips]];
+        headerString += [CPString stringWithFormat:@"\\fi%d", twips];
     }
     twips = _points2twips([paraStyle headIndent]);
     if (twips != 0.0)
@@ -391,9 +392,9 @@ function _points2twips(a) { return (a)*20.0; }
 	   * font size
 	   */
 	    if (currentFont == nil || 
-	        [font pointSize] != [currentFont pointSize])
+	        [font size] != [currentFont size])
 	    {
-	        var points =[font pointSize]*2,
+	        var points =[font size]*2,
 	            pString;
 	      
 	        pString = [CPString stringWithFormat: @"\\fs%d", points];
@@ -421,9 +422,8 @@ function _points2twips(a) { return (a)*20.0; }
 	    var color = [attributes objectForKey: CPForegroundColorAttributeName];
 	    if (![color isEqual: fgColor])
 	    {
-	        [headerString appendString: [CPString stringWithFormat:@"\\cf%d", 
-						    [self numberForColor: color]]];
-	        [trailerString appendString: @"\\cf0"];
+	        headerString += [CPString stringWithFormat:@"\\cf%d", [self numberForColor: color]];
+	        trailerString += @"\\cf0";
 	    }
 	}
         else if ([currAttrib isEqualToString: CPBackgroundColorAttributeName])
@@ -431,15 +431,14 @@ function _points2twips(a) { return (a)*20.0; }
 	  var color = [attributes objectForKey: CPBackgroundColorAttributeName];
 	  if (![color isEqual: bgColor])
 	    {
-	        [headerString appendString: [CPString stringWithFormat:@"\\cb%d", 
-						    [self numberForColor: color]]];
-	        [trailerString appendString: @"\\cb0"];
+	        headerString += [CPString stringWithFormat:@"\\cb%d", [self numberForColor: color]];
+	        trailerString += @"\\cb0";
 	    }
 	}
         else if ([currAttrib isEqualToString: CPUnderlineStyleAttributeName])
         {
-	  [headerString appendString: @"\\ul"];
-	  [trailerString appendString: @"\\ulnone"];
+	  headerString += @"\\ul";
+	  trailerString += @"\\ulnone";
 	}
         else if ([currAttrib isEqualToString: CPSuperscriptAttributeName])
         {
@@ -448,13 +447,13 @@ function _points2twips(a) { return (a)*20.0; }
 	  
 	    if (svalue > 0)
 	    {
-	        [headerString appendString: [CPString stringWithFormat:@"\\up%d", svalue]];
-	        [trailerString appendString: @"\\up0"];
+	        headerString += [CPString stringWithFormat:@"\\up%d", svalue];
+	        trailerString += @"\\up0";
 	    }
 	    else if (svalue < 0)
 	    {
-	        [headerString appendString: [CPString stringWithFormat:@"\\dn-%d", svalue]];
-	        [trailerString appendString: @"\\dn0"];
+	        headerString +=[CPString stringWithFormat:@"\\dn-%d", svalue];
+	        trailerString += @"\\dn0";
 	    }
 	}
         else if ([currAttrib isEqualToString: CPBaselineOffsetAttributeName])
@@ -464,13 +463,13 @@ function _points2twips(a) { return (a)*20.0; }
 	  
 	    if (svalue > 0)
 	    {
-	        [headerString appendString: [CPString stringWithFormat:@"\\up%d", svalue]];
-	        [trailerString appendString: @"\\up0"];
+	        headerString +=[CPString stringWithFormat:@"\\up%d", svalue];
+	        trailerString += @"\\up0";
 	    }
 	    else if (svalue < 0)
 	    {
-	        [headerString appendString: [CPString stringWithFormat:@"\\dn-%d", svalue]];
-	        [trailerString appendString: @"\\dn0"];
+	        headerString += [CPString stringWithFormat:@"\\dn-%d", svalue];
+	        trailerString += @"\\dn0";
 	    }
 	}
         else if ([currAttrib isEqualToString: CPAttachmentAttributeName])
@@ -484,9 +483,9 @@ function _points2twips(a) { return (a)*20.0; }
 	}
     }
 
-    var substring = [substring stringByReplacingString: @"\\" withString: @"\\\\"];
-    substring = [substring stringByReplacingString: @"\n" withString: @"\\par\n"];
-    substring = [substring stringByReplacingString: @"\t" withString: @"\\tab "];
+    var substring = [substring stringByReplacingString: @"\\\\" withString: @"\\\\"];
+    substring = [substring stringByReplacingString: @"\\n" withString: @"\\par\n"];
+    substring = [substring stringByReplacingString: @"\\t" withString: @"\\tab "];
     substring = [substring stringByReplacingString: @"{" withString: @"\\{"];
     substring = [substring stringByReplacingString: @"}" withString: @"\\}"];
   // FIXME: All characters not in the standard encoding must be
@@ -501,7 +500,7 @@ function _points2twips(a) { return (a)*20.0; }
         else
              braces = substring;
       
-      [result appendString: braces];
+      result += braces;
     }
     else
     {
@@ -513,7 +512,7 @@ function _points2twips(a) { return (a)*20.0; }
             nobraces = substring;
 
       
-        [result appendString: nobraces];
+        result += nobraces;
     }
 
     return result;
@@ -548,7 +547,7 @@ function _points2twips(a) { return (a)*20.0; }
 	    runString = [self runStringForString:substring
 			    attributes:attributes
 			    paragraphStart:first];
-	    [result appendString: runString];
+	    result += runString;
 	    first = NO;
 	}
 
@@ -577,9 +576,9 @@ function _points2twips(a) { return (a)*20.0; }
     trailerString = [self trailerString];
     headerString = [self headerString];
 
-    [output appendString: headerString];
-    [output appendString: bodyString];
-    [output appendString: trailerString];
+    output += headerString;
+    output += bodyString;
+    output += trailerString;
     return output;
 }
 @end
