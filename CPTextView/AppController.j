@@ -92,8 +92,8 @@
 - (void) makeRTF:sender
 {
    [_textView2 setString: [RTFProducer produceRTF:[_textView textStorage] documentAttributes: @{}] ];
-   var tc = new TextConverter;
-   alert(tc.convert([_textView2 stringValue]));
+   var tc = [_RTFParser new];
+   alert([tc parseRTF:[_textView2 stringValue]]);
 }
 
 @end
