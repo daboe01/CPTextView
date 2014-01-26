@@ -88,7 +88,7 @@ var kRgsymRtf = {
     CPArray _states;
     unsigned _currentParseIndex;
     BOOL _hexreturn;
-    CPString erg;
+    CPString _res;
 }
 
 - (id)init
@@ -304,10 +304,11 @@ var kRgsymRtf = {
     _currentParseIndex = -1;
     var len = rtf.length;
     var tmp = '';
-    res = '';
     var ch = '';
     var hex = '';
     var lastchar = 0;
+
+    _res = '';
 
     while (_currentParseIndex < len)
     {
@@ -315,7 +316,7 @@ var kRgsymRtf = {
 
         if (tmp !== "\\" && hex.length > 0)
         {
-            res += String.fromCharCode(parseInt((hex), 16));
+            _res += String.fromCharCode(parseInt((hex), 16));
             hex = '';
         }
         switch(tmp)
@@ -326,7 +327,7 @@ var kRgsymRtf = {
                     lastchar = 0;
                 } else
                 {
-                    res += tmp;
+                    _res += tmp;
                 }
             break;
             case "{":
@@ -359,7 +360,7 @@ var kRgsymRtf = {
                             hex += ch.toUpperCase();
                         } else
                         {
-                            res += String.fromCharCode(parseInt((hex + ch), 16));
+                            _res += String.fromCharCode(parseInt((hex + ch), 16));
                             hex = '';
                         }
 
@@ -370,7 +371,7 @@ var kRgsymRtf = {
                             {
                                 temp = parseInt(hexTable[hex.toUpperCase()], 16);
                             }
-                            res += String.fromCharCode(temp);
+                            _res += String.fromCharCode(temp);
                             hex = '';
                         }
                     } else
@@ -380,7 +381,7 @@ var kRgsymRtf = {
                     _hexreturn = NO;
                 } else
                     if (ch !== undefined && _curState === 0)
-                        res += ch;
+                        _res += ch;
             break;
             case 0x0d:
             case 0x0a:
@@ -390,7 +391,7 @@ var kRgsymRtf = {
             default:
                 lastchar = 0;
                 if (_curState == 0){
-                    res += tmp;
+                    _res += tmp;
                 } else
                 {
                     //do nothing
@@ -399,7 +400,7 @@ var kRgsymRtf = {
             break;
         }
     }
-    return res;
+    return _res;
 }
 
 @end
