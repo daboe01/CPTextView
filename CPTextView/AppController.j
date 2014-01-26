@@ -8,6 +8,7 @@
  
 @import <TextView/CPTextView.j>
 @import <TextView/RTFProducer.j>
+@import "RTFParser.j"
 
 @implementation AppController : CPObject
 {
@@ -91,6 +92,8 @@
 - (void) makeRTF:sender
 {
    [_textView2 setString: [RTFProducer produceRTF:[_textView textStorage] documentAttributes: @{}] ];
+   var tc = new TextConverter;
+   alert(tc.convert([_textView2 stringValue]));
 }
 
 @end

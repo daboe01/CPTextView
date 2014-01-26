@@ -1,5 +1,5 @@
 /* 
-   _RTFProducer.j
+   RTFProducer.j
 
    Serialize CPAttributedString to a RTF String 
 
@@ -507,7 +507,7 @@ function _points2twips(a) { return (a)*20.0; }
     return result + trailerString;
 }
 
-- (CPString) bodyString
+- (CPString)bodyString
 {
     var string = [text string],
         result = "",
@@ -518,8 +518,9 @@ function _points2twips(a) { return (a)*20.0; }
         completeRange = CPMakeRange(0, length),
         first = YES;
 
-     while (CPMaxRange(currRange) < CPMaxRange(completeRange))  // save all "runs"
-     {
+// FIXME <!> split along newline characters and run as outer loop
+    while (CPMaxRange(currRange) < CPMaxRange(completeRange))  // save all "runs"
+    {
 	var attributes,
 	    substring,
 	    runString;
@@ -531,7 +532,7 @@ function _points2twips(a) { return (a)*20.0; }
 	  
 	runString = [self runStringForString:substring
 			    attributes:attributes
-			    paragraphStart:NO];
+			    paragraphStart:YES];
 	result += runString;
 	first = NO;
     }

@@ -239,7 +239,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
-    [self scrollRangeToVisible:_selectionRange];
+    [self setNeedsDisplay:YES];
 }
 
 // KVO support
