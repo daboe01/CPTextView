@@ -27,26 +27,6 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
-/*  we have to satisfy the scanner with a stream reading function */
-typedef struct {
-  const char	*string;
-  var position;
-  var length;
-} StringContext;
-
-void	
-initStringContext (StringContext *ctxt, CPData data)
-{
-  ctxt.string = [data bytes];
-  ctxt.position = 0;
-  ctxt.length = [data length];
-}
-
-int	
-readString (StringContext *ctxt)
-{
-  return ctxt.position < ctxt.length ? ctxt.string[ctxt.position++] : EOF;
-}
 
 // Hold the attributs of the current run
 @implementation _RTFAttribute: CPObject

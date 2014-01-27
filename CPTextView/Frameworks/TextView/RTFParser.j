@@ -1,3 +1,178 @@
+/* RTFParser.j
+
+   Parse a RTF string into a CPAttributedString
+
+   Copyright (C) 2014 Daniel Boehringer
+
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+*/
+
+//@import <Foundation/CPAttributedString.j>
+@import "CPAttributedString.j"
+
+// Hold the attributs of the current run
+@implementation _RTFAttribute: CPObject
+{
+    CPRange _range;
+    CPParagraphStyle paragraph;
+    CPColor fgColour;
+    CPColor bgColour;
+    CPColor ulColour;
+    CPString fontName;
+    unsigned fontSize;
+    BOOL bold;
+    BOOL italic;
+    BOOL underline;
+    BOOL strikethrough;
+    BOOL script;
+}
+
+- (id) init
+{
+    [self resetFont];
+    [self resetParagraphStyle];
+    _range = CPMakeRange(0, 0);
+
+    return self;
+}
+
+- (id) copy
+{
+    var mynew =  [_RTFAttribute new];
+
+    mynew.paragraph = [paragraph copy];
+    mynew.fontName = fontName;
+    mynew.fgColour = fgColour;
+    mynew.bgColour = bgColour;
+    mynew.ulColour = ulColour;
+
+    return mynew;
+}
+
+- (CPFont)currentFont
+{
+    var font = [CPFont _fontWithName:fontName size:fontSize bold:bold italic:italic];
+
+    if (font == nil)
+    {
+      /* Before giving up and using a default font, we try if this is
+       * not the case of a font with a composite name, such as
+       * 'Helvetica-Light'.  In that case, even if we don't have
+       * exactly an 'Helvetica-Light' font family, we might have an
+       * 'Helvetica' one.  */
+        var range = [fontName rangeOfString:@"-"];
+
+        if (range.location != CPNotFound)
+	{
+	    var fontFamily = [fontName substringToIndex: range.location];
+
+	    font = [[CPFontManager sharedFontManager] fontWithFamily: fontFamily
+						    traits: traits
+						    weight: weight
+						    size: fontSize];
+	}
+      
+        if (font == nil)
+	{
+	    console.log(@"RTFParser", 
+		         @"Could not find font %@ size %f traits %d weight %d", 
+		         fontName, fontSize, traits, weight);
+
+	  /* Last resort, default font.  :-(  */
+	    font = [CPFont systemFontOfSize: fontSize];
+	}
+    }
+    return font;
+}
+
+- (CPNumber)script
+{
+    return [CPNumber numberWithInt: script];
+}
+
+- (CPNumber)underline
+{
+    if (underline != 0)
+        return [CPNumber numberWithInteger: underline];
+    else
+        return nil;
+}
+
+- (CPNumber)strikethrough
+{
+    if (strikethrough != 0)
+        return [CPNumber numberWithInteger: strikethrough];
+    else
+        return nil;
+}
+
+- (void)resetParagraphStyle
+{
+    paragraph = [[CPParagraphStyle defaultParagraphStyle] copy];
+}
+
+- (void)resetFont
+{
+    var font = [CPFont systemFontOfSize:12];
+
+    fontName = [font familyName];
+    fontSize = 12.0;
+    italic = NO;
+    bold = NO;
+
+    underline = 0;
+    strikethrough = 0;
+    script = 0;
+
+    changed = YES;
+}
+
+- (void)addTab:(float)location type:(CPTextTabType)type
+{
+    var tab = [[CPTextTab alloc] initWithType: CPLeftTabStopType 
+				      location: location];
+
+    if (!tabChanged)
+    {
+        var a = [[CPArray alloc] initWithObjects: tab, nil];
+      // remove all tab stops
+        [paragraph setTabStops: a];
+        tabChanged = YES;
+    }
+    else
+    {
+        [paragraph addTabStop: tab];
+    }
+
+    changed = YES;
+}
+
+-(CPDictionary) dictionary
+{
+    var ret = @{};
+    [ret setObject:[self currentFont] forKey:CPFontAttributeName];
+    [ret setObject:paragraph forKey:CPParagraphStyleAttributeName];
+
+    if (fgColour)
+        [ret setObject:fgColour forKey:CPForegroundColorAttributeName];
+
+    return ret;
+}
+@end
+
+
 // based on https://github.com/lazygyu/RTF-parser
 
 var kRTFParserType_char = 0,
@@ -75,6 +250,7 @@ var kRgsymRtf = {
         "txe"                                : [ "txe",      0,        false,     kRTFParserType_dest,    "destSkip"],
         "xe"                                 : [ "xe",       0,        false,     kRTFParserType_dest,    "destSkip"],
         "["                                  : [ "[",        0,        false,     kRTFParserType_char,    '['],
+        " "                                  : [ " ",        0,        false,     kRTFParserType_char,    ' '],
         "]"                                  : [ "]",        0,        false,     kRTFParserType_char,    ']'],
         "\\"                                 : [ "\\",       0,        false,     kRTFParserType_char,    '\\']
 }
@@ -88,7 +264,9 @@ var kRgsymRtf = {
     CPArray _states;
     unsigned _currentParseIndex;
     BOOL _hexreturn;
-    CPString _res;
+    _RTFAttribute _currentRun;
+    CPAttributedString _result;
+    CPArray _colorArray;
 }
 
 - (id)init
@@ -101,6 +279,9 @@ var kRgsymRtf = {
         _states = [];
         _currentParseIndex = 0;
         _hexreturn = NO;
+        _currentRun = nil;
+        _result = [CPAttributedString new];
+        _colorArray = [];
     }
     return self;
 }
@@ -157,7 +338,7 @@ var kRgsymRtf = {
              }
              //ch = parseInt(ch, 16);
              console.log("hex : " + hex);
-             _hexreturn = true;
+             _hexreturn = YES;
              _currentParseIndex--;
              if (_curState !== 0) return '';
              else return hex;
@@ -177,40 +358,69 @@ var kRgsymRtf = {
     return '';
 }
 
+- (void) _flushCurrentRun
+{
+    var newOffset = 0;
+    if (_currentRun)
+    {
+        _currentRun._range.length = [_result length] - _currentRun._range.location;
+        newOffset = CPMaxRange(_currentRun._range);
+         var dict = [_currentRun dictionary];
+        [_result setAttributes:dict range:_currentRun._range];  // flush previous run
+    }
+    _currentRun = [_RTFAttribute new];
+    _currentRun._range = CPMakeRange(newOffset, 0);  // open a new one
+}
 - (CPString)_applyPropChange:sym parameter:param
 {
     console.log("prop : " + sym[0] + " / param : " + param+ ' ');
-    var tags = { }
 
-    if (tags[sym[0]])
+    switch (sym[0])
     {
-        if (param === 0)
-        {
-            var tmp = tags[sym[0]].split(' ')[0];
-            return "</" + tmp + ">";
-        } else
-        {
-            var tmp = tags[sym[0]];
-            return "<" + tmp + ">";
-        }
-    } else
-    {
-            switch (sym[0])
+        case "pard":
+            [self _flushCurrentRun];
+        break;
+        case "b": // bold
+            if (param === 0)
             {
-                    case "paperw":
-                        _paper.width = param;
-                    break;
-                    case "paperh":
-                        _paper.height = param;
-                    break;
+                _currentRun.bold = YES
+            } else
+            {
+               _currentRun.bold = NO;
             }
+        break;
+        case "i": // italic
+            if (param === 0)
+            {
+                _currentRun.italic = YES
+            } else
+            {
+               _currentRun.italic = NO;
+            }
+        break;
+        case "qc":  // paragraph center
+            [_currentRun.paragraph setAlignment:CPCenterTextAlignment];
+        break;
+        case "paperw":
+            _paper.width = param;
+        break;
+        case "paperh":
+            _paper.height = param;
+        break;
     }
+
     return '';
 }
 
 
 - (CPString)_changeDest:sym
 {
+    switch (sym[0])
+    {
+        case "colortbl":
+            _colorArray.push([CPColor blackColor]);
+        break;
+    }
     if (sym[4] == "destSkip")
     {
         console.log("Dest skip start : [" + sym[0] + "]");
@@ -244,7 +454,41 @@ var kRgsymRtf = {
         }
     } else
     {
-        console.log("skip : " + keyword);
+        switch (keyword)
+        {
+            case "red":
+                var oldColor = [_colorArray lastObject],
+                    green = [oldColor greenComponent],
+                    blue = [oldColor blueComponent];
+                _colorArray.pop();
+                _colorArray.push([CPColor colorWithRed: parseInt(param) / 255 green:green blue:blue alpha:1.0]);
+            break;
+            case "green":
+                var oldColor = [_colorArray lastObject],
+                    red = [oldColor redComponent],
+                    blue = [oldColor blueComponent];
+                _colorArray.pop();
+                _colorArray.push([CPColor colorWithRed: red green: parseInt(param) / 255 blue:blue alpha:1.0]);
+            break;
+            case "blue":
+                var oldColor = [_colorArray lastObject],
+                    green = [oldColor greenComponent],
+                    red = [oldColor redComponent];
+                _colorArray.pop();
+                _colorArray.push([CPColor colorWithRed: red green:green blue:parseInt(param) / 255 alpha:1.0]);
+            break;
+            case "cf":  // change foreground color
+                 var fontIndex = parseInt(param) - 1;
+                 if (fontIndex >= 0)
+                     _currentRun.fgColour = _colorArray[fontIndex];
+            break;
+            case "fs":  // change font size
+                 _currentRun.fontSize = parseInt(param) / 2;
+            break;
+            default:
+               console.log("skip : " + keyword + " param: " + param);
+
+        }
         if (_states.length > 0) _curState = 1;
             return '';
     }
@@ -293,12 +537,16 @@ var kRgsymRtf = {
                 
     return [self _translateKeyword:keyword parameter:param fParameter:fParam];
 }
+- (void) _appendPlainString:(CPString) aString
+{
+    [_result appendAttributedString:[[CPAttributedString alloc] initWithString:aString attributes:nil]];
 
-- (CPAttributedSting) parseRTF:(CPString)rtf
+}
+- (CPAttributedString) parseRTF:(CPString)rtf
 {
     if(rtf.length == 0)
     {
-        alert("invalid rtf");
+      //  alert("invalid rtf");
         return '';
     }
     _currentParseIndex = -1;
@@ -308,15 +556,13 @@ var kRgsymRtf = {
     var hex = '';
     var lastchar = 0;
 
-    _res = '';
-
     while (_currentParseIndex < len)
     {
         tmp = rtf.charAt(++_currentParseIndex);
 
         if (tmp !== "\\" && hex.length > 0)
         {
-            _res += String.fromCharCode(parseInt((hex), 16));
+            [self _appendPlainString: String.fromCharCode(parseInt((hex), 16))];
             hex = '';
         }
         switch(tmp)
@@ -327,7 +573,8 @@ var kRgsymRtf = {
                     lastchar = 0;
                 } else
                 {
-                    _res += tmp;
+debugger
+                   // [self _appendPlainString:tmp]; // FIXME<!> crashes
                 }
             break;
             case "{":
@@ -339,6 +586,7 @@ var kRgsymRtf = {
             case "}":
                 if ([self popState])
                 {
+
                     console.log("pop");
                 }
             break;
@@ -360,7 +608,7 @@ var kRgsymRtf = {
                             hex += ch.toUpperCase();
                         } else
                         {
-                            _res += String.fromCharCode(parseInt((hex + ch), 16));
+                            [self _appendPlainString: String.fromCharCode(parseInt((hex + ch), 16))];
                             hex = '';
                         }
 
@@ -371,7 +619,7 @@ var kRgsymRtf = {
                             {
                                 temp = parseInt(hexTable[hex.toUpperCase()], 16);
                             }
-                            _res += String.fromCharCode(temp);
+                            [self _appendPlainString: String.fromCharCode(temp)]
                             hex = '';
                         }
                     } else
@@ -381,7 +629,10 @@ var kRgsymRtf = {
                     _hexreturn = NO;
                 } else
                     if (ch !== undefined && _curState === 0)
-                        _res += ch;
+                    {
+                         [self _appendPlainString:ch];
+
+                    }
             break;
             case 0x0d:
             case 0x0a:
@@ -390,8 +641,9 @@ var kRgsymRtf = {
             break;
             default:
                 lastchar = 0;
-                if (_curState == 0){
-                    _res += tmp;
+                if (_curState == 0)
+                {
+                    [self _appendPlainString:tmp];
                 } else
                 {
                     //do nothing
@@ -400,7 +652,7 @@ var kRgsymRtf = {
             break;
         }
     }
-    return _res;
+    return _result;
 }
 
 @end

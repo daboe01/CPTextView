@@ -125,11 +125,21 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
 
     return self;
 }
-
+- (id)copy
+{
+    var other = [[self class] alloc];
+    return [other initWithParagraphStyle:self];
+}
 - initWithParagraphStyle:(CPParagraphStyle) other
 {
-    _alignment = [other alignment];
-    _tabStops = [[other tabStops] copy];
+    other._tabStops = [_tabStops copy];
+    other._alignment = _alignment;
+    other._firstLineHeadIndent = _firstLineHeadIndent;
+    other._headIndent = _headIndent;
+    other._tailIndent = _tailIndent;
+    other._paragraphSpacing = _paragraphSpacing;
+    other._minimumLineHeight = _minimumLineHeight;
+    other._maximumLineHeight = _maximumLineHeight;
 
     return self;
 }
@@ -142,6 +152,12 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
     {
         _tabStops = [aCoder decodeObjectForKey:"_tabStops"];
         _alignment = [aCoder decodeIntForKey:"_alignment"];
+        _firstLineHeadIndent = [aCoder decodeIntForKey:"_firstLineHeadIndent"];
+        _headIndent = [aCoder decodeIntForKey:"_headIndent"];
+        _tailIndent = [aCoder decodeIntForKey:"_tailIndent"];
+        _paragraphSpacing = [aCoder decodeIntForKey:"_paragraphSpacing"];
+        _minimumLineHeight = [aCoder decodeIntForKey:"_minimumLineHeight"];
+        _maximumLineHeight = [aCoder decodeIntForKey:"_maximumLineHeight"];
     }
 
     return self;
@@ -151,6 +167,14 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
 {
     [aCoder encodeInt:_alignment forKey:"_alignment"];
     [aCoder encodeObject:_tabStops forKey:"_tabStops"];
+    [aCoder encodeInt:_firstLineHeadIndent forKey:"_firstLineHeadIndent"];
+    [aCoder encodeInt:_headIndent forKey:"_headIndent"];
+    [aCoder encodeInt:_tailIndent forKey:"_tailIndent"];
+    [aCoder encodeInt:_paragraphSpacing forKey:"_paragraphSpacing"];
+    [aCoder encodeInt:_minimumLineHeight forKey:"_minimumLineHeight"];
+    [aCoder encodeInt:_maximumLineHeight forKey:"_maximumLineHeight"];
+
+
 }
 
 @end

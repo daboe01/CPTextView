@@ -8,7 +8,7 @@
  
 @import <TextView/CPTextView.j>
 @import <TextView/RTFProducer.j>
-@import "RTFParser.j"
+@import <TextView/RTFParser.j>
 
 @implementation AppController : CPObject
 {
@@ -93,7 +93,10 @@
 {
    [_textView2 setString: [RTFProducer produceRTF:[_textView textStorage] documentAttributes: @{}] ];
    var tc = [_RTFParser new];
-   alert([tc parseRTF:[_textView2 stringValue]]);
+   var mystr=[tc parseRTF:[_textView2 stringValue]];
+   [_textView selectAll: self];
+   [_textView insertText: mystr];
+
 }
 
 @end
