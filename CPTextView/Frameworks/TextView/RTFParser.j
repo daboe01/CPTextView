@@ -363,9 +363,11 @@ var kRgsymRtf = {
     var newOffset = 0;
     if (_currentRun)
     {
+        if ([_result length] == _currentRun._range.location)
+            return;
         _currentRun._range.length = [_result length] - _currentRun._range.location;
         newOffset = CPMaxRange(_currentRun._range);
-         var dict = [_currentRun dictionary];
+        var dict = [_currentRun dictionary];
         [_result setAttributes:dict range:_currentRun._range];  // flush previous run
     }
     _currentRun = [_RTFAttribute new];
@@ -383,20 +385,18 @@ var kRgsymRtf = {
         case "b": // bold
             if (param === 0)
             {
-                _currentRun.bold = YES
+                if (_currentRun && _currentRun.bold)
+                   [self _flushCurrentRun];
+                _currentRun.bold = NO
             } else
             {
-               _currentRun.bold = NO;
+               if (_currentRun && !_currentRun.bold)
+                  [self _flushCurrentRun]
+               _currentRun.bold = YES;
             }
         break;
         case "i": // italic
-            if (param === 0)
-            {
-                _currentRun.italic = YES
-            } else
-            {
-               _currentRun.italic = NO;
-            }
+            // FIXME
         break;
         case "qc":  // paragraph center
             [_currentRun.paragraph setAlignment:CPCenterTextAlignment];
@@ -539,7 +539,7 @@ var kRgsymRtf = {
 }
 - (void) _appendPlainString:(CPString) aString
 {
-    [_result appendAttributedString:[[CPAttributedString alloc] initWithString:aString attributes:nil]];
+    [_result replaceCharactersInRange:CPMakeRange([_result length], 0) withString:aString];
 
 }
 - (CPAttributedString) parseRTF:(CPString)rtf
@@ -573,8 +573,7 @@ var kRgsymRtf = {
                     lastchar = 0;
                 } else
                 {
-debugger
-                   // [self _appendPlainString:tmp]; // FIXME<!> crashes
+                   [self _appendPlainString:tmp];
                 }
             break;
             case "{":
