@@ -63,7 +63,7 @@
     [mainMenu setSubmenu:editMenu forItem:item];
 
     item = [mainMenu insertItemWithTitle:@"Font" action:@selector(orderFrontFontPanel:) keyEquivalent:nil atIndex:1];    
-    item = [mainMenu insertItemWithTitle:@"RTF roundtrip" action:@selector(makeRTF:) keyEquivalent:nil atIndex:1];    
+    item = [mainMenu insertItemWithTitle:@"RTFRoundtrip" action:@selector(makeRTF:) keyEquivalent:nil atIndex:1];    
 
     var centeredParagraph=[CPParagraphStyle new];
     [centeredParagraph setAlignment: CPCenterTextAlignment];
