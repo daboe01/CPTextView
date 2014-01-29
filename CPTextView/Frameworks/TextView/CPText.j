@@ -21,6 +21,8 @@
  */
 
 @import <AppKit/CPView.j>
+@import <TextView/RTFProducer.j>
+@import <TextView/RTFParser.j>
 
 /*
     CPText notifications
@@ -66,15 +68,36 @@ CPRichStringPboardType = "CPRichStringPboardType";
     var pasteboard = [CPPasteboard generalPasteboard],
         stringForPasting = [[self stringValue] substringWithRange:selectedRange];
 
-    [pasteboard declareTypes:[self isRichText] ? [CPStringPboardType, CPRichStringPboardType] : [CPStringPboardType] owner:nil];
-    [pasteboard setString:stringForPasting forType:CPStringPboardType];
+    [pasteboard declareTypes:[CPStringPboardType] owner:nil];
 
     if ([self isRichText])
     {
-        var richData = [CPKeyedArchiver archivedDataWithRootObject:[[self textStorage] attributedSubstringFromRange:selectedRange]];
-        [pasteboard setData:richData forType:CPRichStringPboardType];
+	    if (0)   // this would be the correct approach, but does not work due to a bug in cappuccino
+        {
+		    [pasteboard declareTypes: [CPStringPboardType, CPRichStringPboardType] owner:nil];
+            var richData = [CPKeyedArchiver archivedDataWithRootObject:[[self textStorage] attributedSubstringFromRange:selectedRange]];
+            [pasteboard setData:richData forType:CPRichStringPboardType];
+		}
+        else   // crude hack to make rich pasting possible in chrome and firefox. this requires a RTF roundtrip, unfortunately
+		{   var richData =  [RTFProducer produceRTF:[[self textStorage] attributedSubstringFromRange:selectedRange] documentAttributes: @{}];
+            [pasteboard setString:richData forType:CPStringPboardType];
+		}
     }
+	else
+		[pasteboard setString:stringForPasting forType:CPStringPboardType];
 
+}
+- (void)paste:(id)sender
+{
+    var pasteboard = [CPPasteboard generalPasteboard],
+      //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
+        stringForPasting = [pasteboard stringForType:CPStringPboardType];
+
+    if ([self isRichText] && [stringForPasting hasPrefix:"{\\rtf1\\ansi"])
+        stringForPasting = [[_RTFParser new] parseRTF:stringForPasting];
+
+    if (stringForPasting)
+        [self insertText:stringForPasting];
 }
 
 - (void)copyFont:(id)sender
@@ -137,19 +160,6 @@ CPRichStringPboardType = "CPRichStringPboardType";
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
     return CPMakeSize(0,0);
-}
-
-- (void)paste:(id)sender
-{
-    var pasteboard = [CPPasteboard generalPasteboard],
-        dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
-        stringForPasting = [pasteboard stringForType:CPStringPboardType];
-
-    if (dataForPasting)
-        stringForPasting = [CPKeyedUnarchiver unarchiveObjectWithData:dataForPasting];
-
-    if (stringForPasting)
-        [self insertText:stringForPasting];
 }
 
 - (void)pasteFont:(id)sender
