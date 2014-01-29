@@ -588,6 +588,7 @@ var kRgsymRtf = {
 
                     console.log("pop");
                 }
+                [self _flushCurrentRun]
             break;
             case "\\":
                 ch = [self _parseKeyword:rtf length:len];
