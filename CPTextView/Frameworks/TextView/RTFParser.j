@@ -396,7 +396,17 @@ var kRgsymRtf = {
             }
         break;
         case "i": // italic
-            // FIXME
+            if (param === 0)
+            {
+                if (_currentRun && _currentRun.italic)
+                   [self _flushCurrentRun];
+                _currentRun.italic = NO
+            } else
+            {
+               if (_currentRun && !_currentRun.italic)
+                  [self _flushCurrentRun]
+               _currentRun.italic = YES;
+            }
         break;
         case "qc":  // paragraph center
             [_currentRun.paragraph setAlignment:CPCenterTextAlignment];
