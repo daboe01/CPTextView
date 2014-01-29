@@ -169,6 +169,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)undo:(id)sender
 {
+debugger
     if (_allowsUndo)
         [[[self window] undoManager] undo];
 }
@@ -398,7 +399,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         if (_selectionRange.length > 0)
         {
-            [[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange:CPMakeRangeCopy(_selectionRange) withAttributedString:[_textStorage attributedSubstringFromRange:_selectionRange]];
+            [[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length]) withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)]];
             [[[self window] undoManager] setActionName:@"Replace rich text"];
         }
 
@@ -408,7 +409,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         if (_selectionRange.length > 0)
         {
-            [[[[self window] undoManager] prepareWithInvocationTarget:self] _replaceCharactersInRange:CPMakeRangeCopy(_selectionRange) withString:[[self string] substringWithRange:CPMakeRangeCopy(_selectionRange)]];
+            [[[[self window] undoManager] prepareWithInvocationTarget:self] _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length]) withString:[[self string] substringWithRange:CPMakeRangeCopy(_selectionRange)]];
             [[[self window] undoManager] setActionName:@"Replace plain text"];
         }
 
