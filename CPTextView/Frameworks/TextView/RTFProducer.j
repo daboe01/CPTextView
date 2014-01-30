@@ -94,7 +94,7 @@ function _points2twips(a) { return (a)*20.0; }
         keyArray = [keyArray sortedArrayUsingSelector: @selector(compare:)];
 
         fontEnum = [keyArray objectEnumerator];
-        while ((currFont = [fontEnum nextObject]) != nil)
+        while ((currFont = [fontEnum nextObject]) !== nil)
 	{
 	    var fontFamily;
 	    var detail;
@@ -107,7 +107,7 @@ function _points2twips(a) { return (a)*20.0; }
 	        fontFamily = @"modern";
 	    else if ([currFont isEqualToString: @"Times"])
 	        fontFamily = @"roman";
-	    var fontFamily = @"nil";
+	    else fontFamily = @"nil";
 
 	    detail = [CPString stringWithFormat: @"%@\\f%@ %@;",
 	        [fontDict objectForKey: currFont], fontFamily, currFont];
