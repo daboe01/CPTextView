@@ -98,6 +98,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     BOOL            _drawCaret;
     CPTimer         _caretTimer;
+    CPTimer         _scollingTimer;
     CPRect          _caretRect;
 
     CPFont          _font;
