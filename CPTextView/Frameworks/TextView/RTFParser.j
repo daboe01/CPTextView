@@ -267,6 +267,9 @@ var kRgsymRtf = {
     _RTFAttribute _currentRun;
     CPAttributedString _result;
     CPArray _colorArray;
+    CPArray _fontArray;
+    CPString _freename;
+    BOOL _parsingFontTable;
 }
 
 - (id)init
@@ -282,6 +285,9 @@ var kRgsymRtf = {
         _currentRun = nil;
         _result = [CPAttributedString new];
         _colorArray = [];
+        _fontArray = [];
+        _freename = "";
+        _parsingFontTable = NO;
     }
     return self;
 }
@@ -430,6 +436,9 @@ var kRgsymRtf = {
         case "colortbl":
             _colorArray.push([CPColor blackColor]);
         break;
+        case "fonttbl":
+            _parsingFontTable = YES;
+        break;
     }
     if (sym[4] == "destSkip")
     {
@@ -534,13 +543,13 @@ var kRgsymRtf = {
     }
     fParam = true;
 
-    while (/[0-9]/.test(ch))
+    while (/[^\\ ;]/.test(ch))
     {
         param += (ch + '');
         ch = rtf.charAt(++_currentParseIndex);
     }
     _currentParseIndex--;
-    param = parseInt(param);
+    //param = parseInt(param);
 
     if (fNeg)
         param *= -1;
@@ -598,6 +607,16 @@ var kRgsymRtf = {
 
                     console.log("pop");
                 }
+                if (_freename)
+                {
+                    console.log(_freename);
+                    if (_parsingFontTable)
+                    {
+                        _parsingFontTable = NO;
+                    }
+                    _fontArray.push([CPFont fontWithName:_freename size:12]);
+                    _freename = "";
+                }
                 [self _flushCurrentRun]
             break;
             case "\\":
@@ -654,10 +673,9 @@ var kRgsymRtf = {
                 if (_curState == 0)
                 {
                     [self _appendPlainString:tmp];
-                } else
+                } else if (tmp !== ';')
                 {
-                    //do nothing
-                                                
+                    _freename += tmp;
                 }
             break;
         }

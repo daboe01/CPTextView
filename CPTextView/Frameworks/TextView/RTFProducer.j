@@ -103,6 +103,8 @@ function _points2twips(a) { return (a)*20.0; }
 	        fontFamily = @"tech";
 	    else if ([currFont isEqualToString: @"Helvetica"])
 	        fontFamily = @"swiss";
+	    else if ([currFont isEqualToString: @"Arial"])
+	        fontFamily = @"swiss";
 	    else if ([currFont isEqualToString: @"Courier"])
 	        fontFamily = @"modern";
 	    else if ([currFont isEqualToString: @"Times"])
