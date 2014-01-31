@@ -4,6 +4,9 @@
 
    Copyright (C) 2014 Daniel Boehringer
 
+FIXME: this implementation is a messy hack and should be redone using a 'real' parser
+e.g. using zaach/jison on github
+
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -285,7 +288,7 @@ var kRgsymRtf = {
         _currentRun = nil;
         _result = [CPAttributedString new];
         _colorArray = [];
-        _fontArray = ['Arial'];
+        _fontArray = ['Arial'];   // FIXME: should be name of system font
         _freename = "";
         _parsingFontTable = NO;
     }
