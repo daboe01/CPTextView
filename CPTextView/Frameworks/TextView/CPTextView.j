@@ -46,6 +46,10 @@ _MidRange = function(a1)
 {
     return [CPColor colorWithHexString:"99CCFF"];
 }
++ (CPColor)selectedTextBackgroundColorUnfocussed
+{
+    return [CPColor colorWithHexString:"CCCCCC"];
+}
 
 @end
 
@@ -168,9 +172,25 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     return self;
 }
 
+- (BOOL)_isFocused
+{
+   return [[self window] isKeyWindow] && _isFirstResponder;
+}
+- (void)becomeKeyWindow
+{
+    [self setNeedsDisplay:YES];
+}
+
+/*!
+    @ignore
+*/
+- (void)resignKeyWindow
+{
+    [self setNeedsDisplay:YES];
+}
+
 - (void)undo:(id)sender
 {
-debugger
     if (_allowsUndo)
         [[[self window] undoManager] undo];
 }
@@ -449,7 +469,9 @@ debugger
                                     rectCount:nil];
 
         CGContextSaveGState(ctx);
-        CGContextSetFillColor(ctx, [_selectedTextAttributes objectForKey:CPBackgroundColorAttributeName]);
+        var effectiveSelectionColor = [self _isFocused]? [_selectedTextAttributes objectForKey:CPBackgroundColorAttributeName] : [CPColor selectedTextBackgroundColorUnfocussed];
+
+        CGContextSetFillColor(ctx, effectiveSelectionColor);
 
         for (var i = 0; i < rects.length; i++)
         {
@@ -1129,6 +1151,7 @@ debugger
     _isFirstResponder = YES;
     [self updateInsertionPointStateAndRestartTimer:YES];
     [[CPFontManager sharedFontManager] setSelectedFont:[self font] isMultiple:NO];
+    [self setNeedsDisplay:YES];
     return YES;
 }
 
@@ -1137,6 +1160,7 @@ debugger
     [_caretTimer invalidate];
     _caretTimer = nil;
     _isFirstResponder = NO;
+    [self setNeedsDisplay:YES];
     return YES;
 }
 
