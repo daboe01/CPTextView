@@ -501,6 +501,14 @@ var kRgsymRtf = {
                  if (fontIndex >= 0)
                      _currentRun.fgColour = _colorArray[fontIndex];
             break;
+            case "f":  // change font
+                 var fontIndex = parseInt(param);
+debugger
+                 [self _flushCurrentRun];
+                 if (fontIndex >= 0 && fontIndex < _fontArray.length)
+                     _currentRun.fontName = _fontArray[fontIndex];
+
+            break;
             case "fs":  // change font size
                  _currentRun.fontSize = parseInt(param) / 2;
             break;
@@ -592,6 +600,7 @@ var kRgsymRtf = {
                     lastchar = 0;
                 } else
                 {
+                    _freename += tmp;
                    [self _appendPlainString:tmp];
                 }
             break;
@@ -612,14 +621,16 @@ var kRgsymRtf = {
                     console.log(_freename);
                     if (_parsingFontTable)
                     {
-                        _parsingFontTable = NO;
+debugger;
+                         _fontArray.push(_freename);
+                         _parsingFontTable = NO;
                     }
-                    _fontArray.push([CPFont fontWithName:_freename size:12]);
                     _freename = "";
                 }
                 [self _flushCurrentRun]
             break;
             case "\\":
+                _freename = '';
                 ch = [self _parseKeyword:rtf length:len];
                 if (!_hexreturn && ch.length == 0)
                 {
