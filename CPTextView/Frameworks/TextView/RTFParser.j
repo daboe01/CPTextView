@@ -543,13 +543,13 @@ var kRgsymRtf = {
     }
     fParam = true;
 
-    while (/[^\\ ;]/.test(ch))
+    while (/[0-9]/.test(ch))
     {
         param += (ch + '');
         ch = rtf.charAt(++_currentParseIndex);
     }
     _currentParseIndex--;
-    //param = parseInt(param);
+    param = parseInt(param);
 
     if (fNeg)
         param *= -1;
