@@ -285,7 +285,7 @@ var kRgsymRtf = {
         _currentRun = nil;
         _result = [CPAttributedString new];
         _colorArray = [];
-        _fontArray = [];
+        _fontArray = ['Arial'];
         _freename = "";
         _parsingFontTable = NO;
     }
@@ -503,8 +503,6 @@ var kRgsymRtf = {
             break;
             case "f":  // change font
                  var fontIndex = parseInt(param);
-debugger
-                 [self _flushCurrentRun];
                  if (fontIndex >= 0 && fontIndex < _fontArray.length)
                      _currentRun.fontName = _fontArray[fontIndex];
 
