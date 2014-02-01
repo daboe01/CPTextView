@@ -40,6 +40,8 @@ _MidRange = function(a1)
     return Math.floor((CPMaxRange(a1) + a1.location) / 2);
 };
 
+
+// FIXME: move to theme ?
 @implementation CPColor(CPTextViewExtensions)
 
 + (CPColor)selectedTextBackgroundColor
@@ -492,6 +494,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self updateInsertionPointStateAndRestartTimer:NO];
         [self drawInsertionPointInRect:_caretRect color:_insertionPointColor turnedOn:_drawCaret];
     }
+    else
+        if (_caretDOM)
+            _caretDOM.style.visibility = "hidden";
 }
 
 - (void)setSelectedRange:(CPRange)range
@@ -1616,7 +1621,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (BOOL)shouldDrawInsertionPoint
 {
-    return (_isFirstResponder && _selectionRange.length === 0);
+    return (_selectionRange.length === 0 && [self _isFocused])
 }
 
 - (void)drawInsertionPointInRect:(CPRect)aRect color:(CPColor)aColor turnedOn:(BOOL)flag
