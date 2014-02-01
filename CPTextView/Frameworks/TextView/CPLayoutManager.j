@@ -171,7 +171,6 @@ var _objectsInRange = function(aList, aRange)
     if (aColor)
         style.color = [aColor cssString];
 
-    // FIXME <!> quote HTML entities
     if (CPFeatureIsCompatible(CPJavaScriptInnerTextFeature))
         span.innerText = aString;
     else if (CPFeatureIsCompatible(CPJavaScriptTextContentFeature))
@@ -195,9 +194,10 @@ var _objectsInRange = function(aList, aRange)
 
         _runs = [[CPMutableArray alloc] init];
         var effectiveRange = CPMakeRange(0,0),
-            location = aRange.location;
+            location;
 
-        do {
+        for (location = aRange.location; location < CPMaxRange(aRange); location = CPMaxRange(effectiveRange))
+        {
             var attributes = [textStorage attributesAtIndex:location effectiveRange:effectiveRange];
             effectiveRange = attributes ? CPIntersectionRange(aRange, effectiveRange) : aRange;
 
@@ -212,9 +212,7 @@ var _objectsInRange = function(aList, aRange)
                 run = {_range:CPMakeRangeCopy(effectiveRange), elem:elem, string:string};
 
             _runs.push(run);
-
-            location = CPMaxRange(effectiveRange);
-        } while (location < CPMaxRange(aRange));
+        }
     }
 
     return self;

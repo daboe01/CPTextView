@@ -153,11 +153,20 @@ var _sharedSimpleTypesetter = nil;
     return [_layoutManager textContainers];
 }
 
-- (CPTextTab)textTabForGlyphLocation:(double)glyphLocation
-             writingDirection:(CPWritingDirection)direction
-             maxLocation:(double)maxLocation
+- (CPTextTab)textTabForWidth:(double)aWidth writingDirection:(CPWritingDirection)direction
 {
-    // <!> FIXME TODO
+    var tabStops = [_currentParagraph tabStops];
+    var i,
+        l = tabStops.length;
+    for (i = l-1; i >= 0; i--)
+    {
+        if (aWidth > tabStops[i]._location)
+        {
+            if (i + 1 < l)
+                return tabStops[i + 1];
+        }
+    }
+    return nil;
 }
 
 - (BOOL)_flushRange:(CPRange)lineRange
@@ -278,27 +287,33 @@ var _sharedSimpleTypesetter = nil;
                 rangeWidth = _widthOfStringForFont([theString substringWithRange: measuringRange], _currentFont).width  + currentAnchor;
                           // [[theString substringWithRange: measuringRange] sizeWithFont:_currentFont].width + currentAnchor;
 
+            switch (currentChar)    // faster than sending actionForControlCharacterAtIndex: for each char.
+            {
+                case  ' ':
+                    wrapRange = CPMakeRangeCopy(lineRange);
+                    wrapWidth = rangeWidth;
+                break;
+                case '\n':
+                    isNewline = YES;
+                break;
+                case '\t':
+                {
+                    var nextTab = [self textTabForWidth:rangeWidth writingDirection:0];
+                    rangeWidth = nextTab._location;
+                    
+                }
+                break;
+            }
+
             advancements.push(rangeWidth - prevRangeWidth);
-            prevRangeWidth= rangeWidth;
-
-            if (currentChar == ' ')
-            {
-                wrapRange = CPMakeRangeCopy(lineRange);
-                wrapWidth = rangeWidth;
-            }
-            else if (currentChar == '\n') /* FIXME: should send actionForControlCharacterAtIndex: */
-            {
-                isNewline = YES;
-            }
-
-            _lineWidth = rangeWidth;
+            prevRangeWidth = _lineWidth = rangeWidth;
 
             if (lineOrigin.x + rangeWidth > containerSize.width)
             {
                 if (wrapWidth)
                 {
                     lineRange = wrapRange;
-                    _lineWidth = wrapWidth;
+                   _lineWidth = wrapWidth;
                 }
 
                 isNewline = YES;
