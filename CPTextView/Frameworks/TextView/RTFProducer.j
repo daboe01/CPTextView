@@ -327,6 +327,7 @@ function _points2twips(a) { return (a)*20.0; }
         headerString += [CPString stringWithFormat: @"\\sl-%d", twips];
     }
 // tabs
+    if (1)
     {
         var enumerator,
             tab;
@@ -340,22 +341,22 @@ function _points2twips(a) { return (a)*20.0; }
                 // no tabkind emission needed
                 break;
 /*              case NSRightTabStopType:
-                    [result appendString: @"\\tqr"];
+                    headerString += @"\\tqr";
                 break;
                 case NSCenterTabStopType:
-                    [result appendString: @"\\tqc"];
+                   headerString += @"\\tqc";
                 break;
                 case NSDecimalTabStopType:
-                    [result appendString: @"\\tqdec"];
+                    headerString += @"\\tqdec";
                 break;
                 default:
                     NSLog(@"Unknown tab stop type.");
 */
           }
 
-          [result appendString: [NSString stringWithFormat: @"\\tx%d",_points2twips([tab location])]];
+          headerString += [CPString stringWithFormat:@"\\tx%d",_points2twips([tab location])];
       }
-  }  
+    }  
     return headerString;
 }
 

@@ -39,7 +39,7 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
 
 @implementation CPTextTab : CPObject
 {
-    int    _type     @accessors(property=type);
+    int    _type     @accessors(property=tabStopType);
     double _location @accessors(property=location);
 }
 
@@ -104,7 +104,7 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
         _defaultTabStopArray = [];
 
         // <!> FIXME: Define constants for these magic numbers: 13, 28
-         for (i = 1; i < 130 ; i++)
+         for (i = 1; i < 80 ; i++)
          {
             _defaultTabStopArray.push([[CPTextTab alloc] initWithType:CPLeftTabStopType location:i * 28]);
          }
@@ -116,7 +116,7 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
 - (void)_initWithDefaults
 {
     _alignment = CPLeftTextAlignment;
-    _tabStops = [[self class] _defaultTabStops];
+    _tabStops = [[[self class] _defaultTabStops] copy];
 }
 
 - (id)init

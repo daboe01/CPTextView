@@ -4,7 +4,7 @@
 
    Copyright (C) 2014 Daniel Boehringer
 
-FIXME: this implementation is a messy hack and should be redone using a 'real' parser
+FIXME: this stuff really sucks and should be redone using a 'real' parser
 e.g. using zaach/jison on github
 
  * This library is free software; you can redistribute it and/or
@@ -501,12 +501,12 @@ var kRgsymRtf = {
             break;
             case "cf":  // change foreground color
                  var fontIndex = parseInt(param) - 1;
-                 if (fontIndex >= 0)
+                 if (_currentRun && fontIndex >= 0)
                      _currentRun.fgColour = _colorArray[fontIndex];
             break;
             case "f":  // change font
                  var fontIndex = parseInt(param);
-                 if (fontIndex >= 0 && fontIndex < _fontArray.length)
+                 if (_currentRun && fontIndex >= 0 && fontIndex < _fontArray.length)
                      _currentRun.fontName = _fontArray[fontIndex];
 
             break;
@@ -622,7 +622,6 @@ var kRgsymRtf = {
                     console.log(_freename);
                     if (_parsingFontTable)
                     {
-debugger;
                          _fontArray.push(_freename);
                          _parsingFontTable = NO;
                     }

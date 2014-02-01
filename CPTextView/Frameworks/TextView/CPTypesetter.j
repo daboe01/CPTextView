@@ -159,6 +159,10 @@ var _sharedSimpleTypesetter = nil;
 - (CPTextTab)textTabForWidth:(double)aWidth writingDirection:(CPWritingDirection)direction
 {
     var tabStops = [_currentParagraph tabStops];
+
+    if (!tabStops)
+        tabStops = [CPParagraphStyle _defaultTabStops];
+
     var i,
         l = tabStops.length;
 
@@ -293,7 +297,6 @@ var _sharedSimpleTypesetter = nil;
 
             var currentChar = theString[glyphIndex],  // use pure javascript methods for performance reasons
                 rangeWidth = _widthOfStringForFont(theString.substr(measuringRange.location, measuringRange.length), _currentFont).width  + currentAnchor;
-                          // [[theString substringWithRange: measuringRange] sizeWithFont:_currentFont].width + currentAnchor;
 
             switch (currentChar)    // faster than sending actionForControlCharacterAtIndex: for each char.
             {
@@ -306,10 +309,10 @@ var _sharedSimpleTypesetter = nil;
                     var nextTab = [self textTabForWidth:rangeWidth + lineOrigin.x writingDirection:0];
                     if (nextTab)
                     {
-                        rangeWidth = nextTab._location;
+                        rangeWidth = nextTab._location - lineOrigin.x;
                     }
                     else
-                        rangeWidth += 28;
+                        rangeWidth += 28;   //FIXME
                 }  // fallthrough intentional
                 case  ' ':
                     wrapRange = CPMakeRangeCopy(lineRange);
@@ -343,7 +346,7 @@ var _sharedSimpleTypesetter = nil;
 
                 if (isTabStop)
                 {
-                   lineOrigin.x = rangeWidth;
+                   lineOrigin.x += rangeWidth;
                    isTabStop = NO;
                 }
                 if (isNewline)
