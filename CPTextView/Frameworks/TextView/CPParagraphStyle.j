@@ -85,7 +85,7 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
     unsigned        _paragraphSpacing @accessors(property = paragraphSpacing);
     unsigned        _minimumLineHeight @accessors(property = minimumLineHeight);
     unsigned        _maximumLineHeight @accessors(property = maximumLineHeight);
-
+    unsigned        _lineSpacing @accessors(property = lineSpacing);
 }
 
 + (CPParagraphStyle)defaultParagraphStyle
@@ -140,6 +140,7 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
     other._paragraphSpacing = _paragraphSpacing;
     other._minimumLineHeight = _minimumLineHeight;
     other._maximumLineHeight = _maximumLineHeight;
+    other._lineSpacing = _lineSpacing;
 
     return self;
 }
@@ -158,6 +159,7 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
         _paragraphSpacing = [aCoder decodeIntForKey:"_paragraphSpacing"];
         _minimumLineHeight = [aCoder decodeIntForKey:"_minimumLineHeight"];
         _maximumLineHeight = [aCoder decodeIntForKey:"_maximumLineHeight"];
+        _lineSpacing = [aCoder decodeIntForKey:"_lineSpacing"];
     }
 
     return self;
@@ -173,8 +175,7 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
     [aCoder encodeInt:_paragraphSpacing forKey:"_paragraphSpacing"];
     [aCoder encodeInt:_minimumLineHeight forKey:"_minimumLineHeight"];
     [aCoder encodeInt:_maximumLineHeight forKey:"_maximumLineHeight"];
-
-
+    [aCoder encodeInt:_lineSpacing forKey:"_lineSpacing"];
 }
 
 @end

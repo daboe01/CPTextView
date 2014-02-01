@@ -1,3 +1,4 @@
+
 /*
  *  CPTypesetter.j
  *  AppKit
@@ -7,6 +8,8 @@
  *  Based on original work by
  *  Emmanuel Maillard on 27/02/2010.
  *  Copyright Emmanuel Maillard 2010.
+ *
+ *  FIXME: paragraphStyle indent information is currently not properly respected
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -288,8 +291,8 @@ var _sharedSimpleTypesetter = nil;
             lineRange.length++;
             measuringRange.length++;
 
-            var currentChar = [theString characterAtIndex: glyphIndex],
-                rangeWidth = _widthOfStringForFont([theString substringWithRange: measuringRange], _currentFont).width  + currentAnchor;
+            var currentChar = theString[glyphIndex],  // use pure javascript methods for performance reasons
+                rangeWidth = _widthOfStringForFont(theString.substr(measuringRange.location, measuringRange.length), _currentFont).width  + currentAnchor;
                           // [[theString substringWithRange: measuringRange] sizeWithFont:_currentFont].width + currentAnchor;
 
             switch (currentChar)    // faster than sending actionForControlCharacterAtIndex: for each char.
@@ -299,7 +302,6 @@ var _sharedSimpleTypesetter = nil;
                 break;
                 case '\t':
                 {
-debugger
                     isTabStop = YES;
                     var nextTab = [self textTabForWidth:rangeWidth + lineOrigin.x writingDirection:0];
                     if (nextTab)
@@ -346,7 +348,13 @@ debugger
                 }
                 if (isNewline)
                 {
+                    if ([_currentParagraph minimumLineHeight])
+                        _lineHeight = MAX(_lineHeight, [_currentParagraph minimumLineHeight]);
+                    if ([_currentParagraph maximumLineHeight])
+                        _lineHeight = MIN(_lineHeight, [_currentParagraph maximumLineHeight]);
                     lineOrigin.y += _lineHeight;
+                    if ([_currentParagraph lineSpacing])
+                        lineOrigin.y += [_currentParagraph lineSpacing];
                     if (lineOrigin.y > [_currentTextContainer containerSize].height)
                     {
                         _currentTextContainer = [[_layoutManager textContainers] objectAtIndex: ++_indexOfCurrentContainer];
