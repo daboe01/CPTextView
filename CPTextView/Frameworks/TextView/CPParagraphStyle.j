@@ -103,8 +103,8 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
         var i;
         _defaultTabStopArray = [];
 
-        // <!> FIXME: Define constants for these magick numbers: 13, 28
-         for (i = 1; i < 13 ; i++)
+        // <!> FIXME: Define constants for these magic numbers: 13, 28
+         for (i = 1; i < 130 ; i++)
          {
             _defaultTabStopArray.push([[CPTextTab alloc] initWithType:CPLeftTabStopType location:i * 28]);
          }

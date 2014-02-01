@@ -153,11 +153,24 @@ var _sharedSimpleTypesetter = nil;
     return [_layoutManager textContainers];
 }
 
-- (CPTextTab)textTabForGlyphLocation:(double)glyphLocation
-             writingDirection:(CPWritingDirection)direction
-             maxLocation:(double)maxLocation
+- (CPTextTab)textTabForWidth:(double)aWidth writingDirection:(CPWritingDirection)direction
 {
-    // <!> FIXME TODO
+    var tabStops = [_currentParagraph tabStops];
+    var i,
+        l = tabStops.length;
+
+    if (aWidth > tabStops[l-1]._location)
+        return nil;
+
+    for (i = l-1; i >= 0; i--)
+    {
+        if (aWidth > tabStops[i]._location)
+        {
+            if (i + 1 < l)
+                return tabStops[i + 1];
+        }
+    }
+    return nil;
 }
 
 - (BOOL)_flushRange:(CPRange)lineRange
@@ -221,6 +234,7 @@ var _sharedSimpleTypesetter = nil;
         wrapRange = CPMakeRange(0, 0),
         wrapWidth = 0,
         isNewline = NO,
+        isTabStop = NO,
         isWordWrapped = NO,
         numberOfGlyphs= [_textStorage length],
         leading;
@@ -278,27 +292,38 @@ var _sharedSimpleTypesetter = nil;
                 rangeWidth = _widthOfStringForFont([theString substringWithRange: measuringRange], _currentFont).width  + currentAnchor;
                           // [[theString substringWithRange: measuringRange] sizeWithFont:_currentFont].width + currentAnchor;
 
+            switch (currentChar)    // faster than sending actionForControlCharacterAtIndex: for each char.
+            {
+                case '\n':
+                    isNewline = YES;
+                break;
+                case '\t':
+                {
+debugger
+                    isTabStop = YES;
+                    var nextTab = [self textTabForWidth:rangeWidth + lineOrigin.x writingDirection:0];
+                    if (nextTab)
+                    {
+                        rangeWidth = nextTab._location;
+                    }
+                    else
+                        rangeWidth += 28;
+                }  // fallthrough intentional
+                case  ' ':
+                    wrapRange = CPMakeRangeCopy(lineRange);
+                    wrapWidth = rangeWidth;
+                break;
+            }
+
             advancements.push(rangeWidth - prevRangeWidth);
-            prevRangeWidth= rangeWidth;
-
-            if (currentChar == ' ')
-            {
-                wrapRange = CPMakeRangeCopy(lineRange);
-                wrapWidth = rangeWidth;
-            }
-            else if (currentChar == '\n') /* FIXME: should send actionForControlCharacterAtIndex: */
-            {
-                isNewline = YES;
-            }
-
-            _lineWidth = rangeWidth;
+            prevRangeWidth = _lineWidth = rangeWidth;
 
             if (lineOrigin.x + rangeWidth > containerSize.width)
             {
                 if (wrapWidth)
                 {
                     lineRange = wrapRange;
-                    _lineWidth = wrapWidth;
+                   _lineWidth = wrapWidth;
                 }
 
                 isNewline = YES;
@@ -309,30 +334,38 @@ var _sharedSimpleTypesetter = nil;
             _lineHeight = MAX(_lineHeight, ascent - descent + leading);
             _lineBase = MAX(_lineBase, ascent);
 
-            if (isNewline)
+            if (isNewline || isTabStop)
             {
                 if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines isLast:NO])
                     return;
 
-                lineOrigin.y += _lineHeight;
-                if (lineOrigin.y > [_currentTextContainer containerSize].height)
+                if (isTabStop)
                 {
-                    _currentTextContainer = [[_layoutManager textContainers] objectAtIndex: ++_indexOfCurrentContainer];
+                   lineOrigin.x = rangeWidth;
+                   isTabStop = NO;
                 }
-                _lineHeight    = 0;
-                _lineBase      = 0;
-                _lineWidth     = 0;
+                if (isNewline)
+                {
+                    lineOrigin.y += _lineHeight;
+                    if (lineOrigin.y > [_currentTextContainer containerSize].height)
+                    {
+                        _currentTextContainer = [[_layoutManager textContainers] objectAtIndex: ++_indexOfCurrentContainer];
+                    }
+                    lineOrigin.x = 0;
+                    numLines++;
+                    isNewline = NO;
+                }
+               _lineWidth      = 0;
                 advancements   = [];
                 prevRangeWidth = 0;
                 currentAnchor  = 0;
-                _previousFont  = nil;
-
+               _lineHeight     = 0;
+               _lineBase       = 0;
+               _previousFont   = nil;
                 lineRange      = CPMakeRange(glyphIndex + 1, 0);
                 wrapRange      = CPMakeRange(0, 0);
                 wrapWidth      = 0;
-                isNewline      = NO;
                 isWordWrapped  = NO;
-                numLines++;
             }
     }
 
