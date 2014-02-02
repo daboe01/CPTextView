@@ -9,8 +9,11 @@ I replaced canvas-drawing with DOM-spans to address the immanent performance and
 I also include a fixed CPAttributedString implementation.
 
 Online demo is at <http://aug-fancy.ukl.uni-freiburg.de/CPTextView>
-The code seems fully functional in my testing. However, i am sure that issues still exist. Please help me testing so we can merge a fully working Text system into cappuccino soon.
-Cappuccino needs the following extensions
+
+At this time, my stuff seems fully functional. However, i am sure that multiple issues still exist, i.e. with large and complex documents. Please help me with testing!
+My intention is to merge a fully working Text system into cappuccino soon.
+However, Cappuccino needs the following extensions
+* Merge my fixed CPAttributedString implementation (PR #2045)
 * CPScrollView needs support for ruler views
 * Multiple pasteboard types are currently unsupported
 * Pasteboard support is broken in Safari. This has to be worked around
