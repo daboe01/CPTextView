@@ -42,6 +42,7 @@ CPTypesetterContainerBreakAction  = (1 << 5);
 
 
 var _measuringContext;
+var _measuringContextFont;
 var _isCanvasSizingInvalid = 0;
 var _didTestCanvasSizingValid;
 function _widthOfStringForFont(aString, aFont)
@@ -57,8 +58,11 @@ function _widthOfStringForFont(aString, aFont)
     }
     if (!CPFeatureIsCompatible(CPHTMLCanvasFeature) || _isCanvasSizingInvalid)  // measuring with canvas is _much_ faster on chrome
         return [aString sizeWithFont:aFont];
- 
-    _measuringContext.font = [aFont cssString];  // fixme: cache CSSString to avoid method invocation
+    if (_measuringContextFont !== aFont)
+    {
+        _measuringContextFont = aFont
+        _measuringContext.font = [aFont cssString];
+    }
     return _measuringContext.measureText(aString);
 }
 

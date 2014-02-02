@@ -6,6 +6,8 @@
 
 FIXME: this really sucks and should be redone using a 'real' parser
 e.g. using zaach/jison on github
+ * all paragraph spacing information is currently not parsed
+
 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
