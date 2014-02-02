@@ -1355,21 +1355,22 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setTextColor:(CPColor)aColor range:(CPRange)range
 {
-    if (!_isRichText)
+    if (!_isRichText)  // FIXME
         return;
 
-    if (CPMaxRange(range) >= [_layoutManager numberOfCharacters])
+    if (!CPEmptyRange(_selectionRange))
     {
-        _textColor = aColor;
-        [_textStorage setForegroundColor:_textColor];
+        if (aColor)
+            [_textStorage addAttribute:CPForegroundColorAttributeName value:aColor range:CPMakeRangeCopy(range)];
+        else
+            [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRangeCopy(range)];
     }
-
-    if (aColor)
-        [_textStorage addAttribute:CPForegroundColorAttributeName value:aColor range:CPMakeRangeCopy(range)];
     else
-        [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRangeCopy(range)];
-
+    {
+        [_typingAttributes setObject: aColor forKey:CPForegroundColorAttributeName];
+    }
     [_layoutManager _validateLayoutAndGlyphs];
+    [self setNeedsDisplay:YES];
     [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
 }
 
