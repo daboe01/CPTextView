@@ -11,11 +11,11 @@ I also include a fixed CPAttributedString implementation.
 Online demo is at <http://aug-fancy.ukl.uni-freiburg.de/CPTextView>
 
 At this time, my stuff seems fully functional. However, i am sure that multiple issues still exist, i.e. with large and complex documents. Please help me with testing!
-My intention is to merge a fully working Text system into cappuccino soon.
-However, Cappuccino needs the following extensions
-* Merge my fixed CPAttributedString implementation (PR #2045)
-* CPScrollView needs support for ruler views
+My intention is to merge a fully working Text system into Cappuccino soon.
+However, Cappuccino needs the following extensions before rich text support is comlete:
+* Merge PR #2045 (my fixed CPAttributedString implementation
+* CPScrollView needs to support ruler views as in cocoa
 * Multiple pasteboard types are currently unsupported
-* Pasteboard support is broken in Safari. This has to be worked around
+* Pasteboard support is broken in Safari. This has to be worked around somehow.
 
-Please look also at the issue list on GitHub in order to see what remains to do.
+Please look also at the issue list on GitHub in order to see what remains to do from my side.
