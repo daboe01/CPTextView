@@ -834,7 +834,8 @@ var _objectsInRange = function(aList, aRange)
         if (fragment._textContainer === container)
         {
             var frames = [fragment glyphFrames];
-            for (var j = 0; j < frames.length; j++)
+            var len = fragment._range.length;
+            for (var j = 0; j < len; j++)
             {
                 if (CPRectContainsPoint(frames[j], point))
                 {
@@ -859,14 +860,14 @@ var _objectsInRange = function(aList, aRange)
                         point.y <= fragment._fragmentRect.origin.y + fragment._fragmentRect.size.height)
                     {
                         var nlLoc = CPMaxRange(fragment._range) - 1,
-                            lastFrame = [[fragment glyphFrames] lastObject],
-                            firstFrame = [[fragment glyphFrames] firstObject];
+                            lastFrame = [fragment glyphFrames][fragment._range.length-1],
+                            firstFrame = [fragment glyphFrames][0];
 
                     // this allows clicking before and after the (invisible) return character
                         if (point.x > CPRectGetMaxX(lastFrame) && fragment.length > 0 &&
                             [[_textStorage string] characterAtIndex: nlLoc] === '\n' || i === c - 1)
                             return nlLoc + 1;
-                        else if (point.x < CPRectGetMinX(firstFrame))
+                        else if (point.x <= CPRectGetMinX(firstFrame))
                             return fragment._range.location;
                         else
                             return nlLoc;
@@ -1321,8 +1322,8 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPRange)characterRangeForGlyphRange:(CPRange)aRange actualGlyphRange:(CPRangePointer)actualRange
 {
-    /* FIXME: stub */
-    return aRange;
+    return _MakeRangeFromAbs([self characterIndexForGlyphAtIndex:aRange.location],
+                             [self characterIndexForGlyphAtIndex:CPMaxRange(aRange)]);
 }
 
 - (unsigned)characterIndexForGlyphAtIndex:(unsigned)index
@@ -1356,9 +1357,10 @@ var _objectsInRange = function(aList, aRange)
         if (fragment._textContainer === container)
         {
             var frames = [fragment glyphFrames],
-                rect = nil;
+                rect = nil,
+                len = fragment._range.length;
 
-            for (var j = 0; j < frames.length; j++)
+            for (var j = 0; j < len; j++)
             {
                 if (CPLocationInRange(fragment._range.location + j, selectedCharRange))
                 {
@@ -1367,9 +1369,7 @@ var _objectsInRange = function(aList, aRange)
                     else
                         rect = CPRectUnion(rect, frames[j]);
 
-                    if (CPRectGetMaxX(frames[j]) >=  CPRectGetMaxX(fragment._fragmentRect) &&
-                        CPMaxRange(selectedCharRange) > CPMaxRange(fragment._range) ||
-                        [[_textStorage string] characterAtIndex:MAX(0, CPMaxRange(selectedCharRange)-1)] === '\n' )
+                    if ([[_textStorage string] characterAtIndex:MAX(0, CPMaxRange(selectedCharRange)-1)] === '\n' )
                     {
                          rect.size.width = containerSize.width - rect.origin.x;
                     }
@@ -1379,6 +1379,14 @@ var _objectsInRange = function(aList, aRange)
             if (rect)
                 rectArray.push(rect);
         }
+    }
+
+    var len = rectArray.length;
+    for (var i = 0; i < len - 1; i++) // extend the width of all but the last one
+    {
+        if (rectArray[i].origin.y == rectArray[i + 1].origin.y)
+            continue;
+        rectArray[i].size.width = containerSize.width - rectArray[i].origin.x;
     }
 
     return rectArray;
