@@ -6,7 +6,6 @@
  *  1. make browser-width for size smaller and fix columns
  *  2. sampleview is currently not shown
  *  3. add all the missing features from the MacOS X counterpart
- *  4. handle multiple selection properly instead of setting only the new attrib (all bolds in current selection should e.g. become bold italic)
  *
  *
  * Created by Daniel Boehringer on 2/JAN/2014.

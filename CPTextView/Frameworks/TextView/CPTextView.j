@@ -422,7 +422,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         if (_selectionRange.length > 0)
         {
-            [[[[self window] undoManager] prepareWithInvocationTarget: self] _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length]) withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)]];
+            [[[[self window] undoManager] prepareWithInvocationTarget: self]
+                _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length])
+                withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)]];
             [[[self window] undoManager] setActionName:@"Replace rich text"];
         }
 
@@ -1266,27 +1268,38 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)changeFont:(id)sender
 {
-    var attributes = [_textStorage attributesAtIndex:_selectionRange.location effectiveRange:nil],
-        oldFont = [attributes objectForKey:CPFontAttributeName],
+    var currRange = CPMakeRange(_selectionRange.location, 0),
+        oldFont,
+        attributes,
         scrollRange = CPMakeRange(CPMaxRange(_selectionRange), 0);
 
-    if (!oldFont)
-        oldFont = [self font];
-
-    if ([self isRichText])
+    if (_isRichText)
     {
         if (!CPEmptyRange(_selectionRange))
-            [self setFont:[sender convertFont:oldFont] range:_selectionRange];
+        {
+            while (CPMaxRange(currRange) < CPMaxRange(_selectionRange))  // iterate all "runs"
+            {
+	        attributes = [_textStorage attributesAtIndex: CPMaxRange(currRange)
+			     longestEffectiveRange:currRange
+			     inRange:_selectionRange];
+                oldFont = [attributes objectForKey:CPFontAttributeName] || [self font];
+                [self setFont:[sender convertFont:oldFont] range: currRange];
+            }
+        }
         else
             [_typingAttributes setObject: [sender convertFont:oldFont] forKey:CPFontAttributeName];
     }    
     else
     {
+        attributes = [_textStorage attributesAtIndex:_selectionRange.location effectiveRange:nil];
+        oldFont = [attributes objectForKey:CPFontAttributeName] || [self font];
         var length = [_textStorage length];
         [self setFont:[sender convertFont:oldFont] range:CPMakeRange(0,length)];
         scrollRange = CPMakeRange(length, 0);
     }
     [_layoutManager _validateLayoutAndGlyphs];
+    [self sizeToFit];
+    [self setNeedsDisplay:YES];
     [self scrollRangeToVisible:scrollRange];
 }
 
