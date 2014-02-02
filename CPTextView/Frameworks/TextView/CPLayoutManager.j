@@ -2,7 +2,7 @@
  *  CPLayoutManager.j
  *  AppKit
  *
- *  <!> FIXME only insert into DOM when actually visible (as done in CPTableView)
+ *  FIXME remove from DOM when scrolled out of visible area? (as done in CPTableView)
  *
  *
  *  Created by Daniel Boehringer on 27/12/2013.
@@ -290,10 +290,10 @@ var _objectsInRange = function(aList, aRange)
     for (var i = 0; i < c; i++)
     {
         var run = runs[i];
-        orig.x = (_glyphsFrames[run._range.location - runs[0]._range.location] ? _glyphsFrames[run._range.location - runs[0]._range.location].origin.x : 0) +
-                    aPoint.x;
+        orig.x = _glyphsFrames[run._range.location - _runs[0]._range.location].origin.x + aPoint.x;
+debugger
         run.elem.style.left = (orig.x) + "px";
-        run.elem.style.top = (orig.y - _usedRect.size.height + 4) + "px";
+        run.elem.style.top = (orig.y - _usedRect.size.height + 4) + "px";   // FIXME: consolidate this strange constant
 
         if (!run.DOMactive)
             _textContainer._textView._DOMElement.appendChild(run.elem);
