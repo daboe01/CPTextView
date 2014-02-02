@@ -12,7 +12,7 @@ Online demo is at <http://aug-fancy.ukl.uni-freiburg.de/CPTextView>
 
 At this time, my stuff seems fully functional. However, i am sure that multiple issues still exist, i.e. with large and complex documents. Please help me with testing!
 My intention is to merge a fully working Text system into Cappuccino soon.
-However, Cappuccino needs the following extensions before rich text support is comlete:
+However, Cappuccino needs the following extensions before rich text support is complete:
 * Merge PR #2045 (my fixed CPAttributedString implementation
 * CPScrollView needs to support ruler views as in cocoa
 * Multiple pasteboard types are currently unsupported
