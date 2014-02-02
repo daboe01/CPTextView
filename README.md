@@ -1,7 +1,7 @@
 CPTextView
 ==========
 This is an implementation of the cocoa text system for cappuccino.
-This is based on the (dead) cappuccino-fork from <http://github.com/emaillard/cappuccino>.
+It is based on the (long-dead) cappuccino-fork from <http://github.com/emaillard/cappuccino>.
 
 I extracted the classes CPTextView, CPTextStorage, CPTextContainer, CPLayoutManager and CPSimpleTypesetter to create a standalone framework. This framework compiles with the current version of cappuccino.
 I refactored and debugged the stuff to get basic editing and selection handling working as expected.
