@@ -291,7 +291,7 @@ var _objectsInRange = function(aList, aRange)
     {
         var run = runs[i];
         orig.x = _glyphsFrames[run._range.location - _runs[0]._range.location].origin.x + aPoint.x;
-debugger
+
         run.elem.style.left = (orig.x) + "px";
         run.elem.style.top = (orig.y - _usedRect.size.height + 4) + "px";   // FIXME: consolidate this strange constant
 

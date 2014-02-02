@@ -430,13 +430,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
     else
     {
-        if (_selectionRange.length > 0)
+        [[[self window] undoManager] setActionName:@"Replace plain text"];
+        if (_isRichText)
+        {
+            aString = [[CPAttributedString alloc] initWithString:aString attributes:_typingAttributes];
+            [[[[self window] undoManager] prepareWithInvocationTarget:self]
+                _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length])
+                withAttributedString: [_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)]];
+            [_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:aString];
+        }
+        else
         {
             [[[[self window] undoManager] prepareWithInvocationTarget:self] _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length]) withString:[[self string] substringWithRange:CPMakeRangeCopy(_selectionRange)]];
-            [[[self window] undoManager] setActionName:@"Replace plain text"];
+            [_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString:aString];
         }
-
-        [_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString: aString];
     }
 
     [self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
@@ -502,6 +509,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)setSelectedRange:(CPRange)range
 {
     [self setSelectedRange:range affinity:0 stillSelecting:NO];
+    [self setTypingAttributes:[_textStorage attributesAtIndex:MAX(0, range.location -1) effectiveRange:nil]];
 }
 
 - (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity /* unused */ )affinity stillSelecting:(BOOL)selecting
@@ -1266,7 +1274,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         oldFont = [self font];
 
     if ([self isRichText])
-        [self setFont:[sender convertFont:oldFont] range:_selectionRange];
+    {
+        if (!CPEmptyRange(_selectionRange))
+            [self setFont:[sender convertFont:oldFont] range:_selectionRange];
+        else
+            [_typingAttributes setObject: [sender convertFont:oldFont] forKey:CPFontAttributeName];
+    }    
     else
     {
         var length = [_textStorage length];
