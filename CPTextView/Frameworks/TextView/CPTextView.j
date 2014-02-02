@@ -1290,7 +1290,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         else
             [_textStorage addAttribute:CPUnderlineStyleAttributeName value:[CPNumber numberWithInt:1] range:CPMakeRangeCopy(_selectionRange)];
     }
-    /* else TODO: */
+    else
+    {
+        if ([_typingAttributes containsKey:CPUnderlineStyleAttributeName] && [[_typingAttributes  objectForKey:CPUnderlineStyleAttributeName] intValue])
+            [_typingAttributes setObject:[CPNumber numberWithInt:0] forKey:CPUnderlineStyleAttributeName];
+        else
+            [_typingAttributes setObject:[CPNumber numberWithInt:1] forKey:CPUnderlineStyleAttributeName];
+    }
 }
 
 - (CPSelectionAffinity)selectionAffinity
