@@ -58,7 +58,7 @@ function _widthOfStringForFont(aString, aFont)
     if (!CPFeatureIsCompatible(CPHTMLCanvasFeature) || _isCanvasSizingInvalid)  // measuring with canvas is _much_ faster on chrome
         return [aString sizeWithFont:aFont];
  
-    _measuringContext.font = [aFont cssString];
+    _measuringContext.font = [aFont cssString];  // fixme: cache CSSString to avoid method invocation
     return _measuringContext.measureText(aString);
 }
 
@@ -287,9 +287,9 @@ var _sharedSimpleTypesetter = nil;
 
             if (_previousFont !== _currentFont)
             {
-                measuringRange= CPMakeRange(glyphIndex, 0);
-                currentAnchor= prevRangeWidth;
-                _previousFont= _currentFont;
+                measuringRange = CPMakeRange(glyphIndex, 0);
+                currentAnchor = prevRangeWidth;
+                _previousFont = _currentFont;
             }
 
             lineRange.length++;
@@ -298,7 +298,7 @@ var _sharedSimpleTypesetter = nil;
             var currentChar = theString[glyphIndex],  // use pure javascript methods for performance reasons
                 rangeWidth = _widthOfStringForFont(theString.substr(measuringRange.location, measuringRange.length), _currentFont).width  + currentAnchor;
 
-            switch (currentChar)    // faster than sending actionForControlCharacterAtIndex: for each char.
+            switch (currentChar)    // faster than sending actionForControlCharacterAtIndex: called for each char.
             {
                 case '\n':
                     isNewline = YES;
