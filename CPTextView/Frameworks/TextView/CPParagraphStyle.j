@@ -98,19 +98,22 @@ CPParagraphStyleAttributeName = @"CPParagraphStyleAttributeName";
 
 + (CPArray)_defaultTabStops
 {
-   if (!_defaultTabStopArray)
+    if (!_defaultTabStopArray)
     {
         var i;
         _defaultTabStopArray = [];
 
         // <!> FIXME: Define constants for these magic numbers: 13, 28
-         for (i = 1; i < 80 ; i++)
+         for (i = 1; i < 16 ; i++)
          {
             _defaultTabStopArray.push([[CPTextTab alloc] initWithType:CPLeftTabStopType location:i * 28]);
          }
     }
-
-    return _defaultTabStopArray;
+   return _defaultTabStopArray;
+}
+- (void)addTabStop:(CPTextTab)aStop
+{
+    _tabStops.push(aStop);
 }
 
 - (void)_initWithDefaults

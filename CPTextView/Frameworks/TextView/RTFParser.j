@@ -4,7 +4,7 @@
 
    Copyright (C) 2014 Daniel Boehringer
 
-FIXME: this stuff really sucks and should be redone using a 'real' parser
+FIXME: this really sucks and should be redone using a 'real' parser
 e.g. using zaach/jison on github
 
  * This library is free software; you can redistribute it and/or
@@ -40,6 +40,7 @@ e.g. using zaach/jison on github
     BOOL underline;
     BOOL strikethrough;
     BOOL script;
+    BOOL _tabChanged;
 }
 
 - (id) init
@@ -138,8 +139,6 @@ e.g. using zaach/jison on github
     underline = 0;
     strikethrough = 0;
     script = 0;
-
-    changed = YES;
 }
 
 - (void)addTab:(float)location type:(CPTextTabType)type
@@ -147,19 +146,15 @@ e.g. using zaach/jison on github
     var tab = [[CPTextTab alloc] initWithType: CPLeftTabStopType 
 				      location: location];
 
-    if (!tabChanged)
+    if (!_tabChanged)
     {
-        var a = [[CPArray alloc] initWithObjects: tab, nil];
-      // remove all tab stops
-        [paragraph setTabStops: a];
-        tabChanged = YES;
+        [paragraph setTabStops:[tab]];
+        _tabChanged = YES;
     }
     else
     {
         [paragraph addTabStop: tab];
     }
-
-    changed = YES;
 }
 
 -(CPDictionary) dictionary
@@ -512,6 +507,13 @@ var kRgsymRtf = {
             break;
             case "fs":  // change font size
                  _currentRun.fontSize = parseInt(param) / 2;
+            break;
+            case "tx":  // tabstop
+                 var location = parseInt(param) / 20;
+                 if (_currentRun)
+                 {
+                     [_currentRun addTab:location type:CPLeftTabStopType];
+                 }
             break;
             default:
                console.log("skip : " + keyword + " param: " + param);

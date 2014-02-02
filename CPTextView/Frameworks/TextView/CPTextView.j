@@ -494,7 +494,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self updateInsertionPointStateAndRestartTimer:NO];
         [self drawInsertionPointInRect:_caretRect color:_insertionPointColor turnedOn:_drawCaret];
     }
-    else
+    else   // <!> FIXME: breaks DOM abstraction, but i did get it working otherwise
         if (_caretDOM)
             _caretDOM.style.visibility = "hidden";
 }
