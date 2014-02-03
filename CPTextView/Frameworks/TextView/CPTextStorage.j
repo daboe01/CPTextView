@@ -287,4 +287,10 @@ CPKernAttributeName = @"CPKernAttributeName";
     return _foregroundColor;
 }
 
+- (CPAttributedString)attributedSubstringFromRange:(CPRange)aRange
+{
+    if (!aRange || CPMaxRange(aRange) > _string.length || aRange.location < 0)
+	    return [CPAttributedString new];
+    return [super attributedSubstringFromRange:aRange];
+}
 @end
