@@ -1,8 +1,7 @@
 /*
  * AppController.j
- * fixmes:
- *  research/debug on rescuing newlines+ possibility on rescuing failures
- *  make selection gray when not first responder
+ * private fixmes:
+ *  rescue greift nicht, wenn abschnitt via backspace hochgezogen wird
  *  update demo to use a 2-column-setup
  */
  

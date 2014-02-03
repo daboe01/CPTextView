@@ -358,7 +358,6 @@ var _objectsInRange = function(aList, aRange)
 
     _fragmentRect.origin.y += verticalOffset;
     _usedRect.origin.y += verticalOffset;
-    _location.y += verticalOffset;
 
     var l = _glyphsFrames.length;
 
@@ -657,24 +656,29 @@ var _objectsInRange = function(aList, aRange)
         return NO;
 
     var startLineForDOMRemoval = i,
-        l = _lineFragments.length,
         isIdentical = YES,
         newLineFragment= _lineFragments[i],
-        oldLineFragment = _lineFragmentsForRescue[i];
+        oldLineFragment = _lineFragmentsForRescue[i],
+        newString = [[_textStorage string] substringWithRange: _lineFragments[i]._range];
 
     if (![oldLineFragment isVisuallyIdenticalToFragment: newLineFragment])
     {
         isIdentical = NO;
+        if (newString == "\n")  // newline entered in its own line-> move down
+        {
+            isIdentical = YES;
+            startLineForDOMRemoval--;
+        }
     }
 
-    if (isIdentical)    // patch and, if applicable, patch the linefragments
+    if (isIdentical)    // patch the linefragments instead of re-layoutung
     {
-        var rangeOffset = CPMaxRange(_lineFragments[startLineForDOMRemoval]._range) - CPMaxRange(_lineFragmentsForRescue[startLineForDOMRemoval]._range);
+        var rangeOffset = CPMaxRange(_lineFragments[i]._range) - CPMaxRange(_lineFragmentsForRescue[startLineForDOMRemoval]._range);
 
-        if (!rangeOffset) // <!> fixme-> patch vertically instead of redrawing
+        if (!rangeOffset)
             return NO;
 
-        var verticalOffset = _lineFragments[startLineForDOMRemoval]._usedRect.origin.y - _lineFragmentsForRescue[startLineForDOMRemoval]._usedRect.origin.y,
+        var verticalOffset = _lineFragments[i]._usedRect.origin.y - _lineFragmentsForRescue[startLineForDOMRemoval]._usedRect.origin.y,
             l = _lineFragmentsForRescue.length;
 
         for (var i = startLineForDOMRemoval + 1; i < l; i++)
