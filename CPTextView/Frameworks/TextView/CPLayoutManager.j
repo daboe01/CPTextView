@@ -863,6 +863,8 @@ var _objectsInRange = function(aList, aRange)
                             lastFrame = [fragment glyphFrames][fragment._range.length-1],
                             firstFrame = [fragment glyphFrames][0];
 
+                        if (i < c - 1 && _lineFragments[i + 1]._fragmentRect.origin.y === fragment._fragmentRect.origin.y)
+                           continue;
                     // this allows clicking before and after the (invisible) return character
                         if (point.x > CPRectGetMaxX(lastFrame) && fragment.length > 0 &&
                             [[_textStorage string] characterAtIndex: nlLoc] === '\n' || i === c - 1)
@@ -1295,10 +1297,6 @@ var _objectsInRange = function(aList, aRange)
 
 - (CPTextContainer)textContainerForGlyphAtIndex:(unsigned)index effectiveRange:(CPRangePointer)effectiveGlyphRange withoutAdditionalLayout:(BOOL)flag
 {
-/*    if (!flag)
-        [self _validateLayoutAndGlyphs];
-*/
-
     var lineFragment = _objectWithLocationInRange(_lineFragments, index);
 
     if (lineFragment)
