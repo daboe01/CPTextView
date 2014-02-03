@@ -325,7 +325,9 @@ var _objectsInRange = function(aList, aRange)
     if (!oldFragmentRuns || !newFragmentRuns || oldFragmentRuns.length !== newFragmentRuns.length)
         return NO;
 
-    for (var i = 0; i < oldFragmentRuns.length; i++)
+    var l = oldFragmentRuns.length;
+
+    for (var i = 0; i < l; i++)
     {
         if (newFragmentRuns[i].string !== oldFragmentRuns[i].string ||
             !_RectEqualToRectHorizontally(newLineFragment._fragmentRect, _fragmentRect))
