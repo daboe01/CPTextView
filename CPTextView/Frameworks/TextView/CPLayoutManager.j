@@ -863,6 +863,7 @@ var _objectsInRange = function(aList, aRange)
                             lastFrame = [fragment glyphFrames][fragment._range.length-1],
                             firstFrame = [fragment glyphFrames][0];
 
+                    // skip tabs and move on the last fragment in this line
                         if (i < c - 1 && _lineFragments[i + 1]._fragmentRect.origin.y === fragment._fragmentRect.origin.y)
                            continue;
                     // this allows clicking before and after the (invisible) return character
