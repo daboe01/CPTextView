@@ -1,8 +1,8 @@
 /*
  * AppController.j
- * private fixmes:
- *  rescue greift nicht, wenn abschnitt via backspace hochgezogen wird
- *  update demo to use a 2-column-setup
+ *
+ *  Manual test for the cappuccino text system 
+ *  Copyright (C) 2014 Daniel Boehringer
  */
  
 @import <TextView/CPTextView.j>
@@ -26,6 +26,7 @@
 
     _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
     _textView2 = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
+    _textView2._isRichText = NO;
     [_textView setBackgroundColor:[CPColor whiteColor]];
     [_textView2 setBackgroundColor:[CPColor whiteColor]];
 
@@ -33,7 +34,7 @@
     var scrollView2 = [[CPScrollView alloc] initWithFrame:CGRectMake(560, 20,520,510)];
     //  [scrollView setAutohidesScrollers:YES];
     [scrollView setDocumentView:_textView]; 
-    [scrollView2 setDocumentView:_textView2]; 
+    [scrollView2 setDocumentView:_textView2];
 
     [contentView addSubview: scrollView];
     [contentView addSubview: scrollView2];
