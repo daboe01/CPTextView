@@ -1,7 +1,7 @@
 /*
  * AppController.j
  *
- *  Manual test for the cappuccino text system 
+ *  Manual test application for the cappuccino text system 
  *  Copyright (C) 2014 Daniel Boehringer
  */
  

@@ -126,6 +126,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     var             _caretDOM;
     int             _stickyXLocation;
+    CPRange         _prevRange;
 }
 
 - (id)initWithFrame:(CPRect)aFrame textContainer:(CPTextContainer)aContainer
@@ -145,6 +146,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _delegate = nil;
         _delegateRespondsToSelectorMask = 0;
         _selectionRange = CPMakeRange(0, 0);
+        _prevRange = CPMakeRange(0, 0);
 
         _selectionGranularity = CPSelectByCharacter;
         _selectedTextAttributes = [CPDictionary dictionaryWithObject:[CPColor selectedTextBackgroundColor]
@@ -510,6 +512,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setSelectedRange:(CPRange)range
 {
+     _prevRange = CPMakeRangeCopy(_selectionRange);
     [self setSelectedRange:range affinity:0 stillSelecting:NO];
     [self setTypingAttributes:[_textStorage attributesAtIndex:MAX(0, range.location -1) effectiveRange:nil]];
 }
@@ -736,8 +739,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       [self _establishSelection:_MakeRangeFromAbs(_selectionRange.location, CPMaxRange(_selectionRange) - 1) byExtending:NO];
-    }
+       var myprevSel = CPMakeRangeCopy(_prevRange);
+       [self _establishSelection:_MakeRangeFromAbs(myprevSel.location, ((_selectionRange.location < myprevSel.location)? _selectionRange.location:CPMaxRange(_selectionRange)) - 1) byExtending:NO];
+        _prevRange = myprevSel;
+   }
 }
 - (void)moveBackward:(id)sender
 {
@@ -753,7 +758,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        [self _establishSelection: _MakeRangeFromAbs(_selectionRange.location, CPMaxRange(_selectionRange) + 1) byExtending:NO];
+       var myprevSel = CPMakeRangeCopy(_prevRange);
+       [self _establishSelection:_MakeRangeFromAbs(myprevSel.location, ((_selectionRange.location < myprevSel.location)? _selectionRange.location:CPMaxRange(_selectionRange)) + 1) byExtending:NO];
+        _prevRange = myprevSel;
     }
 }
 - (void)moveLeft:(id)sender
