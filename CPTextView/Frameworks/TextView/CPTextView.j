@@ -736,8 +736,15 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
     _stickyXLocation = point.x;
 }
-- (void) _establishSelectionByExtendingMove:(unsigned)move
+- (void) _establishSelectionByExtendingToRange:(CPRange)aRange
 {
+    var move;
+	if (aRange.length === 0)
+		move = aRange.location - _selectionRange.location;
+	else
+	{
+	
+	}
     var aSel=_MakeRangeFromAbs(_startTrackingLocation, ((_selectionRange.location < _startTrackingLocation)? _selectionRange.location:CPMaxRange(_selectionRange)) + move)
     var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
     [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
@@ -749,7 +756,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       [self _establishSelectionByExtendingMove: -1];
+       [self _establishSelectionByExtendingToRange: CPMakeRange(_selectionRange.location - 1, 0)];
    }
 }
 - (void)moveBackward:(id)sender
@@ -766,7 +773,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       [self _establishSelectionByExtendingMove: +1];
+       [self _establishSelectionByExtendingToRange: CPMakeRange(_selectionRange.location + 1, 0)];
     }
 }
 - (void)moveLeft:(id)sender
@@ -949,8 +956,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
          parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
                                   inString:[self stringValue]
                                   asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:NO]
-		// [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
-		 [self _establishSelectionByExtendingMove:CPMaxRange(parRange) - CPMaxRange(_selectionRange)];
+		 [self _establishSelectionByExtendingToRange:parRange];
     }
 }
 
@@ -1050,13 +1056,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
         parRange = [self _characterRangeForUnitAtIndex:MAX(0,parRange.location - 1)
                                   inString:[self stringValue]
-                                  asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:NO]
-		[self _establishSelectionByExtendingMove:parRange.location - _selectionRange.location];
+                                  asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:NO];
+		[self _establishSelectionByExtendingToRange:parRange];
     }
 }
 - (void) moveWordLeft:(id)sender
 {
-    if (_isSelectable && _selectionRange.location > 0)
+    if (_isSelectable)
     {
         var parRange = [self _characterRangeForUnitAtIndex:MAX(0, _selectionRange.location - 1)
                                   inString:[self stringValue]
