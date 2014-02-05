@@ -126,7 +126,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     var             _caretDOM;
     int             _stickyXLocation;
-    CPRange         _prevRange;
 }
 
 - (id)initWithFrame:(CPRect)aFrame textContainer:(CPTextContainer)aContainer
@@ -146,7 +145,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _delegate = nil;
         _delegateRespondsToSelectorMask = 0;
         _selectionRange = CPMakeRange(0, 0);
-        _prevRange = CPMakeRange(0, 0);
 
         _selectionGranularity = CPSelectByCharacter;
         _selectedTextAttributes = [CPDictionary dictionaryWithObject:[CPColor selectedTextBackgroundColor]
@@ -512,7 +510,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setSelectedRange:(CPRange)range
 {
-     _prevRange = CPMakeRangeCopy(_selectionRange);
     [self setSelectedRange:range affinity:0 stillSelecting:NO];
     [self setTypingAttributes:[_textStorage attributesAtIndex:MAX(0, range.location -1) effectiveRange:nil]];
 }
@@ -728,7 +725,25 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)_establishSelection:(CPSelection)aSel byExtending:(BOOL)flag
 {
     if (flag)
+    {
         aSel = CPUnionRange(aSel, _selectionRange);
+    }
+    var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
+    [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
+    var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
+    _stickyXLocation = point.x;
+}
+- (void) _establishSelection2:(CPSelection)aSel byExtending:(BOOL)flag
+{
+    var myStartLocation = _startTrackingLocation;
+    if (flag)
+    {
+        var myrange=_MakeRangeFromAbs(myprevSel.location, ((_selectionRange.location < myprevSel.location)? _selectionRange.location:CPMaxRange(_selectionRange)) + 1)
+        aSel = CPUnionRange(aSel, _selectionRange);
+    }
+    else
+        _startTrackingLocation = aSel.location;
+
     var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
     [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
     var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
@@ -739,9 +754,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       var myprevSel = CPMakeRangeCopy(_prevRange);
-       [self _establishSelection:_MakeRangeFromAbs(myprevSel.location, ((_selectionRange.location < myprevSel.location)? _selectionRange.location:CPMaxRange(_selectionRange)) - 1) byExtending:NO];
-        _prevRange = myprevSel;
+       [self _establishSelection2: -1) byExtending:YES];
+        _startTrackingLocation = myStartLocation;
    }
 }
 - (void)moveBackward:(id)sender
@@ -758,9 +772,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       var myprevSel = CPMakeRangeCopy(_prevRange);
-       [self _establishSelection:_MakeRangeFromAbs(myprevSel.location, ((_selectionRange.location < myprevSel.location)? _selectionRange.location:CPMaxRange(_selectionRange)) + 1) byExtending:NO];
-        _prevRange = myprevSel;
+       var myStartLocation = _startTrackingLocation;
+       [self _establishSelectionAbs:_MakeRangeFromAbs(myprevSel.location, ((_selectionRange.location < myprevSel.location)? _selectionRange.location:CPMaxRange(_selectionRange)) + 1) byExtending:NO];
+        _startTrackingLocation = myStartLocation;
     }
 }
 - (void)moveLeft:(id)sender

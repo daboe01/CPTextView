@@ -289,7 +289,7 @@ CPKernAttributeName = @"CPKernAttributeName";
 
 - (CPAttributedString)attributedSubstringFromRange:(CPRange)aRange
 {
-    if (!aRange.length && CPMaxRange(aRange) >= _string.length)
+    if (!aRange.length)
 	    return [CPAttributedString new];
     return [super attributedSubstringFromRange:aRange];
 }
