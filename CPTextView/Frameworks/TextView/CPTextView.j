@@ -728,22 +728,17 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         aSel = CPUnionRange(aSel, _selectionRange);
     }
+	else
+	    _startTrackingLocation = _selectionRange.location;
+
     var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
     [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
     var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
     _stickyXLocation = point.x;
 }
-- (void) _establishSelection2:(CPSelection)aSel byExtending:(BOOL)flag
+- (void) _establishSelectionByExtendingMove:(unsigned)move
 {
-    var myStartLocation = _startTrackingLocation;
-    if (flag)
-    {
-        var myrange=_MakeRangeFromAbs(myprevSel.location, ((_selectionRange.location < myprevSel.location)? _selectionRange.location:CPMaxRange(_selectionRange)) + 1)
-        aSel = CPUnionRange(aSel, _selectionRange);
-    }
-    else
-        _startTrackingLocation = aSel.location;
-
+    var aSel=_MakeRangeFromAbs(_startTrackingLocation, ((_selectionRange.location < _startTrackingLocation)? _selectionRange.location:CPMaxRange(_selectionRange)) + move)
     var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
     [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
     var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
@@ -754,8 +749,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       [self _establishSelection2: -1) byExtending:YES];
-        _startTrackingLocation = myStartLocation;
+       [self _establishSelectionByExtendingMove: -1];
    }
 }
 - (void)moveBackward:(id)sender
@@ -772,19 +766,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       var myStartLocation = _startTrackingLocation;
-       [self _establishSelectionAbs:_MakeRangeFromAbs(myprevSel.location, ((_selectionRange.location < myprevSel.location)? _selectionRange.location:CPMaxRange(_selectionRange)) + 1) byExtending:NO];
-        _startTrackingLocation = myStartLocation;
+       [self _establishSelectionByExtendingMove: +1];
     }
 }
 - (void)moveLeft:(id)sender
 {
     if (_isSelectable)
     {
-        if (_selectionRange.location > 0)
-        {
-            [self _establishSelection:CPMakeRange(_selectionRange.location - 1, 0) byExtending:NO];
-        }
+        [self _establishSelection:CPMakeRange(_selectionRange.location - 1, 0) byExtending:NO];
     }
 }
 
@@ -960,7 +949,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
          parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
                                   inString:[self stringValue]
                                   asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:NO]
-         [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
+		// [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:YES];
+		 [self _establishSelectionByExtendingMove:CPMaxRange(parRange) - CPMaxRange(_selectionRange)];
     }
 }
 
@@ -1052,7 +1042,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void) moveWordLeftAndModifySelection:(id)sender
 {
-    if (_isSelectable && _selectionRange.location > 0)
+    if (_isSelectable)
     {
         var parRange = [self _characterRangeForUnitAtIndex:MAX(0, _selectionRange.location - 1)
                                   inString:[self stringValue]
@@ -1061,7 +1051,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         parRange = [self _characterRangeForUnitAtIndex:MAX(0,parRange.location - 1)
                                   inString:[self stringValue]
                                   asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:NO]
-        [self _establishSelection:CPMakeRange(parRange.location, 0) byExtending:YES];
+		[self _establishSelectionByExtendingMove:parRange.location - _selectionRange.location];
     }
 }
 - (void) moveWordLeft:(id)sender
