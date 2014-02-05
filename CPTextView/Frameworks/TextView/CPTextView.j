@@ -728,23 +728,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         aSel = CPUnionRange(aSel, _selectionRange);
     }
-	else
-	    _startTrackingLocation = _selectionRange.location;
 
     var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
     [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
+    _startTrackingLocation = _selectionRange.location;
     var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
     _stickyXLocation = point.x;
 }
 - (void) _establishSelectionByExtendingToRange:(CPRange)aRange
 {
     var move;
-	if (aRange.length === 0)
-		move = aRange.location - _selectionRange.location;
-	else
-	{
-	
-	}
+    if (aRange.length === 0)
+        move = aRange.location - _selectionRange.location;
+    else
+        move = CPMaxRange(aRange) - CPMaxRange(_selectionRange);
     var aSel=_MakeRangeFromAbs(_startTrackingLocation, ((_selectionRange.location < _startTrackingLocation)? _selectionRange.location:CPMaxRange(_selectionRange)) + move)
     var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
     [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
@@ -756,7 +753,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       [self _establishSelectionByExtendingToRange: CPMakeRange(_selectionRange.location - 1, 0)];
+       [self _establishSelectionByExtendingToRange:CPMakeRange(_selectionRange.location - 1, 0)];
    }
 }
 - (void)moveBackward:(id)sender
@@ -956,7 +953,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
          parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
                                   inString:[self stringValue]
                                   asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:NO]
-		 [self _establishSelectionByExtendingToRange:parRange];
+         [self _establishSelectionByExtendingToRange:CPMakeRange(CPMaxRange(parRange), 1)];
     }
 }
 
@@ -1057,7 +1054,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         parRange = [self _characterRangeForUnitAtIndex:MAX(0,parRange.location - 1)
                                   inString:[self stringValue]
                                   asDefinedByCharArray: [[self class] _wordBoundaryCharacterArray] skip:NO];
-		[self _establishSelectionByExtendingToRange:parRange];
+        [self _establishSelectionByExtendingToRange:CPMakeRange(parRange.location, 0)];
     }
 }
 - (void) moveWordLeft:(id)sender
@@ -1291,9 +1288,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         {
             while (CPMaxRange(currRange) < CPMaxRange(_selectionRange))  // iterate all "runs"
             {
-	        attributes = [_textStorage attributesAtIndex: CPMaxRange(currRange)
-			     longestEffectiveRange:currRange
-			     inRange:_selectionRange];
+            attributes = [_textStorage attributesAtIndex: CPMaxRange(currRange)
+                 longestEffectiveRange:currRange
+                 inRange:_selectionRange];
                 oldFont = [attributes objectForKey:CPFontAttributeName] || [self font];
                 [self setFont:[sender convertFont:oldFont] range: currRange];
             }
