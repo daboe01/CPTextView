@@ -754,7 +754,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 
     var start = ((aSel.location < _startTrackingLocation)? aSel.location:CPMaxRange(aSel));
-    aSel = [self selectionRangeForProposedRange:_MakeRangeFromAbs(_startTrackingLocation, start + move ) granularity:granularity];
+    aSel = [self selectionRangeForProposedRange:_MakeRangeFromAbs(_startTrackingLocation, start) granularity:granularity];
     [self _performSelectionFixupForRange:aSel];
 }
 
