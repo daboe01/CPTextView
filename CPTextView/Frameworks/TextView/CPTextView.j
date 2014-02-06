@@ -746,7 +746,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var aSel = CPMakeRangeCopy(_selectionRange);
 
     if (granularity !== CPSelectByCharacter)
-    {   var inWord = ![self _isCharacterAtIndex:CPMaxRange(_selectionRange) + move granularity:granularity],
+    {   var inWord = ![self _isCharacterAtIndex:(move > 0 ? CPMaxRange(_selectionRange) : _selectionRange.location) + move granularity:granularity],
             bSel;
         aSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(_selectionRange) : _selectionRange.location) + move, 0) granularity:granularity],
         bSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(aSel) : aSel.location) + move, 0) granularity:granularity];
@@ -879,7 +879,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        var inWord = ![self _isCharacterAtIndex:CPMaxRange(_selectionRange) + 1 inCharArray:[[self class] _wordBoundaryCharacterArray]],
+        var inWord = ![self _isCharacterAtIndex:CPMaxRange(_selectionRange) + 1 granularity:CPSelectByWord],
             aSel = [self selectionRangeForProposedRange:CPMakeRange(CPMaxRange(_selectionRange) + 1, 0) granularity:CPSelectByWord],
             bSel = [self selectionRangeForProposedRange:CPMakeRange(CPMaxRange(aSel) + 1, 0) granularity:CPSelectByWord];
         [self _establishSelection:CPMakeRange(CPMaxRange(inWord? aSel:bSel), 0) byExtending:NO];
@@ -1031,7 +1031,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        var inWord = ![self _isCharacterAtIndex:_selectionRange.location - 1 inCharArray:[[self class] _wordBoundaryCharacterArray]],
+        var inWord = ![self _isCharacterAtIndex:_selectionRange.location - 1 granularity:CPSelectByWord],
             aSel = [self selectionRangeForProposedRange:CPMakeRange(_selectionRange.location - 1, 0) granularity:CPSelectByWord],
             bSel = [self selectionRangeForProposedRange:CPMakeRange(aSel.location - 1, 0) granularity:CPSelectByWord];
         [self _establishSelection:CPMakeRange((inWord? aSel:bSel).location, 0) byExtending:NO];
