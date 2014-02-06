@@ -71,7 +71,7 @@
                attributes:[CPDictionary dictionaryWithObjects:[centeredParagraph, [CPFont boldFontWithName:"Arial" size:18], [CPColor redColor]]
                                         forKeys:[CPParagraphStyleAttributeName, CPFontAttributeName, CPForegroundColorAttributeName]]]];
 
-    [_textView insertText: [[CPAttributedString alloc] initWithString:@"lectus neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
+    [_textView insertText: [[CPAttributedString alloc] initWithString:@"lectus neque cr     as eget lectus neque cr as eget lectus cr as eget lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
 
     [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
