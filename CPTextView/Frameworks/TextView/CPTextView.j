@@ -654,6 +654,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self setSelectedRange:[self selectedRange] affinity:0 stillSelecting:NO];
     var point = [_layoutManager locationForGlyphAtIndex: [self selectedRange].location];
     _stickyXLocation= point.x;
+    _startTrackingLocation = _selectionRange.location;
 }
 
 - (void)moveDown:(id)sender
@@ -678,7 +679,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         point.x += 2;
 
         var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
-        [self setSelectedRange: CPMakeRange(dindex,0) ];
+        [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
         [self scrollRangeToVisible: CPMakeRange(dindex, 0)]
     }
 }
@@ -710,22 +711,24 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         point.x += 2;
 
         var dindex= [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
-        [self setSelectedRange: CPMakeRange(dindex,0) ];
+        [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
         [self scrollRangeToVisible: CPMakeRange(dindex, 0)]
     }
 }
 - (void)moveUpAndModifySelection:(id)sender
 {
     if (_isSelectable)
-    {   var oldSelection = _selectionRange;
+    {   var oldSelection = CPMakeRangeCopy(_selectionRange);
         [self moveUp:sender];
         [self _establishSelection:CPUnionRange(_selectionRange, oldSelection) byExtending:NO];
     }
 }
 - (void)_performSelectionFixupForRange:(CPRange)aSel
 {
-    var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
-    [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
+    aSel.location = MAX(0, aSel.location);
+    if (CPMaxRange(aSel) > [_layoutManager numberOfCharacters])
+        aSel = CPMakeRange([_layoutManager numberOfCharacters], 0);
+    [self setSelectedRange:aSel];
     var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
     _stickyXLocation = point.x;
 }
@@ -740,29 +743,34 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self _performSelectionFixupForRange:aSel];
     _startTrackingLocation = _selectionRange.location;
 }
+- (unsigned) _calculateMoveSelectionFromRange:(CPRange)aRange intoDirection:(integer)move granularity:(CPSelectionGranularity)granularity
+{
+    var inWord = ![self _isCharacterAtIndex:(move > 0 ? CPMaxRange(aRange) : aRange.location) + move granularity:granularity],
+        aSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(aRange) : aRange.location) + move, 0) granularity:granularity],
+        bSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(aSel) : aSel.location) + move, 0) granularity:granularity];
+    return move > 0 ? CPMaxRange(inWord? aSel:bSel) : (inWord? aSel:bSel).location;
+}
 
 - (void) _moveSelectionIntoDirection:(integer)move granularity:(CPSelectionGranularity)granularity
 {
-    var inWord = ![self _isCharacterAtIndex:(move > 0 ? CPMaxRange(_selectionRange) : _selectionRange.location) + move granularity:granularity],
-        aSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(_selectionRange) : _selectionRange.location) + move, 0) granularity:granularity],
-        bSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(aSel) : aSel.location) + move, 0) granularity:granularity];
-    [self _performSelectionFixupForRange:CPMakeRange(move > 0 ? CPMaxRange(inWord? aSel:bSel) : (inWord? aSel:bSel).location, 0)];
+    var pos = [self _calculateMoveSelectionFromRange:_selectionRange intoDirection:move granularity:granularity];
+    [self _performSelectionFixupForRange:CPMakeRange(pos, 0)];
 }
 
 - (void) _extendSelectionIntoDirection:(integer)move granularity:(CPSelectionGranularity)granularity
 {
     var aSel = CPMakeRangeCopy(_selectionRange);
-debugger
-    if (granularity !== CPSelectByCharacter)
-    {   var inWord = ![self _isCharacterAtIndex:(move > 0 ? CPMaxRange(_selectionRange) : _selectionRange.location) + move granularity:granularity],
-            bSel;
-        aSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(_selectionRange) : _selectionRange.location) + move, 0) granularity:granularity],
-        bSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(aSel) : aSel.location) + move, 0) granularity:granularity];
-        aSel = CPMakeRange(move > 0 ? CPMaxRange(inWord? aSel:bSel) : (inWord? aSel:bSel).location, 0);
-    }
 
-    var start = ((aSel.location < _startTrackingLocation)? aSel.location:CPMaxRange(aSel));
-    aSel = [self selectionRangeForProposedRange:_MakeRangeFromAbs(_startTrackingLocation, start) granularity:granularity];
+    if (granularity !== CPSelectByCharacter)
+    {   var pos = [self _calculateMoveSelectionFromRange:CPMakeRange(aSel.location < _startTrackingLocation? aSel.location : CPMaxRange(aSel), 0)
+                                           intoDirection:move granularity:granularity];
+        aSel = CPMakeRange(pos, 0);
+    }
+    else
+        aSel = CPMakeRange((aSel.location < _startTrackingLocation? aSel.location : CPMaxRange(aSel)) + move, 0);
+
+    var start =  aSel.location < _startTrackingLocation? aSel.location : CPMaxRange(aSel);
+    aSel = _MakeRangeFromAbs(_startTrackingLocation, aSel.location);
     [self _performSelectionFixupForRange:aSel];
 }
 
