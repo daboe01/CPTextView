@@ -722,6 +722,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self _establishSelection:CPUnionRange(_selectionRange, oldSelection) byExtending:NO];
     }
 }
+- (void)_performSelectionFixupForRange:(CPRange)aSel
+{
+    var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
+    [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
+    var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
+    _stickyXLocation = point.x;
+}
+
 - (void)_establishSelection:(CPSelection)aSel byExtending:(BOOL)flag
 {
     if (flag)
@@ -729,24 +737,26 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         aSel = CPUnionRange(aSel, _selectionRange);
     }
 
-    var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
-    [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
+    [self _performSelectionFixupForRange:aSel];
     _startTrackingLocation = _selectionRange.location;
-    var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
-    _stickyXLocation = point.x;
 }
+
+//use this instead of _establishSelectionByExtendingToRange
+- (void) _establishSelectionByExtendingIntoDirection:(integer)move granularity:(CPSelectionGranularity)granularity
+{
+    //selectionRangeForProposedRange
+}
+
 - (void) _establishSelectionByExtendingToRange:(CPRange)aRange
 {
     var move;
     if (aRange.length === 0)
         move = aRange.location - _selectionRange.location;
     else
-        move = CPMaxRange(aRange) - CPMaxRange(_selectionRange);
-    var aSel=_MakeRangeFromAbs(_startTrackingLocation, ((_selectionRange.location < _startTrackingLocation)? _selectionRange.location:CPMaxRange(_selectionRange)) + move)
-    var fullRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
-    [self setSelectedRange: CPIntersectionRange(fullRange, aSel)];
-    var point = [_layoutManager locationForGlyphAtIndex:aSel.location];
-    _stickyXLocation = point.x;
+        move = aRange.location - ((_selectionRange.location < _startTrackingLocation)? _selectionRange.location:CPMaxRange(_selectionRange));
+
+    var aSel=_MakeRangeFromAbs(_startTrackingLocation, ((_selectionRange.location < _startTrackingLocation)? _selectionRange.location:CPMaxRange(_selectionRange)) + move);
+    [self _performSelectionFixupForRange:aSel];
 }
 
 - (void)moveLeftAndModifySelection:(id)sender
