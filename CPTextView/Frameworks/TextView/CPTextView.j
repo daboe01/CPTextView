@@ -686,7 +686,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)moveDownAndModifySelection:(id)sender
 {
     if (_isSelectable)
-    {   var oldSelection = _selectionRange;
+    {   var oldSelection = CPMakeRangeCopy(_selectionRange);
         [self moveDown:sender];
         [self _establishSelection:CPUnionRange(_selectionRange, oldSelection) byExtending:NO];
     }
@@ -720,6 +720,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_isSelectable)
     {   var oldSelection = CPMakeRangeCopy(_selectionRange);
         [self moveUp:sender];
+/* aSel = CPMakeRange((aSel.location < _startTrackingLocation? aSel.location : CPMaxRange(aSel)) + move, 0);
+
+  aSel = _MakeRangeFromAbs(_startTrackingLocation, aSel.location);
+*/
         [self _establishSelection:CPUnionRange(_selectionRange, oldSelection) byExtending:NO];
     }
 }
@@ -769,7 +773,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     else
         aSel = CPMakeRange((aSel.location < _startTrackingLocation? aSel.location : CPMaxRange(aSel)) + move, 0);
 
-    var start =  aSel.location < _startTrackingLocation? aSel.location : CPMaxRange(aSel);
     aSel = _MakeRangeFromAbs(_startTrackingLocation, aSel.location);
     [self _performSelectionFixupForRange:aSel];
 }
