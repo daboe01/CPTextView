@@ -1149,7 +1149,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setTypingAttributes:(CPDictionary)attributes
 {
-debugger
     if (!attributes)
         attributes = [CPDictionary dictionary];
 
@@ -1254,7 +1253,6 @@ debugger
         }
         else
         {
-debugger
             [_typingAttributes setObject:[sender selectedFont] forKey:CPFontAttributeName];
         }
     }    

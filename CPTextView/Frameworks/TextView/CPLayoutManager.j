@@ -641,6 +641,7 @@ var _objectsInRange = function(aList, aRange)
         location = aRange.location,
         found = NO;
 
+   // try to find the first linefragment of the desired range
     for (var i = 0; i < l; i++)
     {
         if (CPLocationInRange(location, _lineFragments[i]._range))
@@ -659,13 +660,21 @@ var _objectsInRange = function(aList, aRange)
         isIdentical = YES,
         newLineFragment= _lineFragments[i],
         oldLineFragment = _lineFragmentsForRescue[i],
-        newString = [[_textStorage string] substringWithRange: _lineFragments[i]._range];
+        oldLength = CPMaxRange([_lineFragmentsForRescue lastObject]._range),
+        newLength = [[_textStorage string].length];
 
     if (![oldLineFragment isVisuallyIdenticalToFragment: newLineFragment])
     {
         isIdentical = NO;
-        if (newString == "\n")  // newline entered in its own line-> move down
+        if (newLength < oldLength && oldLineFragment._range.length == 1 && newLineFragment._range.length > 1 && newLineFragment._range.location === oldLineFragment._range.location) // deleting newline in its own line-> move up instead of re.layouting
         {
+            isIdentical = YES;
+            i--;
+            startLineForDOMRemoval--;
+        }
+        if (newLength > oldLength && newLineFragment._range.length == 1 && oldLineFragment._range.length > 1 && newLineFragment._range.location === oldLineFragment._range.location)  // newline entered in its own line-> move down instead of re.layouting
+        {
+debugger
             isIdentical = YES;
             startLineForDOMRemoval--;
         }
@@ -684,7 +693,6 @@ var _objectsInRange = function(aList, aRange)
         for (var i = startLineForDOMRemoval + 1; i < l; i++)
         {
             _lineFragmentsForRescue[i]._isInvalid = NO;    // protect them from final removal
-            //if()
             [_lineFragmentsForRescue[i] _relocateVerticallyByY:verticalOffset rangeOffset:rangeOffset];
             _lineFragments.push(_lineFragmentsForRescue[i]);
         }
