@@ -539,9 +539,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
         [[CPNotificationCenter defaultCenter] postNotificationName:CPTextViewDidChangeSelectionNotification object:self];
 
-        // TODO: check multiple font in selection
-        var attributes = [_textStorage attributesAtIndex:_selectionRange.location effectiveRange:nil];
-        [self setTypingAttributes:attributes];
+        [self setTypingAttributes:[_textStorage attributesAtIndex:MAX(0, range.location -1) effectiveRange:nil]];
     }
 }
 
@@ -761,6 +759,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     var pos = [self _calculateMoveSelectionFromRange:_selectionRange intoDirection:move granularity:granularity];
     [self _performSelectionFixupForRange:CPMakeRange(pos, 0)];
+    _startTrackingLocation = _selectionRange.location;
 }
 
 - (void) _extendSelectionIntoDirection:(integer)move granularity:(CPSelectionGranularity)granularity
@@ -840,14 +839,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-         var parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(_selectionRange)
-                              inString:[self stringValue]
-                              asDefinedByCharArray: ['\n'] skip:YES];
-
-         parRange = [self _characterRangeForUnitAtIndex:CPMaxRange(parRange)
-                                  inString:[self stringValue]
-                                  asDefinedByCharArray: ['\n'] skip:NO]
-         [self _establishSelection:CPMakeRange(CPMaxRange(parRange), 0) byExtending:NO];
+	    [self _moveSelectionIntoDirection: +1 granularity:CPSelectByParagraph]
     }
 }
 - (void) moveWordBackwardAndModifySelection:(id)sender
@@ -1227,9 +1219,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)setFont:(CPFont)font range:(CPRange)range
 {
     if (!_isRichText)
-        return;
-
-    if (CPMaxRange(range) >= [_layoutManager numberOfCharacters])
     {
         _font = font;
         [_textStorage setFont:_font];
@@ -1263,20 +1252,21 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         {
             while (CPMaxRange(currRange) < CPMaxRange(_selectionRange))  // iterate all "runs"
             {
-            attributes = [_textStorage attributesAtIndex: CPMaxRange(currRange)
-                 longestEffectiveRange:currRange
-                 inRange:_selectionRange];
+                attributes = [_textStorage attributesAtIndex:CPMaxRange(currRange)
+                                       longestEffectiveRange:currRange
+                                                     inRange:_selectionRange];
                 oldFont = [attributes objectForKey:CPFontAttributeName] || [self font];
                 [self setFont:[sender convertFont:oldFont] range: currRange];
             }
         }
         else
+        {
             [_typingAttributes setObject: [sender convertFont:oldFont] forKey:CPFontAttributeName];
+        }
     }    
     else
     {
-        attributes = [_textStorage attributesAtIndex:_selectionRange.location effectiveRange:nil];
-        oldFont = [attributes objectForKey:CPFontAttributeName] || [self font];
+        oldFont = [self font];
         var length = [_textStorage length];
         [self setFont:[sender convertFont:oldFont] range:CPMakeRange(0,length)];
         scrollRange = CPMakeRange(length, 0);

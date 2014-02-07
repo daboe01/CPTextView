@@ -93,8 +93,11 @@ CPRichStringPboardType = "CPRichStringPboardType";
       //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
         stringForPasting = [pasteboard stringForType:CPStringPboardType];
 
-    if ([self isRichText] && [stringForPasting hasPrefix:"{\\rtf1\\ansi"])
+    if ([stringForPasting hasPrefix:"{\\rtf1\\ansi"])
         stringForPasting = [[_RTFParser new] parseRTF:stringForPasting];
+
+    if (![self isRichText] && [stringForPasting isKindOfClass:[CPAttributedString class]])
+        stringForPasting = stringForPasting._string;
 
     if (stringForPasting)
         [self insertText:stringForPasting];
