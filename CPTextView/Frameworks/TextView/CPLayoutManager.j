@@ -910,6 +910,7 @@ debugger
     [tempAttributes._attributes addEntriesFromDictionary:attributes];
 }
 
+// i did not touch this monster (yet)
 - (void)_handleTemporaryAttributes:(CPDictionary)attributes forCharacterRange:(CPRange)charRange withSelector:(SEL)attributesOperation
 {
     if (!_temporaryAttributes)
@@ -919,7 +920,8 @@ debugger
         length = 0,
         dirtyRange = nil;
 
-    do {
+    while (length != charRange.length)
+    {
         var tempAttributesIndex = [_temporaryAttributes indexOfObject: location sortedByFunction:_sortRange context:nil];
 
         if (tempAttributesIndex != CPNotFound)
@@ -998,7 +1000,7 @@ debugger
             dirtyRange = CPMakeRangeCopy(charRange);
             break;
         }
-    } while (length != charRange.length);
+    }
 
     if (dirtyRange)
         [self invalidateDisplayForGlyphRange:dirtyRange];
@@ -1014,6 +1016,7 @@ debugger
     [self _handleTemporaryAttributes:attributes forCharacterRange:charRange withSelector:@selector(_addAttributes:toTemporaryAttributes:)];
 }
 
+// i did not touch this monster (yet)
 - (void)removeTemporaryAttribute:(CPString)attributeName forCharacterRange:(CPRange)charRange
 {
     if (!_temporaryAttributes)
@@ -1022,7 +1025,8 @@ debugger
     var location = charRange.location,
         length = 0,
         dirtyRange = nil;
-    do {
+    while (length != charRange.length)
+    {
         var tempAttributesIndex = [_temporaryAttributes indexOfObject: location sortedByFunction:_sortRange context:nil];
 
         if (tempAttributesIndex != CPNotFound)
@@ -1106,7 +1110,7 @@ debugger
         }
         else
             break;
-    } while (length != charRange.length);
+    }
 
     if (dirtyRange)
         [self invalidateDisplayForGlyphRange:dirtyRange];
