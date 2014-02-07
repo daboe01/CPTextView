@@ -243,7 +243,7 @@ var _availableTraits= [@"Normal", @"Italic", @"Bold", @"Bold Italic"],
 {
     if ([self isVisible])
     {
-        var attribs = [[textView textStorage] attributesAtIndex:[textView selectedRange].location effectiveRange:nil],
+        var attribs = [textView typingAttributes],
             font = [attribs objectForKey:CPFontAttributeName] || [[textView textStorage] font] || [CPFont systemFontOfSize:12.0];
 
         if (font)

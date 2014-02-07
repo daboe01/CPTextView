@@ -1253,7 +1253,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         }
         else
         {
-            [_typingAttributes setObject: [sender convertFont:oldFont] || [self font] forKey:CPFontAttributeName];
+		debugger
+            [_typingAttributes setObject: [sender convertFont:oldFont] || [sender selectedFont] forKey:CPFontAttributeName];
         }
     }    
     else
