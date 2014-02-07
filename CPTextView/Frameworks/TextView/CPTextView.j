@@ -396,7 +396,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void)_replaceCharactersInRange: aRange withString: aString
 {
-    [_textStorage replaceCharactersInRange:CPMakeRangeCopy( aRange) withString:aString];
+    [_textStorage replaceCharactersInRange:CPMakeRangeCopy(aRange) withString:aString];
     [self setSelectedRange:CPMakeRange(aRange.location, aString.length)];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
@@ -412,21 +412,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (![self shouldChangeTextInRange:CPMakeRangeCopy(_selectionRange) replacementString:string])
         return;
 
-    if (_selectionRange.length === 0)
-    {
-        [[[[self window] undoManager] prepareWithInvocationTarget:self] _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [string length]) withString:@""];
-        [[[self window] undoManager] setActionName:@"Insert text"];
-    }
 
     if (isAttributed)
     {
-        if (_selectionRange.length > 0)
-        {
-            [[[[self window] undoManager] prepareWithInvocationTarget: self]
+        [[[[self window] undoManager] prepareWithInvocationTarget: self]
                 _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length])
                 withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)]];
-            [[[self window] undoManager] setActionName:@"Replace rich text"];
-        }
+        [[[self window] undoManager] setActionName:@"Replace rich text"];
 
         [_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withAttributedString:aString];
     }
