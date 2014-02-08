@@ -290,6 +290,12 @@ var _objectsInRange = function(aList, aRange)
     for (var i = 0; i < c; i++)
     {
         var run = runs[i];
+
+        if (run.DOMactive && !run.DOMpatched)
+        {
+            continue;
+        }
+
         orig.x = _glyphsFrames[run._range.location - _runs[0]._range.location].origin.x + aPoint.x;
 
         run.elem.style.left = (orig.x) + "px";
@@ -299,6 +305,7 @@ var _objectsInRange = function(aList, aRange)
             _textContainer._textView._DOMElement.appendChild(run.elem);
 
         run.DOMactive = YES;
+        run.DOMpatched = NO;
 
         if (run.underline)
         {
@@ -350,7 +357,10 @@ var _objectsInRange = function(aList, aRange)
         _runs[i]._range.location += rangeOffset;
 
         if (verticalOffset)
+        {
             _runs[i].elem.top = (_runs[i].elem.top + verticalOffset) + 'px';
+            _runs[i].DOMpatched = YES;
+        }
     }
 
     if (!verticalOffset)
@@ -365,7 +375,6 @@ var _objectsInRange = function(aList, aRange)
     {
         _glyphsFrames[i].origin.y += verticalOffset;
     }
-
 }
 
 @end

@@ -664,8 +664,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         point.y += 2 + rectSource.size.height;
         point.x += 2;
 
-        var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
+        var dindex= [_layoutManager glyphIndexForPoint: point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction],
+            oldStickyLoc = _stickyXLocation;
         [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
+        _stickyXLocation = oldStickyLoc;
         [self scrollRangeToVisible: CPMakeRange(dindex, 0)]
     }
 }
@@ -699,8 +701,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         point.y -= 2;    // FIXME <!> these should not be constants
         point.x += 2;
 
-        var dindex= [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
+        var dindex= [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction],
+            oldStickyLoc = _stickyXLocation;
         [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
+        _stickyXLocation = oldStickyLoc;
         [self scrollRangeToVisible: CPMakeRange(dindex, 0)]
     }
 }
