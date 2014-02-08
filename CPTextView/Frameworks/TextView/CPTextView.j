@@ -458,11 +458,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)drawRect:(CPRect)aRect
 {
     var ctx = [[CPGraphicsContext currentContext] graphicsPort],
-        //  CGContextClearRect(ctx, aRect);
         range = [_layoutManager glyphRangeForBoundingRect:aRect inTextContainer:_textContainer];
-
-    if (range.length)
-        [_layoutManager drawBackgroundForGlyphRange:range atPoint:_textContainerOrigin];
 
     if (_selectionRange.length)
     {
