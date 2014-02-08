@@ -1328,7 +1328,7 @@ var _objectsInRange = function(aList, aRange)
         return lineFragment._textContainer;
     }
 
-    return nil;
+    return [_textContainers lastObject];
 }
 
 - (CPTextContainer)textContainerForGlyphAtIndex:(unsigned)index effectiveRange:(CPRangePointer)effectiveGlyphRange

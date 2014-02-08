@@ -226,7 +226,7 @@ var _sharedSimpleTypesetter = nil;
 {
     _layoutManager = layoutManager;
     _textStorage = [_layoutManager textStorage];
-    _indexOfCurrentContainer = 0; // fixme<!> [_currentTextContainer textContainerForGlyphAtIndex: effectiveRange:nil withoutAdditionalLayout:YES]
+    _indexOfCurrentContainer = [_layoutManager textContainerForGlyphAtIndex:glyphIndex effectiveRange:nil withoutAdditionalLayout:YES]
     _currentTextContainer = [[_layoutManager textContainers] objectAtIndex: _indexOfCurrentContainer];
     _attributesRange = CPMakeRange(0, 0);
     _lineHeight = 0;
