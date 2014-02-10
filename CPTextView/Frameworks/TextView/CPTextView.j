@@ -4,7 +4,7 @@
  *
  *  Created by Daniel Boehringer on 27/12/2013.
  *  All modifications copyright Daniel Boehringer 2013.
- *  Based on original work by
+ *  Based on original
  *  Created by Emmanuel Maillard on 27/02/2010.
  *  Copyright Emmanuel Maillard 2010.
  *
@@ -37,11 +37,11 @@ _MakeRangeFromAbs = function(a1, a2)
 };
 _MidRange = function(a1)
 {
-    return Math.floor((CPMaxRange(a1) + a1.location) / 2);
+    return FLOOR((CPMaxRange(a1) + a1.location) / 2);
 };
 
 
-// FIXME: move to theme ?
+// FIXME: move to theme!
 @implementation CPColor(CPTextViewExtensions)
 
 + (CPColor)selectedTextBackgroundColor
@@ -435,7 +435,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         }
         else
         {
-            [[[[self window] undoManager] prepareWithInvocationTarget:self] _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length]) withString:[[self string] substringWithRange:CPMakeRangeCopy(_selectionRange)]];
+            [[[[self window] undoManager] prepareWithInvocationTarget:self] _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length])
+                                                                                           withString:[[self string] substringWithRange:CPMakeRangeCopy(_selectionRange)]];
             [_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString:aString];
         }
     }
