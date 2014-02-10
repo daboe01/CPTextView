@@ -211,10 +211,10 @@ CPRemoveTraitFontAction = 7;
 - (void)modifyFontViaPanel:(id)sender
 {
     _fontAction = CPViaPanelFontAction;
-    [self sendAction];
-
     if (_selectedFont)
         [self setSelectedFont:[self convertFont:_selectedFont] isMultiple:NO];
+
+    [self sendAction];
 }
 
 /*!

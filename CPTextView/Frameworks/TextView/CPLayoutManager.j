@@ -290,6 +290,12 @@ var _objectsInRange = function(aList, aRange)
     for (var i = 0; i < c; i++)
     {
         var run = runs[i];
+
+        if (run.DOMactive && !run.DOMpatched)
+        {
+            continue;
+        }
+
         orig.x = _glyphsFrames[run._range.location - _runs[0]._range.location].origin.x + aPoint.x;
 
         run.elem.style.left = (orig.x) + "px";
@@ -299,6 +305,7 @@ var _objectsInRange = function(aList, aRange)
             _textContainer._textView._DOMElement.appendChild(run.elem);
 
         run.DOMactive = YES;
+        run.DOMpatched = NO;
 
         if (run.underline)
         {
@@ -350,7 +357,10 @@ var _objectsInRange = function(aList, aRange)
         _runs[i]._range.location += rangeOffset;
 
         if (verticalOffset)
+        {
             _runs[i].elem.top = (_runs[i].elem.top + verticalOffset) + 'px';
+            _runs[i].DOMpatched = YES;
+        }
     }
 
     if (!verticalOffset)
@@ -365,7 +375,6 @@ var _objectsInRange = function(aList, aRange)
     {
         _glyphsFrames[i].origin.y += verticalOffset;
     }
-
 }
 
 @end
@@ -641,6 +650,7 @@ var _objectsInRange = function(aList, aRange)
         location = aRange.location,
         found = NO;
 
+   // try to find the first linefragment of the desired range
     for (var i = 0; i < l; i++)
     {
         if (CPLocationInRange(location, _lineFragments[i]._range))
@@ -659,12 +669,19 @@ var _objectsInRange = function(aList, aRange)
         isIdentical = YES,
         newLineFragment= _lineFragments[i],
         oldLineFragment = _lineFragmentsForRescue[i],
-        newString = [[_textStorage string] substringWithRange: _lineFragments[i]._range];
+        oldLength = CPMaxRange([_lineFragmentsForRescue lastObject]._range),
+        newLength = [[_textStorage string].length];
 
     if (![oldLineFragment isVisuallyIdenticalToFragment: newLineFragment])
     {
         isIdentical = NO;
-        if (newString == "\n")  // newline entered in its own line-> move down
+        if (newLength < oldLength && oldLineFragment._range.length == 1 && newLineFragment._range.length > 1 && newLineFragment._range.location === oldLineFragment._range.location) // deleting newline in its own line-> move up instead of re.layouting
+        {
+            isIdentical = YES;
+            i--;
+            startLineForDOMRemoval--;
+        }
+        if (newLength > oldLength && newLineFragment._range.length == 1 && oldLineFragment._range.length > 1 && newLineFragment._range.location === oldLineFragment._range.location)  // newline entered in its own line-> move down instead of re.layouting
         {
             isIdentical = YES;
             startLineForDOMRemoval--;
@@ -684,7 +701,6 @@ var _objectsInRange = function(aList, aRange)
         for (var i = startLineForDOMRemoval + 1; i < l; i++)
         {
             _lineFragmentsForRescue[i]._isInvalid = NO;    // protect them from final removal
-            //if()
             [_lineFragmentsForRescue[i] _relocateVerticallyByY:verticalOffset rangeOffset:rangeOffset];
             _lineFragments.push(_lineFragmentsForRescue[i]);
         }
@@ -902,6 +918,7 @@ var _objectsInRange = function(aList, aRange)
     [tempAttributes._attributes addEntriesFromDictionary:attributes];
 }
 
+// i did not touch this monster (yet)
 - (void)_handleTemporaryAttributes:(CPDictionary)attributes forCharacterRange:(CPRange)charRange withSelector:(SEL)attributesOperation
 {
     if (!_temporaryAttributes)
@@ -911,7 +928,8 @@ var _objectsInRange = function(aList, aRange)
         length = 0,
         dirtyRange = nil;
 
-    do {
+    while (length != charRange.length)
+    {
         var tempAttributesIndex = [_temporaryAttributes indexOfObject: location sortedByFunction:_sortRange context:nil];
 
         if (tempAttributesIndex != CPNotFound)
@@ -990,7 +1008,7 @@ var _objectsInRange = function(aList, aRange)
             dirtyRange = CPMakeRangeCopy(charRange);
             break;
         }
-    } while (length != charRange.length);
+    }
 
     if (dirtyRange)
         [self invalidateDisplayForGlyphRange:dirtyRange];
@@ -1006,6 +1024,7 @@ var _objectsInRange = function(aList, aRange)
     [self _handleTemporaryAttributes:attributes forCharacterRange:charRange withSelector:@selector(_addAttributes:toTemporaryAttributes:)];
 }
 
+// i did not touch this monster (yet)
 - (void)removeTemporaryAttribute:(CPString)attributeName forCharacterRange:(CPRange)charRange
 {
     if (!_temporaryAttributes)
@@ -1014,7 +1033,8 @@ var _objectsInRange = function(aList, aRange)
     var location = charRange.location,
         length = 0,
         dirtyRange = nil;
-    do {
+    while (length != charRange.length)
+    {
         var tempAttributesIndex = [_temporaryAttributes indexOfObject: location sortedByFunction:_sortRange context:nil];
 
         if (tempAttributesIndex != CPNotFound)
@@ -1098,7 +1118,7 @@ var _objectsInRange = function(aList, aRange)
         }
         else
             break;
-    } while (length != charRange.length);
+    }
 
     if (dirtyRange)
         [self invalidateDisplayForGlyphRange:dirtyRange];
@@ -1317,7 +1337,7 @@ var _objectsInRange = function(aList, aRange)
         return lineFragment._textContainer;
     }
 
-    return nil;
+    return [_textContainers lastObject];
 }
 
 - (CPTextContainer)textContainerForGlyphAtIndex:(unsigned)index effectiveRange:(CPRangePointer)effectiveGlyphRange

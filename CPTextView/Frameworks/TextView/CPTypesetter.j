@@ -189,7 +189,6 @@ var _sharedSimpleTypesetter = nil;
         currentContainerSize:(CPSize)containerSize
         advancements:(CPArray)advancements
         lineCount:(unsigned)lineCount
-        isLast:(BOOL)isLast
 {
     [_layoutManager setTextContainer:_currentTextContainer forGlyphRange:lineRange];  // creates a new lineFragment
     var rect = CPRectMake(lineOrigin.x, lineOrigin.y, _lineWidth, _lineHeight);
@@ -214,12 +213,6 @@ var _sharedSimpleTypesetter = nil;
     [_layoutManager setLocation:CPMakePoint(myX, _lineBase) forStartOfGlyphRange:lineRange];
     [_layoutManager _setAdvancements:advancements forGlyphRange:lineRange];
 
-    if (isLast)
-    {
-        rect = CPRectMake(lineOrigin.x + _lineWidth, lineOrigin.y, containerSize.width - _lineWidth, _lineHeight);
-        [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
-    }
-
     if (!lineCount)
         return NO;
 
@@ -233,8 +226,10 @@ var _sharedSimpleTypesetter = nil;
 {
     _layoutManager = layoutManager;
     _textStorage = [_layoutManager textStorage];
-    _indexOfCurrentContainer = 0; // fixme<!> [_currentTextContainer textContainerForGlyphAtIndex: effectiveRange:nil withoutAdditionalLayout:YES]
-    _currentTextContainer = [[_layoutManager textContainers] objectAtIndex: _indexOfCurrentContainer];
+    _indexOfCurrentContainer = MAX(0, [[_layoutManager textContainers]
+                                   indexOfObject:[_layoutManager textContainerForGlyphAtIndex:glyphIndex effectiveRange:nil withoutAdditionalLayout:YES]
+                                   inRange:CPMakeRange(0, [[_layoutManager textContainers] count])]);
+    _currentTextContainer = [[_layoutManager textContainers] objectAtIndex:_indexOfCurrentContainer];
     _attributesRange = CPMakeRange(0, 0);
     _lineHeight = 0;
     _lineBase = 0;
@@ -345,7 +340,7 @@ var _sharedSimpleTypesetter = nil;
 
             if (isNewline || isTabStop)
             {
-                if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines isLast:NO])
+                if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines])
                     return;
 
                 if (isTabStop)
@@ -386,7 +381,13 @@ var _sharedSimpleTypesetter = nil;
 
     // this is to "flush" the remaining characters
     if (lineRange.length)
-        [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines isLast:YES];
+        [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines];
+
+    if ([theString.charAt(theString.length - 1) ==="\n"])
+    {
+        var rect = CPRectMake(0, lineOrigin.y, containerSize.width, [_layoutManager._lineFragments lastObject]._usedRect.size.height);   // fixme: row-height is crudely hacked
+        [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
+    }
 }
 
 @end
