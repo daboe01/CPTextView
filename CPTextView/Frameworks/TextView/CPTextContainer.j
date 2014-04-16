@@ -117,10 +117,31 @@ CPLineMovesUp = 4;
 
 }
 
+// Controls whether the receiver adjusts the width of its bounding rectangle when its text view is resized.
 - (void)setWidthTracksTextView:(BOOL)flag
 {
-    //<!> fixme: Controls whether the receiver adjusts the width of its bounding rectangle when its text view is resized.
+    [_textView setPostsFrameChangedNotifications:flag];
+
+    if (flag)
+	{
+        [[CPNotificationCenter defaultCenter] addObserver:self
+                selector:@selector(textViewFrameChanged:)
+                    name:CPViewFrameDidChangeNotification
+                  object:_textView];
+    }
+    else
+    {
+        [[CPNotificationCenter defaultCenter] removeObserver:self
+                    name:CPViewFrameDidChangeNotification
+                  object:_textView];
+    }
 }
+
+- (void) textViewFrameChanged:(CPNotification)aNotification
+{
+    [self setContainerSize:[_textView frame].size];
+}
+
 
 - (void)setTextView:(CPTextView)aTextView
 {
