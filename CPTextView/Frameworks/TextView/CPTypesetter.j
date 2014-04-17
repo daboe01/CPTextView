@@ -57,11 +57,11 @@ function _widthOfStringForFont(aString, aFont)
         _measuringContext.font = [aFont cssString];
         _isCanvasSizingInvalid = [teststring sizeWithFont:aFont].width != _measuringContext.measureText(teststring).width;
     }
-    if (!CPFeatureIsCompatible(CPHTMLCanvasFeature) || _isCanvasSizingInvalid)  // measuring with canvas is _much_ faster on chrome
+    if ((!CPFeatureIsCompatible(CPHTMLCanvasFeature) || _isCanvasSizingInvalid))  // measuring with canvas is _much_ faster on chrome
         return [aString sizeWithFont:aFont];
     if (_measuringContextFont !== aFont)
     {
-        _measuringContextFont = aFont
+        _measuringContextFont = aFont;
         _measuringContext.font = [aFont cssString];
     }
     return _measuringContext.measureText(aString);
@@ -226,10 +226,10 @@ var _sharedSimpleTypesetter = nil;
         nextGlyphIndex:(UIntegerReference)nextGlyph
 {
     _layoutManager = layoutManager;
-    _textStorage = [_layoutManager textStorage];
     _indexOfCurrentContainer = MAX(0, [[_layoutManager textContainers]
                                    indexOfObject:[_layoutManager textContainerForGlyphAtIndex:glyphIndex effectiveRange:nil withoutAdditionalLayout:YES]
                                    inRange:CPMakeRange(0, [[_layoutManager textContainers] count])]);
+    _textStorage = [_layoutManager textStorage];
     _currentTextContainer = [[_layoutManager textContainers] objectAtIndex:_indexOfCurrentContainer];
     _attributesRange = CPMakeRange(0, 0);
     _lineHeight = 0;
@@ -279,7 +279,7 @@ var _sharedSimpleTypesetter = nil;
                 _currentParagraph = [_currentAttributes objectForKey:CPParagraphStyleAttributeName] || [CPParagraphStyle defaultParagraphStyle];
 
                 if (!_currentFont)
-                    _currentFont = [_textStorage font];
+                    _currentFont = [_textStorage font] || [CPFont systemFontOfSize:12.0];
 
                 ascent = ["x" sizeWithFont:_currentFont].height; //FIXME
                 descent = 0;    //FIXME
@@ -334,7 +334,7 @@ var _sharedSimpleTypesetter = nil;
 
                 isNewline = YES;
                 isWordWrapped = YES;
-                glyphIndex = CPMaxRange(lineRange) - 1;
+                glyphIndex = CPMaxRange(lineRange) - 1;  // start the line starts directly at current character 
             }
 
             _lineHeight = MAX(_lineHeight, ascent - descent + leading);
@@ -362,7 +362,7 @@ var _sharedSimpleTypesetter = nil;
                     if (lineOrigin.y > [_currentTextContainer containerSize].height)
                     {
                         _indexOfCurrentContainer++;
-						_indexOfCurrentContainer=MAX(_indexOfCurrentContainer, [[_layoutManager textContainers] count]-1);
+                        _indexOfCurrentContainer=MAX(_indexOfCurrentContainer, [[_layoutManager textContainers] count] - 1);
                         _currentTextContainer = [[_layoutManager textContainers] objectAtIndex: _indexOfCurrentContainer];
                     }
                     lineOrigin.x = 0;
@@ -371,12 +371,12 @@ var _sharedSimpleTypesetter = nil;
                 }
                _lineWidth      = 0;
                 advancements   = [];
-                prevRangeWidth = 0;
                 currentAnchor  = 0;
+                prevRangeWidth = 0;
                _lineHeight     = 0;
                _lineBase       = 0;
-               _previousFont   = nil;
                 lineRange      = CPMakeRange(glyphIndex + 1, 0);
+                measuringRange = CPMakeRange(glyphIndex + 1, 0);
                 wrapRange      = CPMakeRange(0, 0);
                 wrapWidth      = 0;
                 isWordWrapped  = NO;
@@ -385,8 +385,8 @@ var _sharedSimpleTypesetter = nil;
 
     // this is to "flush" the remaining characters
     if (lineRange.length)
-        [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines];
-
+    {   [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines];
+    }
     if ([theString.charAt(theString.length - 1) === "\n"])
     {
         var rect = CGRectMake(0, lineOrigin.y, containerSize.width, [_layoutManager._lineFragments lastObject]._usedRect.size.height);   // fixme: row-height is crudely hacked

@@ -637,7 +637,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 
     [self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
-
+if([aString string]=='x') debugger
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];

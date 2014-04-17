@@ -111,10 +111,12 @@ CPLineMovesUp = 4;
     _size = someSize;
 
     if (oldSize.width != _size.width)
+    {
         [_layoutManager invalidateLayoutForCharacterRange:CPMakeRange(0,[[_layoutManager textStorage] length])
                         isSoft:NO
                         actualCharacterRange:NULL];
-
+        [_layoutManager _validateLayoutAndGlyphs];
+    }
 }
 
 // Controls whether the receiver adjusts the width of its bounding rectangle when its text view is resized.
@@ -140,8 +142,7 @@ CPLineMovesUp = 4;
 - (void) textViewFrameChanged:(CPNotification)aNotification
 {
 	var newSize=CPMakeSize([_textView frame].size.width, _size.height);
-debugger 
-   [self setContainerSize:newSize];
+    [self setContainerSize:newSize];
 }
 
 
