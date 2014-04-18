@@ -657,7 +657,7 @@ var _objectsInRange = function(aList, aRange)
     for (var i = 0; i < l; i++)
     {
         if (CPLocationInRange(location, _lineFragments[i]._range))
-        {    found = YES;
+        {   found = YES;
             break;
         }
     }
@@ -674,6 +674,9 @@ var _objectsInRange = function(aList, aRange)
         oldLineFragment = _lineFragmentsForRescue[i],
         oldLength = CPMaxRange([_lineFragmentsForRescue lastObject]._range),
         newLength = [[_textStorage string].length];
+
+    if(ABS(newLength - oldLength) > 1)
+        return NO;
 
     if (![oldLineFragment isVisuallyIdenticalToFragment: newLineFragment])
     {
