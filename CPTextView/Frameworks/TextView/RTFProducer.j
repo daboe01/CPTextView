@@ -36,7 +36,7 @@ CPISOLatin1StringEncoding = "CPISOLatin1StringEncoding";
 function _points2twips(a) { return (a)*20.0; }
 
 
-@implementation RTFProducer:CPObject
+@implementation _CPRTFProducer:CPObject
 {
     CPAttributedString text;
     CPMutableDictionary fontDict;

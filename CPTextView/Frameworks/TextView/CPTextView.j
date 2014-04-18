@@ -30,6 +30,8 @@
 @import "CPLayoutManager.j"
 @import <AppKit/CPFontManager.j>
 @import "CPFontManagerAdditions.j"
+@import "RTFProducer.j"
+@import "RTFParser.j"
 
 @class _CPRTFProducer;
 @class _CPRTFParser;
