@@ -33,6 +33,7 @@
 @import <AppKit/CPFontManager.j>
 @import <AppKit/CPPanel.j>
 @import "CPLayoutManager.j"
+@import "CPFontManagerAdditions.j"
 
 /*
     Collection indexes
