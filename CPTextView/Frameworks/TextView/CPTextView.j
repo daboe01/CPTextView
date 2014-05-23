@@ -130,15 +130,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     CPLog.error(@"-[CPText " + _cmd + "] subclass responsibility");
 }
 
-- (void)cut:(id)sender
-{
-    [self copy:sender];
-
-    var loc = [self selectedRange].location;
-
-    [self replaceCharactersInRange:[self selectedRange] withString:""];
-    [self setSelectedRange:CPMakeRange(loc,0) ];
-}
 
 - (void)delete:(id)sender
 {
@@ -293,6 +284,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     CPRange         _selectionRange;
     CPDictionary    _selectedTextAttributes;
     int             _selectionGranularity;
+    int             _previousSelectionGranularity;
 
     CPColor         _insertionPointColor;
 
@@ -639,7 +631,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 
     [self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
-if([aString string]=='x') debugger
+
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
@@ -834,6 +826,7 @@ if([aString string]=='x') debugger
 - (void)mouseUp:(CPEvent)event
 {
     /* will post CPTextViewDidChangeSelectionNotification */
+    _previousSelectionGranularity = [self selectionGranularity];
     [self setSelectionGranularity:CPSelectByCharacter];
     [self setSelectedRange:[self selectedRange] affinity:0 stillSelecting:NO];
     var point = [_layoutManager locationForGlyphAtIndex:[self selectedRange].location];
@@ -1275,7 +1268,12 @@ if([aString string]=='x') debugger
     else
         changedRange = _selectionRange;
 
+    if (_previousSelectionGranularity > 0 &&
+        changedRange.location > 0 && [self _isCharacterAtIndex:changedRange.location-1 granularity:_previousSelectionGranularity] &&
+        changedRange.location < [[self string] length] && [self _isCharacterAtIndex:CPMaxRange(changedRange) granularity:_previousSelectionGranularity])
+        changedRange.length++;
     [self _deleteForRange:changedRange];
+
 }
 
 - (void)deleteForward:(id)sender
