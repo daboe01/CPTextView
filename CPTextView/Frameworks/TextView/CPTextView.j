@@ -1021,8 +1021,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void)moveParagraphForward:(id)sender
 {
-debugger
-
     if (_isSelectable)
     {
        [self _moveSelectionIntoDirection:+1 granularity:CPSelectByParagraph]
