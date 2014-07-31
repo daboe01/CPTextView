@@ -363,6 +363,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _isHorizontallyResizable = NO;
 
         _caretRect = CGRectMake(0,0,1,11);
+        [self setBackgroundColor:[CPColor whiteColor]];
     }
 
     [self registerForDraggedTypes:[CPColorDragType]];

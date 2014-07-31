@@ -24,6 +24,28 @@
     
     [contentView setBackgroundColor:[CPColor colorWithWhite:0.95 alpha:1.0]];
 
+    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,200,200)];
+  //  [_textView setBackgroundColor:[CPColor whiteColor]];
+
+    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(20, 20,220,210)];
+    [scrollView setDocumentView:_textView]; 
+
+    [contentView addSubview: scrollView];
+
+   [_textView setDelegate:self];
+
+ 
+    [theWindow orderFront:self];
+}
+- (void)applicationDidFinishLaunching3:(CPNotification)aNotification
+{
+   // CPLogRegister(CPLogConsole);
+
+    var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask],
+        contentView = [theWindow contentView];
+    
+    [contentView setBackgroundColor:[CPColor colorWithWhite:0.95 alpha:1.0]];
+
     _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
     _textView2 = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
     _textView2._isRichText = NO;
