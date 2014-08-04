@@ -55,7 +55,7 @@ function _widthOfStringForFont(aString, aFont)
         var teststring = "0123456879abcdefghiklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.-()";
         _didTestCanvasSizingValid = YES;
         _measuringContext.font = [aFont cssString];
-        _isCanvasSizingInvalid = [teststring sizeWithFont:aFont].width != _measuringContext.measureText(teststring).width;
+        _isCanvasSizingInvalid = Math.round([teststring sizeWithFont:aFont].width) != Math.round(_measuringContext.measureText(teststring).width);
     }
     if ((!CPFeatureIsCompatible(CPHTMLCanvasFeature) || _isCanvasSizingInvalid))  // measuring with canvas is _much_ faster on chrome
         return [aString sizeWithFont:aFont];
