@@ -1639,7 +1639,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var minSize = [self minSize],
         maxSize = [self maxSize],
         desiredSize = aSize,
-        rect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(0, MAX(0, [_layoutManager numberOfCharacters] - 1)) inTextContainer:_textContainer];
+        rect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(0, MAX(0, [_layoutManager numberOfCharacters] - 1)) inTextContainer:_textContainer],
+        myClipviewSize = nil;
+
+    if ([[self superview] isKindOfClass:[CPClipView class]])
+        myClipviewSize = [[self superview] frame].size;
 
     if ([_layoutManager extraLineFragmentTextContainer] === _textContainer)
         rect = CGRectUnion(rect, [_layoutManager extraLineFragmentRect]);
@@ -1663,6 +1667,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         else if (desiredSize.height > maxSize.height)
             desiredSize.height = maxSize.height;
     }
+	if (myClipviewSize)
+	{
+		if (desiredSize.width < myClipviewSize.width)
+			desiredSize.width = myClipviewSize.width;
+		if (desiredSize.height < myClipviewSize.height)
+			desiredSize.height = myClipviewSize.height;
+	}
 
     [super setFrameSize:desiredSize];
 }

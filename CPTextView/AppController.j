@@ -22,21 +22,23 @@
     var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask],
         contentView = [theWindow contentView];
     
-    [contentView setBackgroundColor:[CPColor colorWithWhite:0.95 alpha:1.0]];
+    [contentView setBackgroundColor:[CPColor colorWithWhite:0.5 alpha:1.0]];
 
-    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,200,200)];
+    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0, 370,200)];
   //  [_textView setBackgroundColor:[CPColor whiteColor]];
 
-    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(20, 20,220,210)];
+    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, 400,400)];
     [scrollView setDocumentView:_textView]; 
 
+    [_textView setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
+    [scrollView setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
     [contentView addSubview: scrollView];
+   //[[_textView textContainer] setWidthTracksTextView:YES]
+    [_textView setDelegate:self];
 
-   [_textView setDelegate:self];
-
- 
     [theWindow orderFront:self];
 }
+
 - (void)applicationDidFinishLaunching3:(CPNotification)aNotification
 {
    // CPLogRegister(CPLogConsole);

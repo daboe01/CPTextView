@@ -116,6 +116,7 @@ CPLineMovesUp = 4;
                         isSoft:NO
                         actualCharacterRange:NULL];
         [_layoutManager _validateLayoutAndGlyphs];
+        [_textView sizeToFit];
     }
 }
 
