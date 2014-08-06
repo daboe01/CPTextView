@@ -1667,6 +1667,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         else if (desiredSize.height > maxSize.height)
             desiredSize.height = maxSize.height;
     }
+
 	if (myClipviewSize)
 	{
 		if (desiredSize.width < myClipviewSize.width)
