@@ -15,7 +15,7 @@
     CPTextView  _textView2;
 }
 
-- (void)applicationDidFinishLaunching:(CPNotification)aNotification
+- (void)applicationDidFinishLaunching1:(CPNotification)aNotification
 {
    // CPLogRegister(CPLogConsole);
 
@@ -39,7 +39,7 @@
     [theWindow orderFront:self];
 }
 
-- (void)applicationDidFinishLaunching3:(CPNotification)aNotification
+- (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
    // CPLogRegister(CPLogConsole);
 
