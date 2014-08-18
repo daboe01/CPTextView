@@ -143,6 +143,7 @@ var CPSystemTypesetterFactory;
     float               _lineWidth;
 
     unsigned            _indexOfCurrentContainer;
+    CPArray             _thisLineFragments;
 }
 
 
@@ -197,6 +198,7 @@ var CPSystemTypesetterFactory;
 
     [_layoutManager setTextContainer:_currentTextContainer forGlyphRange:lineRange];  // creates a new lineFragment
     [_layoutManager setLineFragmentRect:rect forGlyphRange:lineRange usedRect:rect];
+    _thisLineFragments.push([_layoutManager._lineFragments lastObject]);
 
     switch ([_currentParagraph alignment])
     {
@@ -220,6 +222,26 @@ var CPSystemTypesetterFactory;
         return NO;
 
     return ([_layoutManager _rescuingInvalidFragmentsWasPossibleForGlyphRange:lineRange]);
+}
+
+- (void)_fixupLineFragmentsOfCurrentLine
+{
+    var rect,
+        l = _thisLineFragments.length;
+
+    for (var i = 0; i < l; i++)
+    {
+        if (rect)
+            rect = CGRectUnion(rect, _thisLineFragments[i]._usedRect);
+        else
+            rect = CGRectCreateCopy(_thisLineFragments[i]._usedRect);
+    }
+/*
+debugger
+    for (var i = 0; i < l; i++)
+        _thisLineFragments[i]._usedRect.size.height = rect.size.height;
+*/
+    _thisLineFragments = [];
 }
 
 - (void)layoutGlyphsInLayoutManager:(CPLayoutManager)layoutManager
@@ -269,6 +291,8 @@ var CPSystemTypesetterFactory;
 
     if (![_textStorage length])
         return;
+
+    _thisLineFragments = [];
 
     for (; numLines != maxNumLines && glyphIndex < numberOfGlyphs; glyphIndex++)
     {
@@ -376,6 +400,7 @@ var CPSystemTypesetterFactory;
                 lineOrigin.x = 0;
                 numLines++;
                 isNewline = NO;
+                [self _fixupLineFragmentsOfCurrentLine];
             }
 
             _lineWidth      = 0;
@@ -394,7 +419,10 @@ var CPSystemTypesetterFactory;
 
     // this is to "flush" the remaining characters
     if (lineRange.length)
+    {
         [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines];
+        [self _fixupLineFragmentsOfCurrentLine]
+    }
 
     if (_isNewlineCharacter(theString.charAt(theString.length - 1)))
     {

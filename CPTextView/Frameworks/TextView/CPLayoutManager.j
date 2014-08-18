@@ -1070,14 +1070,12 @@ var _objectsInRange = function(aList, aRange)
     }
 }
 
-/*!
-    NOTE: will not validate glyphs and layout
-*/
 - (CGRect)usedRectForTextContainer:(CPTextContainer)textContainer
 {
-    var rect;
+    var rect,
+        l = _lineFragments.length;
 
-    for (var i = 0; i < _lineFragments.length; i++)
+    for (var i = 0; i < l; i++)
     {
         if (_lineFragments[i]._textContainer === textContainer)
         {
