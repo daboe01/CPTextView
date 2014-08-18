@@ -103,6 +103,12 @@
     [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12.0]] forKeys: [CPFontAttributeName]]]];
 
+
+[_textView insertText:"\n\naaaa\n"];
+[_textView insertText:"aaaa\n"];
+[_textView insertText:"aaaa\n"];
+[_textView insertText:"aaaa\n"];
+
     [theWindow orderFront:self];
     [CPMenu setMenuBarVisible:YES];
 }

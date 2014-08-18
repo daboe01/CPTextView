@@ -671,7 +671,8 @@ var _objectsInRange = function(aList, aRange)
         newLineFragment= _lineFragments[targetLine],
         oldLineFragment = _lineFragmentsForRescue[targetLine],
         oldLength = CPMaxRange([_lineFragmentsForRescue lastObject]._range),
-        newLength = [[_textStorage string].length];
+        newLength = [[_textStorage string].length],
+        removalSkip = 1;
 
     if (ABS(newLength - oldLength) > 1)
         return NO;
@@ -685,7 +686,7 @@ var _objectsInRange = function(aList, aRange)
         {
             isIdentical = YES;
             targetLine--;
-            startLineForDOMRemoval--;
+            removalSkip++;
         }
 
         // newline entered in its own line-> move down instead of re.layouting
@@ -706,7 +707,7 @@ var _objectsInRange = function(aList, aRange)
 
         var verticalOffset = _lineFragments[targetLine]._usedRect.origin.y - _lineFragmentsForRescue[startLineForDOMRemoval]._usedRect.origin.y,
             l = _lineFragmentsForRescue.length,
-            newTargetLine = startLineForDOMRemoval + 1;
+            newTargetLine = startLineForDOMRemoval + removalSkip;
 
         for (; newTargetLine < l; newTargetLine++)
         {
@@ -913,7 +914,7 @@ var _objectsInRange = function(aList, aRange)
                         // Clicked right to the last character
                         if (point.x > CGRectGetMaxX(lastFrame) + 10)
                         {
-                           // This allows clicking before and after empty lines (return characters)
+                            // This allows clicking before and after empty lines (return characters)
                             if (_isNewlineCharacter([[_textStorage string] characterAtIndex: nlLoc]))
                             {
                                 return nlLoc + 1;
