@@ -32,6 +32,11 @@
 
 @global _MakeRangeFromAbs
 
+function _isNewlineCharacter(chr)
+{
+    return (chr === '\n' || chr === '\r');
+}
+
 function _RectEqualToRectHorizontally(lhsRect, rhsRect)
 {
     return (lhsRect.origin.x == rhsRect.origin.x &&
@@ -567,7 +572,7 @@ var _objectsInRange = function(aList, aRange)
 
     if (_removeInvalidLineFragmentsRange && _removeInvalidLineFragmentsRange.length && _lineFragments.length)
     {
-        [[_lineFragments subarrayWithRange:_removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
+     //   [[_lineFragments subarrayWithRange:_removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
         [_lineFragments removeObjectsInRange:_removeInvalidLineFragmentsRange];
         [[_lineFragmentsForRescue subarrayWithRange:_removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
     }
@@ -576,7 +581,7 @@ var _objectsInRange = function(aList, aRange)
 
 - (void)_cleanUpDOM
 {
-    var l = _lineFragmentsForRescue.length;
+    var l = _lineFragmentsForRescue? _lineFragmentsForRescue.length : 0;
 
     for (var i = 0; i < l; i++)
     {
@@ -906,7 +911,7 @@ var _objectsInRange = function(aList, aRange)
 
                         // this allows clicking before and after the (invisible) return character
                         if (point.x > CGRectGetMaxX(lastFrame) && fragment.length > 0 &&
-                            [[_textStorage string] characterAtIndex: nlLoc] === '\n')
+                            _isNewlineCharacter([[_textStorage string] characterAtIndex: nlLoc]) || i === c - 1)
                             return nlLoc + 1;
                         else if (point.x <= CGRectGetMinX(firstFrame))
                             return fragment._range.location;
@@ -1204,7 +1209,7 @@ var _objectsInRange = function(aList, aRange)
                     else
                         rect = CGRectUnion(rect, frames[j]);
 
-                    if ([[_textStorage string] characterAtIndex:MAX(0, CPMaxRange(selectedCharRange) - 1)] === '\n')
+                    if (_isNewlineCharacter([[_textStorage string] characterAtIndex:MAX(0, CPMaxRange(selectedCharRange) - 1)]))
                     {
                          rect.size.width = containerSize.width - rect.origin.x;
                     }

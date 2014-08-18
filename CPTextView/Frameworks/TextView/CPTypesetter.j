@@ -10,6 +10,9 @@
  *  Copyright Emmanuel Maillard 2010.
  *
  *  FIXME: paragraphStyle indent information is currently not properly respected
+ *         collect all fragments per line for patching rect by hindsight upon newline
+ *
+ *
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -213,7 +216,7 @@ var CPSystemTypesetterFactory;
     [_layoutManager setLocation:CPMakePoint(myX, _lineBase) forStartOfGlyphRange:lineRange];
     [_layoutManager _setAdvancements:advancements forGlyphRange:lineRange];
 
-    if (!lineCount)
+    if (!lineCount)  // do not rescue on first line
         return NO;
 
     return ([_layoutManager _rescuingInvalidFragmentsWasPossibleForGlyphRange:lineRange]);
@@ -393,7 +396,7 @@ var CPSystemTypesetterFactory;
     if (lineRange.length)
         [self _flushRange:lineRange lineOrigin:lineOrigin currentContainerSize:containerSize advancements:advancements lineCount:numLines];
 
-    if ([theString.charAt(theString.length - 1) === "\n"])
+    if (_isNewlineCharacter(theString.charAt(theString.length - 1)))
     {
         // fixme: row-height is crudely hacked
         var rect = CGRectMake(0, lineOrigin.y, containerSize.width, [_layoutManager._lineFragments lastObject]._usedRect.size.height);
