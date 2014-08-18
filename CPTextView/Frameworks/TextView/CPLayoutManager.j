@@ -889,7 +889,7 @@ var _objectsInRange = function(aList, aRange)
         }
     }
 
-    // not found, maybe a point left to the last character was clicked->search again with broader constraints
+    // Not found, maybe a point left to the last character was clicked -> search again with broader constraints
     if ([[_textStorage string] length])
     {
         for (var i = 0; i < c; i++)
@@ -898,6 +898,7 @@ var _objectsInRange = function(aList, aRange)
 
             if (fragment._textContainer === container)
             {
+                    // Within the horizontal territory of the current (not-empty) line?
                     if (fragment._range.length > 0 && point.y > fragment._fragmentRect.origin.y &&
                         point.y <= fragment._fragmentRect.origin.y + fragment._fragmentRect.size.height)
                     {
@@ -905,14 +906,20 @@ var _objectsInRange = function(aList, aRange)
                             lastFrame = [fragment glyphFrames][fragment._range.length - 1],
                             firstFrame = [fragment glyphFrames][0];
 
-                        // skip tabs and move on the last fragment in this line
+                        // Skip tabs and move on the last fragment in this line
                         if (i < c - 1 && _lineFragments[i + 1]._fragmentRect.origin.y === fragment._fragmentRect.origin.y)
                            continue;
 
-                        // this allows clicking before and after the (invisible) return character
-                        if (point.x > CGRectGetMaxX(lastFrame) && fragment.length > 0 &&
-                            _isNewlineCharacter([[_textStorage string] characterAtIndex: nlLoc]) || i === c - 1)
-                            return nlLoc + 1;
+                        // Clicked right to the last character
+                        if (point.x > CGRectGetMaxX(lastFrame) + 10)
+                        {
+                           // This allows clicking before and after empty lines (return characters)
+                            if (_isNewlineCharacter([[_textStorage string] characterAtIndex: nlLoc]))
+                            {
+                                return nlLoc + 1;
+                            }
+                        }
+                        // Clicked left to the last character
                         else if (point.x <= CGRectGetMinX(firstFrame))
                             return fragment._range.location;
                         else
