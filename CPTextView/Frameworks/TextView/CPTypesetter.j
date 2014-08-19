@@ -33,6 +33,8 @@
 @import "CPParagraphStyle.j"
 @import "CPTextStorage.j"
 
+@global _isNewlineCharacter
+
 /*
     CPTypesetterControlCharacterAction
 */
@@ -325,11 +327,6 @@ debugger
 
         switch (currentChar)    // faster than sending actionForControlCharacterAtIndex: called for each char.
         {
-            case '\n':
-            case '\r':
-                isNewline = YES;
-                break;
-
             case '\t':
             {
                 var nextTab = [self textTabForWidth:rangeWidth + lineOrigin.x writingDirection:0];
@@ -345,6 +342,11 @@ debugger
                 wrapRange = CPMakeRangeCopy(lineRange);
                 wrapWidth = rangeWidth;
                 break;
+            default:
+                if (_isNewlineCharacter(currentChar))
+                {
+                    isNewline = YES;
+               }
         }
 
         advancements.push(rangeWidth - prevRangeWidth);

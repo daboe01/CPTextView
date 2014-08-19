@@ -674,8 +674,8 @@ var _objectsInRange = function(aList, aRange)
         newLength = [[_textStorage string].length],
         removalSkip = 1;
 
-    if (ABS(newLength - oldLength) > 1)
-        return NO;
+  //  if (ABS(newLength - oldLength) > 1)
+  //      return NO;
 
     if (![oldLineFragment isVisuallyIdenticalToFragment:newLineFragment])
     {
@@ -702,7 +702,7 @@ var _objectsInRange = function(aList, aRange)
     {
         var rangeOffset = CPMaxRange(_lineFragments[targetLine]._range) - CPMaxRange(_lineFragmentsForRescue[startLineForDOMRemoval]._range);
 
-        if (!rangeOffset)
+        if (ABS(rangeOffset) !== ABS(newLength - oldLength))
             return NO;
 
         var verticalOffset = _lineFragments[targetLine]._usedRect.origin.y - _lineFragmentsForRescue[startLineForDOMRemoval]._usedRect.origin.y,
