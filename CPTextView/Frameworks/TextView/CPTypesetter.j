@@ -238,11 +238,13 @@ var CPSystemTypesetterFactory;
         else
             rect = CGRectCreateCopy(_thisLineFragments[i]._usedRect);
     }
-/*
-debugger
+
     for (var i = 0; i < l; i++)
-        _thisLineFragments[i]._usedRect.size.height = rect.size.height;
-*/
+    {
+      //  _thisLineFragments[i]._usedRect.origin.y = rect.origin.y;
+      //  _thisLineFragments[i]._usedRect.size.height = rect.size.height;
+    }
+
     _thisLineFragments = [];
 }
 
@@ -346,7 +348,7 @@ debugger
                 if (_isNewlineCharacter(currentChar))
                 {
                     isNewline = YES;
-               }
+                }
         }
 
         advancements.push(rangeWidth - prevRangeWidth);
