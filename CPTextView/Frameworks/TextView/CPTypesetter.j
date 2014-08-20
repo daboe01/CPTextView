@@ -10,9 +10,7 @@
  *  Copyright Emmanuel Maillard 2010.
  *
  *  FIXME: paragraphStyle indent information is currently not properly respected
- *         collect all fragments per line for patching rect by hindsight upon newline
- *
- *
+ *         collect all run heights per line for proper baseline alignment
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
