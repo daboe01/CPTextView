@@ -303,7 +303,7 @@ var _objectsInRange = function(aList, aRange)
         orig.x = _glyphsFrames[run._range.location - _runs[0]._range.location].origin.x + aPoint.x;
 
         run.elem.style.left = (orig.x) + "px";
-        run.elem.style.top = (orig.y - _usedRect.size.height + 4) + "px";   // FIXME: consolidate this strange constant
+        run.elem.style.top = (orig.y - _usedRect.size.height + 4 - (_usedRect.size.height - _fragmentRect.size.height)) + "px";   // FIXME: consolidate this strange constant
 
         if (!run.DOMactive)
             _textContainer._textView._DOMElement.appendChild(run.elem);
@@ -705,7 +705,7 @@ var _objectsInRange = function(aList, aRange)
         if (ABS(rangeOffset) !== ABS(newLength - oldLength))
             return NO;
 
-        var verticalOffset = _lineFragments[targetLine]._usedRect.origin.y - _lineFragmentsForRescue[startLineForDOMRemoval]._usedRect.origin.y,
+        var verticalOffset = _lineFragments[targetLine]._fragmentRect.origin.y - _lineFragmentsForRescue[startLineForDOMRemoval]._fragmentRect.origin.y,
             l = _lineFragmentsForRescue.length,
             newTargetLine = startLineForDOMRemoval + removalSkip;
 
@@ -794,7 +794,7 @@ var _objectsInRange = function(aList, aRange)
 
         if (fragment._textContainer === container)
         {
-            if (CGRectContainsRect(aRect, fragment._usedRect))
+            if (CGRectContainsRect(aRect, fragment._fragmentRect))
             {
                 if (!range)
                     range = CPMakeRangeCopy(fragment._range);
