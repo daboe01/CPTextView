@@ -233,7 +233,7 @@ var _objectsInRange = function(aList, aRange)
 - (void)setAdvancements:(CPArray)someAdvancements
 {
     var count = someAdvancements.length,
-        origin = CGPointMake(_fragmentRect.origin.x + _location.x, _fragmentRect.origin.y); // FIXME _location.y
+        origin = CGPointMake(_fragmentRect.origin.x + _location.x, _fragmentRect.origin.y );
 
     _glyphsFrames = new Array(count);
 
@@ -289,7 +289,7 @@ var _objectsInRange = function(aList, aRange)
 {
     var runs = _objectsInRange(_runs, aRange),
         c = runs.length,
-        orig = CGPointMake(_location.x, _location.y + _fragmentRect.origin.y);
+        orig = CGPointMake(_fragmentRect.origin.x, _fragmentRect.origin.y);
 
     orig.y += aPoint.y;
 
@@ -303,7 +303,7 @@ var _objectsInRange = function(aList, aRange)
         orig.x = _glyphsFrames[run._range.location - _runs[0]._range.location].origin.x + aPoint.x;
 
         run.elem.style.left = (orig.x) + "px";
-        run.elem.style.top = (orig.y - _usedRect.size.height + 4 - (_usedRect.size.height - _fragmentRect.size.height)) + "px";   // FIXME: consolidate this strange constant
+        run.elem.style.top = (orig.y) + "px";
 
         if (!run.DOMactive)
             _textContainer._textView._DOMElement.appendChild(run.elem);

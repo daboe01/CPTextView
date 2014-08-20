@@ -242,8 +242,8 @@ var CPSystemTypesetterFactory;
     for (var i = 0; i < l; i++)
     {
         var diff = rect.size.height - _thisLineFragments[i]._usedRect.size.height;
-        _thisLineFragments[i]._fragmentRect.origin.y += diff;
-        _thisLineFragments[i]._fragmentRect.size.height = rect.size.height;
+       // _thisLineFragments[i]._fragmentRect.origin.y += diff;
+       // _thisLineFragments[i]._fragmentRect.size.height = rect.size.height;
     }
 
     _thisLineFragments = [];
