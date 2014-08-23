@@ -100,8 +100,14 @@
 
     [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldFontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@"\t111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12.0]] forKeys: [CPFontAttributeName]]]];
+
+
+[_textView insertText:"\n\naaaa\n"];
+[_textView insertText:"aaaa\n"];
+[_textView insertText:"aaaa\n"];
+[_textView insertText:"aaaa\n"];
 
     [theWindow orderFront:self];
     [CPMenu setMenuBarVisible:YES];
