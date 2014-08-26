@@ -161,7 +161,6 @@ var _objectsInRange = function(aList, aRange)
 
 - (id)createDOMElementWithText:(CPString)aString andFont:(CPFont)aFont andColor:(CPColor)aColor
 {
-#if PLATFORM(DOM)
     var style,
         span = document.createElement("span");
 
@@ -187,9 +186,6 @@ var _objectsInRange = function(aList, aRange)
 
     //<!> FIXME aString.replace(/&/g,'&amp;')
     return span;
-#else
-    return nil;
-#endif
 }
 
 - (id)initWithRange:(CPRange)aRange textContainer:(CPTextContainer)aContainer textStorage:(CPTextStorage)textStorage
@@ -413,10 +409,6 @@ var _objectsInRange = function(aList, aRange)
 
 @end
 
-/*!
-    @ingroup appkit
-    @class CPLayoutManager
-*/
 @implementation CPLayoutManager : CPObject
 {
     Class           _lineFragmentFactory    @accessors(setter=setLineFragmentFactory:);
