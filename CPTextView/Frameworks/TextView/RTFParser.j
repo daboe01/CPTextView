@@ -255,7 +255,7 @@ var kRgsymRtf = {
         "\\"                                 : [ "\\",       0,        false,     kRTFParserType_char,    '\\']
 }
 
-@implementation _RTFParser : CPObject
+@implementation _CPRTFParser : CPObject
 {
     CPString _codePage;
     CPSize _paper;

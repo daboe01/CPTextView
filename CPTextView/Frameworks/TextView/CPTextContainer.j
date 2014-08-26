@@ -75,13 +75,13 @@ CPLineMovesUp = 4;
 */
 @implementation CPTextContainer : CPObject
 {
-    CPSize _size;
+    CGSize _size;
     CPTextView _textView;
     CPLayoutManager _layoutManager;
     float _lineFragmentPadding;
 }
 
-- (id)initWithContainerSize:(CPSize)aSize
+- (id)initWithContainerSize:(CGSize)aSize
 {
     self = [super init];
 
@@ -99,28 +99,53 @@ CPLineMovesUp = 4;
     return [self initWithContainerSize:CPMakeSize(1e7, 1e7)];
 }
 
-- (CPSize)containerSize
+- (CGSize)containerSize
 {
     return _size;
 }
 
-- (void)setContainerSize:(CPSize)someSize
+- (void)setContainerSize:(CGSize)someSize
 {
     var oldSize = _size;
 
     _size = someSize;
 
     if (oldSize.width != _size.width)
+    {
         [_layoutManager invalidateLayoutForCharacterRange:CPMakeRange(0,[[_layoutManager textStorage] length])
                         isSoft:NO
                         actualCharacterRange:NULL];
-
+        [_layoutManager _validateLayoutAndGlyphs];
+        [_textView sizeToFit];
+    }
 }
 
+// Controls whether the receiver adjusts the width of its bounding rectangle when its text view is resized.
 - (void)setWidthTracksTextView:(BOOL)flag
 {
-    //<!> fixme: Controls whether the receiver adjusts the width of its bounding rectangle when its text view is resized.
+    [_textView setPostsFrameChangedNotifications:flag];
+
+    if (flag)
+	{
+        [[CPNotificationCenter defaultCenter] addObserver:self
+                selector:@selector(textViewFrameChanged:)
+                    name:CPViewFrameDidChangeNotification
+                  object:_textView];
+    }
+    else
+    {
+        [[CPNotificationCenter defaultCenter] removeObserver:self
+                    name:CPViewFrameDidChangeNotification
+                  object:_textView];
+    }
 }
+
+- (void) textViewFrameChanged:(CPNotification)aNotification
+{
+	var newSize=CPMakeSize([_textView frame].size.width, _size.height);
+    [self setContainerSize:newSize];
+}
+
 
 - (void)setTextView:(CPTextView)aTextView
 {
@@ -166,9 +191,9 @@ CPLineMovesUp = 4;
     return _lineFragmentPadding;
 }
 
-- (BOOL)containsPoint:(CPPoint)aPoint
+- (BOOL)containsPoint:(CGPoint)aPoint
 {
-    return CPRectContainsPoint(CPRectMake(0, 0, _size.width, _size.height), aPoint);
+    return CGRectContainsPoint(CGRectMake(0, 0, _size.width, _size.height), aPoint);
 }
 
 - (BOOL)isSimpleRectangularTextContainer
@@ -176,24 +201,24 @@ CPLineMovesUp = 4;
     return YES;
 }
 
-- (CPRect)lineFragmentRectForProposedRect:(CPRect)proposedRect
+- (CGRect)lineFragmentRectForProposedRect:(CGRect)proposedRect
                            sweepDirection:(CPLineSweepDirection)sweep
                         movementDirection:(CPLineMovementDirection)movement
-                            remainingRect:(CPRectPointer)remainingRect
+                            remainingRect:(CGRectPointer)remainingRect
 {
-    var resultRect = CPRectCreateCopy(proposedRect);
+    var resultRect = CGRectCreateCopy(proposedRect);
 
     if (sweep != CPLineSweepRight || movement != CPLineMovesDown)
     {
         CPLog.trace(@"FIXME: unsupported sweep ("+sweep+") or movement ("+movement+")");
-        return CPRectMakeZero();
+        return CGRectMakeZero();
     }
 
     if (resultRect.origin.x + resultRect.size.width > _size.width)
         resultRect.size.width = _size.width - resultRect.origin.x;
 
     if (resultRect.size.width < 0)
-        resultRect = CPRectMakeZero();
+        resultRect = CGRectMakeZero();
 
     if (remainingRect)
     {

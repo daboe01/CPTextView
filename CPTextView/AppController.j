@@ -15,6 +15,30 @@
     CPTextView  _textView2;
 }
 
+- (void)applicationDidFinishLaunching1:(CPNotification)aNotification
+{
+   // CPLogRegister(CPLogConsole);
+
+    var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask],
+        contentView = [theWindow contentView];
+    
+    [contentView setBackgroundColor:[CPColor colorWithWhite:0.5 alpha:1.0]];
+
+    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0, 370,200)];
+  //  [_textView setBackgroundColor:[CPColor whiteColor]];
+
+    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, 400,400)];
+    [scrollView setDocumentView:_textView]; 
+
+    [_textView setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
+    [scrollView setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
+    [contentView addSubview: scrollView];
+   //[[_textView textContainer] setWidthTracksTextView:YES]
+    [_textView setDelegate:self];
+
+    [theWindow orderFront:self];
+}
+
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
    // CPLogRegister(CPLogConsole);
@@ -76,8 +100,14 @@
 
     [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldFontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@"111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@"\t111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12.0]] forKeys: [CPFontAttributeName]]]];
+
+
+[_textView insertText:"\n\naaaa\n"];
+[_textView insertText:"aaaa\n"];
+[_textView insertText:"aaaa\n"];
+[_textView insertText:"aaaa\n"];
 
     [theWindow orderFront:self];
     [CPMenu setMenuBarVisible:YES];

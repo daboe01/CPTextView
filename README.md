@@ -14,7 +14,6 @@ In my testing the code is currently fully functional. However, i am sure that mu
 My intention is to have a fully working bug-free Text system merged into Cappuccino soon.
 Please look also at the issue list on GitHub in order to see what remains to do from my side.
 Cappuccino needs the following extensions before rich text support is complete:
-* Merge PR #2045 (my fixed CPAttributedString implementation)
 * CPScrollView needs to support ruler views as in cocoa
 * Multiple pasteboard types are currently unsupported
 * Pasteboard support is broken in Safari. This has to be worked around somehow.
