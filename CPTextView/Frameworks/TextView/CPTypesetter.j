@@ -60,7 +60,7 @@ function _widthOfStringForFont(aString, aFont)
 alert([teststring sizeWithFont:aFont].width+" "+ _measuringContext.measureText (teststring).width);
         _didTestCanvasSizingValid = YES;
         _measuringContext.font = [aFont cssString];
-        _isCanvasSizingInvalid = ABS([teststring sizeWithFont:aFont].width -_measuringContext.measureText(teststring).width) > 2;
+        _isCanvasSizingInvalid = ABS([teststring sizeWithFont:aFont].width -_measuringContext.measureText(teststring)) > 2;
     }
 
     if (!CPFeatureIsCompatible(CPHTMLCanvasFeature) || _isCanvasSizingInvalid)  // measuring with canvas is _much_ faster on chrome
