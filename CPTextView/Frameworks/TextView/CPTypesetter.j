@@ -71,7 +71,7 @@ function _widthOfStringForFont(aString, aFont)
         _measuringContext.font = [aFont cssString];
     }
 
-    return ROUND(_measuringContext.measureText(aString));
+    return _measuringContext.measureText(aString);
 }
 
 var CPSystemTypesetterFactory;
