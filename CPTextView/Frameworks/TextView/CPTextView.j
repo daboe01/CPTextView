@@ -36,6 +36,7 @@
 @class _CPRTFProducer;
 @class _CPRTFParser;
 
+_oncontextmenuhandler = function () { return false; };
 
 _MakeRangeFromAbs = function(a1, a2)
 {
@@ -322,6 +323,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     var             _caretDOM;
     int             _stickyXLocation;
+
+    CPArray         _selectionSpans;
 }
 
 - (id)initWithFrame:(CGRect)aFrame textContainer:(CPTextContainer)aContainer
@@ -653,32 +656,58 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self setNeedsDisplayInRect:_caretRect];
 }
 
+- (id) _createSelectionSpanForRect:(CPRect)aRect andColor:(CPColor)aColor
+{
+    var ret = document.createElement("span");
+    ret.style.position = "absolute";
+    ret.style.visibility = "visible";
+    ret.style.padding = "0px";
+    ret.style.margin = "0px";
+    ret.style.whiteSpace = "pre";
+    ret.style.backgroundColor = [aColor cssString];
+
+    ret.style.width = (aRect.size.width)+"px";
+    ret.style.left = (aRect.origin.x) + "px";
+    ret.style.top = (aRect.origin.y) + "px";
+    ret.style.height = (aRect.size.height) + "px";
+    ret.style.zIndex = -1000;
+    ret.oncontextmenu = ret.onmousedown = ret.onselectstart = _oncontextmenuhandler;
+    return ret;
+}
+
 - (void)drawRect:(CGRect)aRect
 {
-    var ctx = [[CPGraphicsContext currentContext] graphicsPort],
-        range = [_layoutManager glyphRangeForBoundingRect:aRect inTextContainer:_textContainer];
+    var range = [_layoutManager glyphRangeForBoundingRect:aRect inTextContainer:_textContainer];
+
+    if (_selectionSpans)
+    {
+        for (var i = 0; i < _selectionSpans.length; i++)
+        {
+            _DOMElement.removeChild(_selectionSpans[i]);
+        }
+    }
+    _selectionSpans = [];
 
     if (_selectionRange.length)
     {
         var rects = [_layoutManager rectArrayForCharacterRange:_selectionRange
                                     withinSelectedCharacterRange:_selectionRange
                                     inTextContainer:_textContainer
-                                    rectCount:nil];
+                                    rectCount:nil],
+            rectsLength = rects.length;
 
-        CGContextSaveGState(ctx);
+
         var effectiveSelectionColor = [self _isFocused]? [_selectedTextAttributes objectForKey:CPBackgroundColorAttributeName] : [CPColor selectedTextBackgroundColorUnfocussed];
 
-        CGContextSetFillColor(ctx, effectiveSelectionColor);
-
-        for (var i = 0; i < rects.length; i++)
+        for (var i = 0; i < rectsLength; i++)
         {
             rects[i].origin.x += _textContainerOrigin.x;
             rects[i].origin.y += _textContainerOrigin.y;
-
-            CGContextFillRect(ctx, rects[i]);
+            var newSpan = [self _createSelectionSpanForRect:rects[i] andColor:effectiveSelectionColor];
+            _selectionSpans.push(newSpan);
+            _DOMElement.appendChild(newSpan);
         }
 
-        CGContextRestoreGState(ctx);
     }
 
     if (range.length)
