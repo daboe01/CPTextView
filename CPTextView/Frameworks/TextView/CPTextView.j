@@ -36,8 +36,6 @@
 @class _CPRTFProducer;
 @class _CPRTFParser;
 
-_oncontextmenuhandler = function () { return false; };
-
 _MakeRangeFromAbs = function(a1, a2)
 {
     return (a1 < a2) ? CPMakeRange(a1, a2 - a1) : CPMakeRange(a2, a1 - a2);
@@ -671,7 +669,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     ret.style.top = (aRect.origin.y) + "px";
     ret.style.height = (aRect.size.height) + "px";
     ret.style.zIndex = -1000;
-    ret.oncontextmenu = ret.onmousedown = ret.onselectstart = _oncontextmenuhandler;
+    ret.oncontextmenu = ret.onmousedown = ret.onmouseup = ret.onselectstart = function () { return false; };
     return ret;
 }
 
