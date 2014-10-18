@@ -753,6 +753,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self setTypingAttributes:[_textStorage attributesAtIndex:MAX(0, range.location -1) effectiveRange:nil]];
 
         [[CPNotificationCenter defaultCenter] postNotificationName:CPTextViewDidChangeSelectionNotification object:self];
+
+        if(CPPlatformHasBug(CPJavaScriptPasteRequiresEditableTarget))
+        {
+            var domelem = _window._platformWindow._platformPasteboard._DOMPasteboardElement;
+            domelem.value=[[self stringValue] substringWithRange:_selectionRange];
+            domelem.select()
+            domelem.focus()
+        }
     }
 }
 
@@ -1367,6 +1375,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self updateInsertionPointStateAndRestartTimer:YES];
     [[CPFontManager sharedFontManager] setSelectedFont:[self font] isMultiple:NO];
     [self setNeedsDisplay:YES];
+
+    if(CPPlatformHasBug(CPJavaScriptPasteRequiresEditableTarget))
+        _window._platformWindow._platformPasteboard._DOMPasteboardElement.focus()
+
     return YES;
 }
 
