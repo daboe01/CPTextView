@@ -45,6 +45,52 @@ _MidRange = function(a1)
     return FLOOR((CPMaxRange(a1) + a1.location) / 2);
 };
 
+@implementation CPPlatformPasteboard(SafariFix)
+
+- (boolean)nativePasteEvent:(DOMEvent)aDOMEvent
+{
+    // This shouldn't happen.
+    if (!supportsNativeCopyAndPaste)
+        return;
+
+    var value;
+    if (aDOMEvent.clipboardData && aDOMEvent.clipboardData.setData)
+        value = aDOMEvent.clipboardData.getData('text/plain');
+    else
+        value = _DOMWindow.clipboardData.getData("Text");
+
+    if ([value length])
+    {
+        var pasteboard = [CPPasteboard generalPasteboard];
+
+        if ([pasteboard _stateUID] != value)
+        {
+            [pasteboard declareTypes:[CPStringPboardType] owner:self];
+            [pasteboard setString:value forType:CPStringPboardType];
+        }
+    }
+
+    var anEvent = [self _fakeClipboardEvent:aDOMEvent type:"v"],
+        platformWindow = [[anEvent window] platformWindow];
+
+    anEvent._suppressCappuccinoPaste = YES;
+    anEvent._isFake = YES;
+
+    // By default we'll stop the native handling of the event since we're handling it ourselves. However, we need to
+    // stop it before we send the event so that the event can overrule our choice. CPTextField for instance wants the
+    // default handling when focused (which is to insert into the field).
+    [platformWindow _propagateCurrentDOMEvent:NO]
+
+    [CPApp sendEvent:anEvent];
+
+    [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+
+    if (![platformWindow _willPropagateCurrentDOMEvent])
+        _CPDOMEventStop(aDOMEvent, self);
+
+    return false;
+}
+@end
 
 // FIXME: move to theme!
 @implementation CPColor(CPTextViewExtensions)
@@ -109,11 +155,15 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [pasteboard setString:stringForPasting forType:CPStringPboardType];
 
 }
+
 - (void)paste:(id)sender
 {
+    if(![CPApp currentEvent]._isFake) return;
+
     var pasteboard = [CPPasteboard generalPasteboard],
       //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
         stringForPasting = [pasteboard stringForType:CPStringPboardType];
+
 
     if ([stringForPasting hasPrefix:"{\\rtf1\\ansi"])
         stringForPasting = [[_CPRTFParser new] parseRTF:stringForPasting];
@@ -1377,8 +1427,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self setNeedsDisplay:YES];
 
     if(CPPlatformHasBug(CPJavaScriptPasteRequiresEditableTarget))
+    {
         _window._platformWindow._platformPasteboard._DOMPasteboardElement.focus()
-
+    }
     return YES;
 }
 
