@@ -16,5 +16,4 @@ Please look also at the issue list on GitHub in order to see what remains to do 
 Cappuccino needs the following extensions before rich text support is complete:
 * CPScrollView needs to support ruler views as in cocoa
 * Multiple pasteboard types are currently unsupported
-* Pasteboard support is broken in Safari. This has to be worked around somehow.
 

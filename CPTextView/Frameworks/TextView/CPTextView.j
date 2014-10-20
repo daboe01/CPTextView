@@ -158,7 +158,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)paste:(id)sender
 {
-    if(![CPApp currentEvent]._isFake) return;
+    if(CPPlatformHasBug(CPJavaScriptPasteRequiresEditableTarget) && ![CPApp currentEvent]._isFake)
+        return;
 
     var pasteboard = [CPPasteboard generalPasteboard],
       //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
