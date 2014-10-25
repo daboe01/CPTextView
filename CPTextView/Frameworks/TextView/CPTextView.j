@@ -808,9 +808,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         if(CPPlatformHasBug(CPJavaScriptPasteRequiresEditableTarget))
         {
             var domelem = _window._platformWindow._platformPasteboard._DOMPasteboardElement;
-            domelem.value=[[self stringValue] substringWithRange:_selectionRange];
-            domelem.select()
+            domelem.value=" ";
             domelem.focus()
+            domelem.select()
         }
     }
 }
