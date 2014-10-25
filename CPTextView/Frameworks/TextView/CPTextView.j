@@ -808,7 +808,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         if(CPPlatformHasBug(CPJavaScriptPasteRequiresEditableTarget))
         {
             var domelem = _window._platformWindow._platformPasteboard._DOMPasteboardElement;
-            domelem.value=" ";
+            domelem.value=" ";  // make sure we do not get an empty selection
             domelem.focus()
             domelem.select()
         }
