@@ -175,6 +175,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_previousSelectionGranularity > 0)
     {
         // FIXME: handle smart pasting
+        // truncate trailing spaces using appropriate granularity regex
+        // look at end of insertion bed
+        // if this does not match that regex add an appropriate single char.
     }
 
     if (stringForPasting)
