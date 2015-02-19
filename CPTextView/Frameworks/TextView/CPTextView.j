@@ -635,22 +635,30 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)_replaceCharactersInRange:aRange withAttributedString:(CPString)aString
 {
+    [[[[self window] undoManager] prepareWithInvocationTarget:self]
+                _replaceCharactersInRange:CPMakeRange(aRange.location, [aString length])
+                withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(aRange)]];
+
     [_textStorage replaceCharactersInRange:aRange withAttributedString:aString];
     [self setSelectedRange:CPMakeRange(aRange.location, [aString length])];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
     [self setNeedsDisplay:YES];
-
 }
 - (void)_replaceCharactersInRange:(CPRange)aRange withString:(CPString)aString
 {
+    [[[[self window] undoManager] prepareWithInvocationTarget:self]
+                _replaceCharactersInRange:CPMakeRange(aRange.location, [aString length])
+                withString:[[self string] substringWithRange:CPMakeRangeCopy(aRange)]];
+
     [_textStorage replaceCharactersInRange:CPMakeRangeCopy(aRange) withString:aString];
     [self setSelectedRange:CPMakeRange(aRange.location, aString.length)];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
     [self setNeedsDisplay:YES];
+
 }
 
 - (void)insertText:(CPString)aString
