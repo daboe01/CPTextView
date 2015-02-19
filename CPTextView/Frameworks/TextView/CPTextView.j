@@ -1366,10 +1366,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     else
         changedRange = _selectionRange;
 
+    // smart delete
     if (_previousSelectionGranularity > 0 &&
         changedRange.location > 0 && [self _isCharacterAtIndex:changedRange.location-1 granularity:_previousSelectionGranularity] &&
         changedRange.location < [[self string] length] && [self _isCharacterAtIndex:CPMaxRange(changedRange) granularity:_previousSelectionGranularity])
         changedRange.length++;
+
     [self _deleteForRange:changedRange];
 }
 
@@ -1805,97 +1807,62 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     switch (granularity)
     {
         case CPSelectByWord:
-            characterSet = [[self class] _wordBoundaryCharacterArray];
+            characterSet = [[self class] _wordBoundaryRegex];
         break;
         case CPSelectByParagraph:
-            characterSet = [[self class] _paragraphBoundaryCharacterArray];
+            characterSet = [[self class] _paragraphBoundaryRegex];
         break;
     }
     // FIXME if (!characterSet) croak!
-    return characterSet.join("").indexOf([self string].charAt(index))  !== CPNotFound;
+    return characterSet.exec([self _characterTripletAtIndex:index]) !== null;
 }
 
-- (CPRange)_characterRangeForUnitAtIndex:(unsigned)index asDefinedByCharArray:(CPArray)characterSet skip:(BOOL)flag
+// FIXME: make this a function to increase performance
+- (CPString)_characterTripletAtIndex:(unsigned)index
 {
-    var wordRange = CPMakeRange(0, 0),
-        lastIndex = CPNotFound,
-        searchIndex,
-        setString = characterSet.join(""),
-        string = [_textStorage string];
+    var tripletRange = _MakeRangeFromAbs(MAX(0, index - 1), MIN([_layoutManager numberOfCharacters], index + 2));
+    return [[_textStorage string] substringWithRange:tripletRange];
+}
+
++ (CPArray)_wordBoundaryRegex
+{
+    return /(.|[\r\n])[\s;,!?:\.-](.|[\r\n])/m;
+}
++ (CPArray)_paragraphBoundaryRegex
+{
+    return /^(.|[\r\n])[\n\r](.|[\r\n])$/m;
+}
+
+- (CPRange)_characterRangeForIndex:(unsigned)index inRange:(CPRange) aRange asDefinedByRegex:regex skip:(BOOL)flag
+{
+    var wordRange = CPMakeRange(index, 0),
+        numberOfCharacters = [_layoutManager numberOfCharacters];
 
     // do we start on a boundary character?
-    if (flag && string.charAt(index) && setString.indexOf(string.charAt(index)) !== CPNotFound)
+    if (flag && regex.exec([self _characterTripletAtIndex:index])  !== null)
     {
         // -> extend to the left
-        wordRange = CPMakeRange(index, 1);
-        while (setString.indexOf(string.charAt(--index)) !== CPNotFound && index > -1)
+        for (var searchIndex = index - 1; searchIndex > 0 && regex.exec([self _characterTripletAtIndex:searchIndex]) !== null; searchIndex--)
         {
-             wordRange = CPMakeRange(index, 1);
-
+            wordRange.location = searchIndex;
         }
         // -> extend to the right
-        for (index = wordRange.location; setString.indexOf(string.charAt(++index)) !== CPNotFound && index < string.length;)
+        for (var searchIndex = index + 1; searchIndex < numberOfCharacters && regex.exec([self _characterTripletAtIndex:searchIndex]) !== null; searchIndex++)
         {
-             wordRange = _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, string.length - 1), index + 1));
-
         }
-        return wordRange;
+        return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), searchIndex));
     }
-
-    for (searchIndex = 0; searchIndex < characterSet.length; searchIndex++)
+    // find left boundary
+    for (var searchIndex = index - 1; searchIndex > 0 && regex.exec([self _characterTripletAtIndex:searchIndex]) === null; searchIndex--)
     {
-        var peek = string.lastIndexOf(characterSet[searchIndex], index);
-
-        if (peek !== CPNotFound)
-        {
-            if (lastIndex === CPNotFound)
-                lastIndex = peek;
-            else
-                lastIndex = MAX(lastIndex, peek);
-        }
+        wordRange.location = searchIndex;
     }
-
-    if (lastIndex !== CPNotFound)
-        wordRange.location = lastIndex + 1;
-
-    lastIndex = CPNotFound;
-
-    for (searchIndex = 0 ; searchIndex < characterSet.length; searchIndex++)
+    // -> extend to the right
+    for (index++; index < numberOfCharacters && regex.exec([self _characterTripletAtIndex:index])  === null; index++)
     {
-        var peek= string.indexOf(characterSet[searchIndex], index);
-
-        if (peek !== CPNotFound)
-        {
-            if (lastIndex === CPNotFound)
-                lastIndex = peek;
-            else
-                lastIndex = MIN(lastIndex, peek);
-        }
-
     }
-
-    if (lastIndex != CPNotFound)
-        wordRange.length = lastIndex - wordRange.location;
-    else
-        wordRange.length = string.length - wordRange.location;
-
-    return wordRange;
+    return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), index));
 }
-
-/* <!> FIXME
-    just a testing characterSet 
-    all of this depend of the current language.
-    Need some CPLocale support and maybe even a FSM...
- */
-+ (CPArray)_wordBoundaryCharacterArray
-{
-    return ['\n','\r', ' ', '\t', ',', ';', '.', '!', '?', '\'', '"', '-', ':'];
-}
-+ (CPArray)_paragraphBoundaryCharacterArray
-{
-    return ['\n','\r'];
-}
-
 
 - (CPRange)selectionRangeForProposedRange:(CPRange)proposedRange granularity:(CPSelectionGranularity)granularity
 {
@@ -1915,24 +1882,24 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     switch (granularity)
     {
         case CPSelectByWord:
-            var wordRange = [self _characterRangeForUnitAtIndex:proposedRange.location asDefinedByCharArray:[[self class] _wordBoundaryCharacterArray] skip:YES];
+            var wordRange = [self _characterRangeForIndex:proposedRange.location inRange:proposedRange asDefinedByRegex:[[self class] _wordBoundaryRegex] skip:YES];
 
             if (proposedRange.length)
-                wordRange = CPUnionRange(wordRange, [self _characterRangeForUnitAtIndex:CPMaxRange(proposedRange) asDefinedByCharArray:[[self class] _wordBoundaryCharacterArray] skip:NO]);
+                wordRange = CPUnionRange(wordRange, [self _characterRangeForIndex:CPMaxRange(proposedRange) inRange:proposedRange asDefinedByRegex:[[self class] _wordBoundaryRegex] skip:NO]);
 
             return wordRange;
 
         case CPSelectByParagraph:
-            var parRange = [self _characterRangeForUnitAtIndex:proposedRange.location asDefinedByCharArray:[[self class] _paragraphBoundaryCharacterArray] skip:NO];
-
-            if (parRange.length < 2)
-                parRange = [self _characterRangeForUnitAtIndex:proposedRange.location > 0 ? proposedRange.location - 1 : 0 asDefinedByCharArray:[[self class] _paragraphBoundaryCharacterArray] skip:NO];
-            if (parRange.length > 0)
-                parRange.length++;
-
+            var parRange = [self _characterRangeForIndex:proposedRange.location inRange:proposedRange asDefinedByRegex:[[self class] _paragraphBoundaryRegex] skip:YES];
 
             if (proposedRange.length)
-                parRange = CPUnionRange(parRange, [self _characterRangeForUnitAtIndex:CPMaxRange(proposedRange) asDefinedByCharArray: [[self class] _paragraphBoundaryCharacterArray] skip:NO]);
+                parRange = CPUnionRange(parRange, [self _characterRangeForIndex:CPMaxRange(proposedRange)
+                                                                        inRange:proposedRange
+                                                               asDefinedByRegex:[[self class] _paragraphBoundaryRegex]
+                                                                           skip:NO]);
+
+            if (parRange.length > 0 && [self _isCharacterAtIndex:CPMaxRange(parRange) granularity:CPSelectByParagraph])
+                parRange.length++;
 
             return parRange;
 
