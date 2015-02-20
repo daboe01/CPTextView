@@ -430,24 +430,22 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)copy:(id)sender
 {
-    _copySelectionGranularity = _previousSelectionGranularity;
+   _copySelectionGranularity = _previousSelectionGranularity;
    [super copy:sender];
 }
 
 - (void)paste:(id)sender
 {
+    [super paste:sender];
     if (_copySelectionGranularity > 0)
     {
         // FIXME: handle smart pasting
         // append trailing spaces using appropriate granularity regex
-        if ([self _isCharacterAtIndex:CPMaxRange(_selectionRange) granularity:_copySelectionGranularity])
+        if (![self _isCharacterAtIndex:CPMaxRange(_selectionRange) granularity:_copySelectionGranularity])
         {
-          //  stringForPasting+=" ";
+            [self insertText:" "];
         }
-        // look at end of insertion bed
-        // if this does not match that regex add an appropriate single char.
     }
-    [super paste:sender];
 }
 
 - (BOOL)_isFocused
