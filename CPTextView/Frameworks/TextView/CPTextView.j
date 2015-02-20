@@ -1772,13 +1772,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             desiredSize.height = maxSize.height;
     }
 
-	if (myClipviewSize)
-	{
-		if (desiredSize.width < myClipviewSize.width)
-			desiredSize.width = myClipviewSize.width;
-		if (desiredSize.height < myClipviewSize.height)
-			desiredSize.height = myClipviewSize.height;
-	}
+    if (myClipviewSize)
+    {
+        if (desiredSize.width < myClipviewSize.width)
+            desiredSize.width = myClipviewSize.width;
+        if (desiredSize.height < myClipviewSize.height)
+            desiredSize.height = myClipviewSize.height;
+    }
 
     [super setFrameSize:desiredSize];
 }
@@ -1829,14 +1829,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 + (CPArray)_wordBoundaryRegex
 {
-    return /^(.|[\r\n])\W(.|[\r\n])$/m;
+    return /^(.|[\r\n])\W/m;
 }
 + (CPArray)_paragraphBoundaryRegex
 {
-    return /^(.|[\r\n])[\n\r](.|[\r\n])$/m;
+    return /^(.|[\r\n])[\n\r]/m;
 }
 
-- (CPRange)_characterRangeForIndex:(unsigned)index inRange:(CPRange) aRange asDefinedByRegex:regex skip:(BOOL)flag
+- (CPRange)_characterRangeForIndex:(unsigned)index inRange:(CPRange) aRange asDefinedByRegex:(JSObject)regex skip:(BOOL)flag
 {
     var wordRange = CPMakeRange(index, 0),
         numberOfCharacters = [_layoutManager numberOfCharacters];
@@ -1850,12 +1850,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             wordRange.location = searchIndex;
         }
         // -> extend to the right
-        for (var searchIndex = index + 1; searchIndex < numberOfCharacters && regex.exec([self _characterTripletAtIndex:searchIndex]) !== null; searchIndex++)
+        searchIndex = index + 1;
+        while (searchIndex < numberOfCharacters && regex.exec([self _characterTripletAtIndex:searchIndex]) !== null)
         {
+            searchIndex++;
         }
         return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), searchIndex));
     }
-    // find left boundary
+    // -> extend to the left
     for (var searchIndex = index - 1; searchIndex > 0 && regex.exec([self _characterTripletAtIndex:searchIndex]) === null; searchIndex--)
     {
         wordRange.location = searchIndex;
