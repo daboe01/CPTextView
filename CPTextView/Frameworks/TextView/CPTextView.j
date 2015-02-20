@@ -45,6 +45,16 @@ _MidRange = function(a1)
     return FLOOR((CPMaxRange(a1) + a1.location) / 2);
 };
 
+_characterTripletFromStringAtIndex=function(string, index)
+{
+    if([string isKindOfClass:CPAttributedString])
+        string = string._string;
+
+    var tripletRange = _MakeRangeFromAbs(MAX(0, index - 1), MIN(string.length, index + 2));
+    return [string substringWithRange:tripletRange];
+}
+
+
 @implementation CPPlatformPasteboard(SafariFix)
 
 - (boolean)nativePasteEvent:(DOMEvent)aDOMEvent
@@ -125,7 +135,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 @implementation CPText : CPControl
 {
-    int _previousSelectionGranularity;
 }
 
 - (void)changeFont:(id)sender
@@ -171,14 +180,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (![self isRichText] && [stringForPasting isKindOfClass:[CPAttributedString class]])
         stringForPasting = stringForPasting._string;
-
-    if (_previousSelectionGranularity > 0)
-    {
-        // FIXME: handle smart pasting
-        // truncate trailing spaces using appropriate granularity regex
-        // look at end of insertion bed
-        // if this does not match that regex add an appropriate single char.
-    }
 
     if (stringForPasting)
         [self insertText:stringForPasting];
@@ -344,6 +345,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     CPDictionary    _selectedTextAttributes;
     int             _selectionGranularity;
     int             _previousSelectionGranularity;
+    int             _copySelectionGranularity;
 
     CPColor         _insertionPointColor;
 
@@ -424,6 +426,28 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self registerForDraggedTypes:[CPColorDragType]];
 
     return self;
+}
+
+- (void)copy:(id)sender
+{
+    _copySelectionGranularity = _previousSelectionGranularity;
+   [super copy:sender];
+}
+
+- (void)paste:(id)sender
+{
+    if (_copySelectionGranularity > 0)
+    {
+        // FIXME: handle smart pasting
+        // append trailing spaces using appropriate granularity regex
+        if ([self _isCharacterAtIndex:CPMaxRange(_selectionRange) granularity:_copySelectionGranularity])
+        {
+          //  stringForPasting+=" ";
+        }
+        // look at end of insertion bed
+        // if this does not match that regex add an appropriate single char.
+    }
+    [super paste:sender];
 }
 
 - (BOOL)_isFocused
@@ -931,6 +955,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     /* will post CPTextViewDidChangeSelectionNotification */
     _previousSelectionGranularity = [self selectionGranularity];
+
     [self setSelectionGranularity:CPSelectByCharacter];
     [self setSelectedRange:[self selectedRange] affinity:0 stillSelecting:NO];
     var point = [_layoutManager locationForGlyphAtIndex:[self selectedRange].location];
@@ -1370,9 +1395,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         changedRange = _selectionRange;
 
     // smart delete
-    if (_previousSelectionGranularity > 0 &&
-        changedRange.location > 0 && [self _isCharacterAtIndex:changedRange.location-1 granularity:_previousSelectionGranularity] &&
-        changedRange.location < [[self string] length] && [self _isCharacterAtIndex:CPMaxRange(changedRange) granularity:_previousSelectionGranularity])
+    if (_copySelectionGranularity > 0 &&
+        changedRange.location > 0 && [self _isCharacterAtIndex:changedRange.location-1 granularity:_copySelectionGranularity] &&
+        changedRange.location < [[self string] length] && [self _isCharacterAtIndex:CPMaxRange(changedRange) granularity:_copySelectionGranularity])
         changedRange.length++;
 
     [self _deleteForRange:changedRange];
@@ -1817,14 +1842,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         break;
     }
     // FIXME if (!characterSet) croak!
-    return characterSet.exec([self _characterTripletAtIndex:index]) !== null;
-}
-
-// FIXME: make this a function to increase performance
-- (CPString)_characterTripletAtIndex:(unsigned)index
-{
-    var tripletRange = _MakeRangeFromAbs(MAX(0, index - 1), MIN([_layoutManager numberOfCharacters], index + 2));
-    return [[_textStorage string] substringWithRange:tripletRange];
+    return characterSet.exec(_characterTripletFromStringAtIndex([_textStorage string], index)) !== null;
 }
 
 + (CPArray)_wordBoundaryRegex
@@ -1839,32 +1857,35 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (CPRange)_characterRangeForIndex:(unsigned)index inRange:(CPRange) aRange asDefinedByRegex:(JSObject)regex skip:(BOOL)flag
 {
     var wordRange = CPMakeRange(index, 0),
-        numberOfCharacters = [_layoutManager numberOfCharacters];
+        numberOfCharacters = [_layoutManager numberOfCharacters],
+        string = [_textStorage string];
 
     // do we start on a boundary character?
-    if (flag && regex.exec([self _characterTripletAtIndex:index])  !== null)
+    if (flag && regex.exec(_characterTripletFromStringAtIndex([_textStorage string], index))  !== null)
     {
         // -> extend to the left
-        for (var searchIndex = index - 1; searchIndex > 0 && regex.exec([self _characterTripletAtIndex:searchIndex]) !== null; searchIndex--)
+        for (var searchIndex = index - 1; searchIndex > 0 && regex.exec(_characterTripletFromStringAtIndex(string, searchIndex)) !== null; searchIndex--)
         {
             wordRange.location = searchIndex;
         }
         // -> extend to the right
         searchIndex = index + 1;
-        while (searchIndex < numberOfCharacters && regex.exec([self _characterTripletAtIndex:searchIndex]) !== null)
+        while (searchIndex < numberOfCharacters && regex.exec(_characterTripletFromStringAtIndex(string, searchIndex)) !== null)
         {
             searchIndex++;
         }
         return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), searchIndex));
     }
     // -> extend to the left
-    for (var searchIndex = index - 1; searchIndex > 0 && regex.exec([self _characterTripletAtIndex:searchIndex]) === null; searchIndex--)
+    for (var searchIndex = index - 1; searchIndex > 0 && regex.exec(_characterTripletFromStringAtIndex(string, searchIndex)) === null; searchIndex--)
     {
         wordRange.location = searchIndex;
     }
     // -> extend to the right
-    for (index++; index < numberOfCharacters && regex.exec([self _characterTripletAtIndex:index])  === null; index++)
+    index++;
+    while (index < numberOfCharacters && regex.exec(_characterTripletFromStringAtIndex(string, index))  === null)
     {
+        index++;
     }
     return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), index));
 }
