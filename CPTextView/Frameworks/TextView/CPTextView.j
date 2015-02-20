@@ -1829,7 +1829,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 + (CPArray)_wordBoundaryRegex
 {
-    return /(.|[\r\n])[\s;,!?:\.-](.|[\r\n])/m;
+    return /^(.|[\r\n])\W(.|[\r\n])$/m;
 }
 + (CPArray)_paragraphBoundaryRegex
 {
