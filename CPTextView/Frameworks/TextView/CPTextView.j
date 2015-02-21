@@ -436,11 +436,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)paste:(id)sender
 {
+    if (_copySelectionGranularity > 0)
+    {
+        if (![self _isCharacterAtIndex:_selectionRange.location granularity:_copySelectionGranularity])
+        {
+            [self insertText:" "];
+        }
+    }
     [super paste:sender];
     if (_copySelectionGranularity > 0)
     {
-        // FIXME: handle smart pasting
-        // append trailing spaces using appropriate granularity regex
         if (![self _isCharacterAtIndex:CPMaxRange(_selectionRange) granularity:_copySelectionGranularity])
         {
             [self insertText:" "];
