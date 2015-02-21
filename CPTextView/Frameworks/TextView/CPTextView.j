@@ -62,7 +62,6 @@ _characterTripletFromStringAtIndex=function(string, index)
 }
 _regexMatchesStringAtIndex=function(regex, string, index)
 {
-    if (!index) return NO;
     var triplet = _characterTripletFromStringAtIndex(string, index);
 
     return regex.exec(triplet)  !== null;
