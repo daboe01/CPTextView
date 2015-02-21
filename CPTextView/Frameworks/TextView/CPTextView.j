@@ -50,8 +50,21 @@ _characterTripletFromStringAtIndex=function(string, index)
     if([string isKindOfClass:CPAttributedString])
         string = string._string;
 
-    var tripletRange = _MakeRangeFromAbs(MAX(0, index - 1), MIN(string.length, index + 2));
-    return [string substringWithRange:tripletRange];
+    var tripletRange = _MakeRangeFromAbs(MAX(0, index - 1), MIN(string.length, index + 2)),
+        ret = [string substringWithRange:tripletRange];
+
+    if (tripletRange.length < 3 && index == 0)
+    {
+        ret = " " + ret;
+    }
+
+    return ret;
+}
+_regexMatchesStringAtIndex=function(regex, string, index)
+{
+    var triplet = _characterTripletFromStringAtIndex(string, index);
+
+    return regex.exec(triplet)  !== null;
 }
 
 
@@ -1839,13 +1852,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         case CPSelectByWord:
             characterSet = [[self class] _wordBoundaryRegex];
-        break;
+            break;
+
         case CPSelectByParagraph:
             characterSet = [[self class] _paragraphBoundaryRegex];
-        break;
+            break;
+        default:
+            // FIXME if (!characterSet) croak!
     }
-    // FIXME if (!characterSet) croak!
-    return characterSet.exec(_characterTripletFromStringAtIndex([_textStorage string], index)) !== null;
+
+    return _regexMatchesStringAtIndex(characterSet, [_textStorage string], index);
 }
 
 + (CPArray)_wordBoundaryRegex
@@ -1864,29 +1880,29 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         string = [_textStorage string];
 
     // do we start on a boundary character?
-    if (flag && regex.exec(_characterTripletFromStringAtIndex([_textStorage string], index))  !== null)
+    if (flag && _regexMatchesStringAtIndex(regex, string, index))
     {
         // -> extend to the left
-        for (var searchIndex = index - 1; searchIndex > 0 && regex.exec(_characterTripletFromStringAtIndex(string, searchIndex)) !== null; searchIndex--)
+        for (var searchIndex = index - 1; searchIndex > 0 && _regexMatchesStringAtIndex (regex, string, searchIndex); searchIndex--)
         {
             wordRange.location = searchIndex;
         }
         // -> extend to the right
         searchIndex = index + 1;
-        while (searchIndex < numberOfCharacters && regex.exec(_characterTripletFromStringAtIndex(string, searchIndex)) !== null)
+        while (searchIndex < numberOfCharacters && _regexMatchesStringAtIndex (regex, string, searchIndex))
         {
             searchIndex++;
         }
         return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), searchIndex));
     }
     // -> extend to the left
-    for (var searchIndex = index - 1; searchIndex > 0 && regex.exec(_characterTripletFromStringAtIndex(string, searchIndex)) === null; searchIndex--)
+    for (var searchIndex = index - 1; searchIndex > 0 && !_regexMatchesStringAtIndex (regex, string, searchIndex); searchIndex--)
     {
         wordRange.location = searchIndex;
     }
     // -> extend to the right
     index++;
-    while (index < numberOfCharacters && regex.exec(_characterTripletFromStringAtIndex(string, index))  === null)
+    while (index < numberOfCharacters && !_regexMatchesStringAtIndex (regex, string, index))
     {
         index++;
     }
