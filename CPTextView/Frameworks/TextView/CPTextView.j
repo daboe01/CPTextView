@@ -62,6 +62,7 @@ _characterTripletFromStringAtIndex=function(string, index)
 }
 _regexMatchesStringAtIndex=function(regex, string, index)
 {
+    if (!index) return NO;
     var triplet = _characterTripletFromStringAtIndex(string, index);
 
     return regex.exec(triplet)  !== null;
@@ -1883,20 +1884,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (flag && _regexMatchesStringAtIndex(regex, string, index))
     {
         // -> extend to the left
-        for (var searchIndex = index - 1; searchIndex > 0 && _regexMatchesStringAtIndex (regex, string, searchIndex); searchIndex--)
+        for (var searchIndex = index - 1; searchIndex > 0 && _regexMatchesStringAtIndex(regex, string, searchIndex); searchIndex--)
         {
             wordRange.location = searchIndex;
         }
         // -> extend to the right
         searchIndex = index + 1;
-        while (searchIndex < numberOfCharacters && _regexMatchesStringAtIndex (regex, string, searchIndex))
+        while (searchIndex < numberOfCharacters && _regexMatchesStringAtIndex(regex, string, searchIndex))
         {
             searchIndex++;
         }
         return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), searchIndex));
     }
     // -> extend to the left
-    for (var searchIndex = index - 1; searchIndex > 0 && !_regexMatchesStringAtIndex (regex, string, searchIndex); searchIndex--)
+    for (var searchIndex = index - 1; searchIndex >= 0 && !_regexMatchesStringAtIndex (regex, string, searchIndex); searchIndex--)
     {
         wordRange.location = searchIndex;
     }
@@ -1906,7 +1907,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         index++;
     }
-    return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), index));
+    return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters), index));
 }
 
 - (CPRange)selectionRangeForProposedRange:(CPRange)proposedRange granularity:(CPSelectionGranularity)granularity
