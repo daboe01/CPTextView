@@ -438,7 +438,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_copySelectionGranularity > 0)
     {
-        if (![self _isCharacterAtIndex:_selectionRange.location granularity:_copySelectionGranularity])
+        if (![self _isCharacterAtIndex:MAX(0, _selectionRange.location - 1) granularity:_copySelectionGranularity])
         {
             [self insertText:" "];
         }
