@@ -894,6 +894,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_startTrackingLocation === CPNotFound)
         _startTrackingLocation = [_layoutManager numberOfCharacters];
 
+    if (fraction[0] > 0.5)
+        _startTrackingLocation++;
+
     var granularities = [-1, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
     [self setSelectionGranularity:granularities[[event clickCount]]];
 
@@ -940,6 +943,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (index == CPNotFound)
         index = _scrollingDownward ? CPMaxRange(oldRange) : oldRange.location;
+
+    if (fraction[0] > 0.5)
+        index++;
 
     if (index > oldRange.location)
     {
@@ -1002,6 +1008,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
         var dindex= [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction],
             oldStickyLoc = _stickyXLocation;
+
+        if (fraction[0] > 0.5)
+            dindex++;
+
         [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
         _stickyXLocation = oldStickyLoc;
         [self scrollRangeToVisible:CPMakeRange(dindex, 0)]
@@ -1039,6 +1049,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
         var dindex= [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction],
             oldStickyLoc = _stickyXLocation;
+
+        if (fraction[0] > 0.5)
+            dindex++;
+
         [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
         _stickyXLocation = oldStickyLoc;
         [self scrollRangeToVisible:CPMakeRange(dindex, 0)]
