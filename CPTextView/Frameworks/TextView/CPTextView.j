@@ -825,7 +825,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)setSelectedRange:(CPRange)range
 {
     [self setSelectedRange:range affinity:0 stillSelecting:NO];
-    [self setTypingAttributes:[_textStorage attributesAtIndex:MAX(0, range.location -1) effectiveRange:nil]];
 }
 
 - (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity /* unused */ )affinity stillSelecting:(BOOL)selecting
