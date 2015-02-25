@@ -851,7 +851,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         if (_isFirstResponder)
             [self updateInsertionPointStateAndRestartTimer:((_selectionRange.length === 0) && ![_caretTimer isValid])];
 
-        [self setTypingAttributes:[_textStorage attributesAtIndex:MAX(0, range.location -1) effectiveRange:nil]];
+        var peekLoc = MAX(0, range.location - 1);
+
+        if ((_isNewlineCharacter([[_textStorage string] characterAtIndex:peekLoc])))
+            peekLoc++;
+
+        [self setTypingAttributes:[_textStorage attributesAtIndex:peekLoc effectiveRange:nil]];
 
         [[CPNotificationCenter defaultCenter] postNotificationName:CPTextViewDidChangeSelectionNotification object:self];
 
