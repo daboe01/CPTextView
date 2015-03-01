@@ -914,6 +914,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     }
     [self setSelectedRange:setRange affinity:0 stillSelecting:YES];
+
+// fixme: only start if we are in the scrolling areas
     _scrollingTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(_supportScrolling:) userInfo:nil repeats:YES];
 
 }
@@ -993,8 +995,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var point = [_layoutManager locationForGlyphAtIndex:[self selectedRange].location];
     _stickyXLocation= point.x;
     _startTrackingLocation = _selectionRange.location;
-    [_scrollingTimer invalidate];
-    _scrollingTimer = nil;
+
+    if (_scrollingTimer)
+    {   [_scrollingTimer invalidate];
+        _scrollingTimer = nil;
+    }
 }
 
 - (void)moveDown:(id)sender
