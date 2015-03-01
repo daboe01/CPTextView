@@ -921,7 +921,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void)_supportScrolling:(CPTimer)aTimer
 {
-   [self mouseDragged:[CPApp currentEvent]];
+    [self mouseDragged:[CPApp currentEvent]];
 }
 
 - (void)_clearRange:(var)range
