@@ -368,7 +368,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     BOOL            _drawCaret;
     CPTimer         _caretTimer;
-    CPTimer         _scollingTimer;
+    CPTimer         _scrollingTimer;
     CPGect          _caretRect;
 
     CPFont          _font;
@@ -914,6 +914,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     }
     [self setSelectedRange:setRange affinity:0 stillSelecting:YES];
+    _scrollingTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(_supportScrolling:) userInfo:nil repeats:YES];
+
+}
+- (void)_supportScrolling:(CPTimer)aTimer
+{
+   [self mouseDragged:[CPApp currentEvent]];
 }
 
 - (void)_clearRange:(var)range
@@ -987,6 +993,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var point = [_layoutManager locationForGlyphAtIndex:[self selectedRange].location];
     _stickyXLocation= point.x;
     _startTrackingLocation = _selectionRange.location;
+    [_scrollingTimer invalidate];
+    _scrollingTimer = nil;
 }
 
 - (void)moveDown:(id)sender
