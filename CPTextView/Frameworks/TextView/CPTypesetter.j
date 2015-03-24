@@ -52,6 +52,7 @@ var _measuringContext,
 
 function _widthOfStringForFont(aString, aFont)
 {
+
     if (!_measuringContext)
         _measuringContext = CGBitmapGraphicsContextCreate();
 
