@@ -367,6 +367,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     BOOL            _isFirstResponder;
 
     BOOL            _drawCaret;
+    BOOL            _drawCaretPemanently;
     CPTimer         _caretTimer;
     CPTimer         _scrollingTimer;
     CPGect          _caretRect;
@@ -751,7 +752,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)_blinkCaret:(CPTimer)aTimer
 {
-    _drawCaret = !_drawCaret;
+    _drawCaret = (!_drawCaret) || _drawCaretPemanently;
     [self setNeedsDisplayInRect:_caretRect];
 }
 
@@ -877,6 +878,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)keyDown:(CPEvent)event
 {
     [self interpretKeyEvents:[event]];
+    _drawCaretPemanently = YES;
+}
+- (void)keyUp:(CPEvent)event
+{
+    [super keyUp:event];
+    _drawCaretPemanently = NO;
 }
 
 - (void)mouseDown:(CPEvent)event
