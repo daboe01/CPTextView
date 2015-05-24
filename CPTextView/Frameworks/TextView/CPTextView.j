@@ -450,17 +450,19 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)paste:(id)sender
 {
-    if (_copySelectionGranularity > 0)
+    if (_copySelectionGranularity > 0 && _selectionRange.location > 0)
     {
-        if (![self _isCharacterAtIndex:MAX(0, _selectionRange.location - 1) granularity:_copySelectionGranularity])
+        if (!_isWhitespaceCharacter([[_textStorage string] characterAtIndex:_selectionRange.location - 1]))
         {
             [self insertText:" "];
         }
     }
+
     [super paste:sender];
+
     if (_copySelectionGranularity > 0)
     {
-        if (![self _isCharacterAtIndex:CPMaxRange(_selectionRange) granularity:_copySelectionGranularity])
+        if (!_isWhitespaceCharacter([[_textStorage string] characterAtIndex:CPMaxRange(_selectionRange)]) && !_isNewlineCharacter([[_textStorage string] characterAtIndex:MAX(0, _selectionRange.location - 1)]))
         {
             [self insertText:" "];
         }
@@ -1906,6 +1908,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 
     return _regexMatchesStringAtIndex(characterSet, [_textStorage string], index);
+}
+
+- (BOOL)_isWhitespaceCharacterAtIndex:(unsigned)index
+{
+    switch ([[_textStorage string] characterAtIndex:index])
+    {
+        case ' ':
+        case '\t':
+        case '\n':
+        case '\r':
+           return YES;
+
+    }
+    return NO;
 }
 
 + (CPArray)_wordBoundaryRegex

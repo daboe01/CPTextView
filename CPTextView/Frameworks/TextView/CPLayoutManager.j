@@ -36,6 +36,10 @@ function _isNewlineCharacter(chr)
 {
     return (chr === '\n' || chr === '\r');
 }
+function _isWhitespaceCharacter(chr)
+{
+    return (chr === '\n' || chr === '\r' || chr === ' ' || chr === '\t');
+}
 
 function _RectEqualToRectHorizontally(lhsRect, rhsRect)
 {
