@@ -145,6 +145,99 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     kDelegateRespondsTo_textView_shouldChangeTypingAttributes_toAttributes              = 0x0010;
 
 
+var _nativeInputField;
+var _nativeInputFieldKeyUpCalled;
+var _nativeInputFieldActive;
+
+
+// FIXME: also handle native copy/paste here in safari
+// fixme: make me a singleton
+@implementation _CPNativeInputManager : CPObject
+
++ (void)initialize
+{
+	_nativeInputField = document.createElement("div");
+	_nativeInputField.contentEditable=YES
+	_nativeInputField.onkeyup = function(e)
+	{
+
+// fixme: filter out shift-up and friends (maybe it is better not to bubble them in the first place)
+
+		_nativeInputFieldKeyUpCalled = YES;
+		var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+
+		if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
+			return;
+
+		if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified') // chrome signal for deadkey
+		{
+            _nativeInputFieldActive = YES;
+
+			[currentFirstResponder _activateNativeInputElement:_nativeInputField];
+		} else
+		{
+            if (_nativeInputFieldActive)
+            {
+                [currentFirstResponder insertText:_nativeInputField.innerHTML];
+                [self hideInputElement];
+                _nativeInputFieldActive = NO;
+            }
+            _nativeInputField.innerHTML = '';
+
+		}
+	}
+	_nativeInputField.onkeydown=function(e)
+	{
+		_nativeInputFieldKeyUpCalled = NO;
+		var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+
+		if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
+			return;
+
+		// on FF (no keyIdentifier) the only way to detect a dead key is the missing keyup event
+        if (e.keyIdentifier === undefined)
+		    setTimeout(function(){
+				if (!_nativeInputFieldActive  && _nativeInputFieldKeyUpCalled == NO && !e.repeat)
+				{
+                    _nativeInputFieldActive = YES;
+                    [currentFirstResponder _activateNativeInputElement:_nativeInputField];
+                }
+                else if (!_nativeInputFieldActive)
+                    [self hideInputElement];
+			}, 400);
+    }
+	_nativeInputField.onkeypress=function(e)
+	{
+		_nativeInputFieldKeyUpCalled = YES;
+    }
+
+	_nativeInputField.style.width="64px"
+	_nativeInputField.style.zIndex = 10000;
+    _nativeInputField.style.position = "absolute";
+    _nativeInputField.style.visibility = "visible";
+    _nativeInputField.style.padding = "0px";
+    _nativeInputField.style.margin = "0px";
+    _nativeInputField.style.whiteSpace = "pre";
+    _nativeInputField.style.outline = "0px solid transparent";
+}
++ (void)focus
+{
+    var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+
+    if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
+        return;
+
+    [self hideInputElement];
+	currentFirstResponder._DOMElement.appendChild(_nativeInputField);
+    _nativeInputField.focus()
+}
+
++ (void)hideInputElement
+{
+	_nativeInputField.style.top="-1000px"
+	_nativeInputField.style.left="-1000px"
+}
+@end
 
 @implementation CPText : CPControl
 {
@@ -861,15 +954,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self setTypingAttributes:[_textStorage attributesAtIndex:peekLoc effectiveRange:nil]];
 
         [[CPNotificationCenter defaultCenter] postNotificationName:CPTextViewDidChangeSelectionNotification object:self];
-
-        if(CPPlatformHasBug(CPJavaScriptPasteRequiresEditableTarget))
-        {
-            var domelem = _window._platformWindow._platformPasteboard._DOMPasteboardElement;
-            domelem.value=" ";  // make sure we do not get an empty selection
-            domelem.focus()
-            domelem.select()
-        }
     }
+}
+
+- (void)_activateNativeInputElement:(DOMElemet)aNativeField
+{
+     aNativeField.style.top = _caretDOM.style.top
+     aNativeField.style.left = _caretDOM.style.left
+     aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
 }
 
 - (CPArray)selectedRanges
@@ -879,9 +971,15 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)keyDown:(CPEvent)event
 {
-    [self interpretKeyEvents:[event]];
+
+    [[_window platformWindow] _propagateCurrentDOMEvent:YES];
+
+    if ([event charactersIgnoringModifiers] != 'å') // filter out the constant for dead keys in chrome
+        [self interpretKeyEvents:[event]];
+
     _drawCaretPemanently = YES;
 }
+
 - (void)keyUp:(CPEvent)event
 {
     [super keyUp:event];
@@ -1522,17 +1620,17 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (BOOL)becomeFirstResponder
 {
+    [super becomeFirstResponder]
     _isFirstResponder = YES;
     [self updateInsertionPointStateAndRestartTimer:YES];
     [[CPFontManager sharedFontManager] setSelectedFont:[self font] isMultiple:NO];
     [self setNeedsDisplay:YES];
 
-    if(CPPlatformHasBug(CPJavaScriptPasteRequiresEditableTarget))
-    {
-        _window._platformWindow._platformPasteboard._DOMPasteboardElement.focus()
-    }
+    [[CPRunLoop currentRunLoop] performSelector:@selector(focus) target:[_CPNativeInputManager class] argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+
     return YES;
 }
+
 
 - (BOOL)resignFirstResponder
 {
@@ -2104,3 +2202,4 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 
 @end
+
