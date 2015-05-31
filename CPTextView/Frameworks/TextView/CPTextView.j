@@ -156,26 +156,26 @@ var _nativeInputFieldActive;
 
 + (void)initialize
 {
-	_nativeInputField = document.createElement("div");
-	_nativeInputField.contentEditable=YES
-	_nativeInputField.onkeyup = function(e)
-	{
+    _nativeInputField = document.createElement("div");
+    _nativeInputField.contentEditable=YES
+    _nativeInputField.onkeyup = function(e)
+    {
 
 // fixme: filter out shift-up and friends (maybe it is better not to bubble them in the first place)
 
-		_nativeInputFieldKeyUpCalled = YES;
-		var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+        _nativeInputFieldKeyUpCalled = YES;
+        var currentFirstResponder = [[CPApp mainWindow] firstResponder]
 
-		if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
-			return;
+        if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
+            return;
 
-		if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified') // chrome signal for deadkey
-		{
+        if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified') // chrome signal for deadkey
+        {
             _nativeInputFieldActive = YES;
 
-			[currentFirstResponder _activateNativeInputElement:_nativeInputField];
-		} else
-		{
+            [currentFirstResponder _activateNativeInputElement:_nativeInputField];
+        } else
+        {
             if (_nativeInputFieldActive)
             {
                 [currentFirstResponder insertText:_nativeInputField.innerHTML];
@@ -184,35 +184,35 @@ var _nativeInputFieldActive;
             }
             _nativeInputField.innerHTML = '';
 
-		}
-	}
-	_nativeInputField.onkeydown=function(e)
-	{
-		_nativeInputFieldKeyUpCalled = NO;
-		var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+        }
+    }
+    _nativeInputField.onkeydown=function(e)
+    {
+        _nativeInputFieldKeyUpCalled = NO;
+        var currentFirstResponder = [[CPApp mainWindow] firstResponder]
 
-		if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
-			return;
+        if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
+            return;
 
-		// on FF (no keyIdentifier) the only way to detect a dead key is the missing keyup event
+        // on FF (no keyIdentifier) the only way to detect a dead key is the missing keyup event
         if (e.keyIdentifier === undefined)
-		    setTimeout(function(){
-				if (!_nativeInputFieldActive  && _nativeInputFieldKeyUpCalled == NO && !e.repeat)
-				{
+            setTimeout(function(){
+                if (!_nativeInputFieldActive  && _nativeInputFieldKeyUpCalled == NO && !e.repeat)
+                {
                     _nativeInputFieldActive = YES;
                     [currentFirstResponder _activateNativeInputElement:_nativeInputField];
                 }
                 else if (!_nativeInputFieldActive)
                     [self hideInputElement];
-			}, 400);
+            }, 400);
     }
-	_nativeInputField.onkeypress=function(e)
-	{
-		_nativeInputFieldKeyUpCalled = YES;
+    _nativeInputField.onkeypress=function(e)
+    {
+        _nativeInputFieldKeyUpCalled = YES;
     }
 
-	_nativeInputField.style.width="64px"
-	_nativeInputField.style.zIndex = 10000;
+    _nativeInputField.style.width="64px"
+    _nativeInputField.style.zIndex = 10000;
     _nativeInputField.style.position = "absolute";
     _nativeInputField.style.visibility = "visible";
     _nativeInputField.style.padding = "0px";
@@ -228,14 +228,14 @@ var _nativeInputFieldActive;
         return;
 
     [self hideInputElement];
-	currentFirstResponder._DOMElement.appendChild(_nativeInputField);
+    currentFirstResponder._DOMElement.appendChild(_nativeInputField);
     _nativeInputField.focus()
 }
 
 + (void)hideInputElement
 {
-	_nativeInputField.style.top="-1000px"
-	_nativeInputField.style.left="-1000px"
+    _nativeInputField.style.top="-1000px"
+    _nativeInputField.style.left="-1000px"
 }
 @end
 
