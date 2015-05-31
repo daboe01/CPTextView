@@ -150,18 +150,22 @@ var _nativeInputFieldKeyUpCalled;
 var _nativeInputFieldActive;
 
 
-// FIXME: also handle native copy/paste here in safari
-// fixme: make me a singleton
+// FIXME: also handle native copy/paste here for unfixed safari bug
+// fixme: use one instance for each textview
+// FIXME: hide the cptextview caret when the system caret is visible
+// FIXME: filter out shift-up and friends (maybe it is better not to bubble them in the first place)
+
 @implementation _CPNativeInputManager : CPObject
 
 + (void)initialize
 {
     _nativeInputField = document.createElement("div");
     _nativeInputField.contentEditable=YES
+
     _nativeInputField.onkeyup = function(e)
     {
 
-// fixme: filter out shift-up and friends (maybe it is better not to bubble them in the first place)
+// fixme: filter out shift-up and friends (maybe it is better not to bubble these in the first place)
 
         _nativeInputFieldKeyUpCalled = YES;
         var currentFirstResponder = [[CPApp mainWindow] firstResponder]
@@ -169,7 +173,7 @@ var _nativeInputFieldActive;
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
 
-        if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified') // chrome signal for deadkey
+        if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified') // chrome signal for deadkeys
         {
             _nativeInputFieldActive = YES;
 
@@ -220,6 +224,7 @@ var _nativeInputFieldActive;
     _nativeInputField.style.whiteSpace = "pre";
     _nativeInputField.style.outline = "0px solid transparent";
 }
+
 + (void)focus
 {
     var currentFirstResponder = [[CPApp mainWindow] firstResponder]
@@ -962,6 +967,7 @@ var _nativeInputFieldActive;
      aNativeField.style.top = _caretDOM.style.top
      aNativeField.style.left = _caretDOM.style.left
      aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
+//FIXME: hide our cared because now the system caret is visible
 }
 
 - (CPArray)selectedRanges
