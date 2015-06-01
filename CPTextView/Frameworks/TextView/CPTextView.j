@@ -149,22 +149,29 @@ var _nativeInputField;
 var _nativeInputFieldKeyUpCalled;
 var _nativeInputFieldActive;
 
-
-// FIXME: make ESC to exit the deadkey manager
-
 @implementation _CPNativeInputManager : CPObject
- 
+
++ (void)_endInputSessionWithString:(CPString)aStr
+{
+    _nativeInputFieldActive = NO;
+    var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+    var aRange = [currentFirstResponder selectedRange]
+    [currentFirstResponder setSelectedRange:CPMakeRange(aRange.location - 2, 2)]; // fixme: see comment in _activateNativeInputElement:
+    [currentFirstResponder insertText:aStr];
+    [self hideInputElement];
+    [currentFirstResponder updateInsertionPointStateAndRestartTimer:YES];
+}
+
 + (void)initialize
 {
     _nativeInputField = document.createElement("div");
     _nativeInputField.contentEditable=YES;
 
-// fixme: e.which is depreciated. we need to find better ways to identify the keys
+// fixme: e.which is depreciated(?). we may need to find better ways to identify the keys
     _nativeInputField.onkeyup = function(e)
     {
-
-        // filter out the shift-up and friends used to access the deadkeys
-        if (e.which < 32)
+       // filter out the shift-up and friends used to access the deadkeys
+        if (e.which < 27)
             return;
 
         _nativeInputFieldKeyUpCalled = YES;
@@ -173,7 +180,13 @@ var _nativeInputFieldActive;
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
 
-        if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified' ||  // chrome signal for deadkeys
+        if (e.which == 27 && _nativeInputFieldActive) // escape
+        {
+            [self _endInputSessionWithString:''];
+            return;
+        }
+
+        if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified' ||  // main chrome/safari signal for deadkeys
             (e.keyIdentifier !== undefined && e.which === 192) ) // workaround chrome bug that fails to trigger 'Unidentified' in all cases
         {
             _nativeInputFieldActive = YES;
@@ -181,16 +194,9 @@ var _nativeInputFieldActive;
         } else
         {
             if (_nativeInputFieldActive)
-            {
-                var aRange = [currentFirstResponder selectedRange]
-                [currentFirstResponder setSelectedRange:CPMakeRange(aRange.location - 2, 2)]; // fixme: see comment in _activateNativeInputElement:
-                [currentFirstResponder insertText:_nativeInputField.innerHTML];
-                [self hideInputElement];
-                _nativeInputFieldActive = NO;
-                [currentFirstResponder updateInsertionPointStateAndRestartTimer:YES];
-            }
-            _nativeInputField.innerHTML = '';
+                [self _endInputSessionWithString:_nativeInputField.innerHTML];
 
+            _nativeInputField.innerHTML = '';
         }
     }
     _nativeInputField.onkeydown=function(e)
@@ -248,11 +254,11 @@ var _nativeInputFieldActive;
     currentFirstResponder._DOMElement.appendChild(_nativeInputField);
 
     if (_nativeInputField.innerHTML.length == 0)
-        _nativeInputField.innerHTML = '-';
+        _nativeInputField.innerHTML = '-';  // make sure we have a selection to allow the native pasteboard work in safari
 
     _nativeInputField.focus();
 
-    // select all in the contenteditable div
+    // select all in the contenteditable div (http://stackoverflow.com/questions/12243898/how-to-select-all-text-in-contenteditable-div)
     if (document.body.createTextRange)
     {
         var range = document.body.createTextRange();
