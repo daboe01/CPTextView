@@ -150,10 +150,8 @@ var _nativeInputFieldKeyUpCalled;
 var _nativeInputFieldActive;
 
 
-// FIXME: also handle native copy/paste here for unfixed safari bug
+// FIXME: also handle native copy/paste here for unfixed safari bug (select all when setSelection is set to a non-zero length)
 // fixme: use one instance for each textview
-// FIXME: hide the cptextview caret when the system caret is visible
-// FIXME: filter out shift-up and friends (maybe it is better not to bubble them in the first place)
 
 @implementation _CPNativeInputManager : CPObject
 
@@ -165,7 +163,9 @@ var _nativeInputFieldActive;
     _nativeInputField.onkeyup = function(e)
     {
 
-// fixme: filter out shift-up and friends (maybe it is better not to bubble these in the first place)
+        // filter out the shift-up and friends used to access the deadkeys
+        if (e.which < 32)  // fixme: e.which is depreciated. we need to find a better way
+            return;
 
         _nativeInputFieldKeyUpCalled = YES;
         var currentFirstResponder = [[CPApp mainWindow] firstResponder]
@@ -173,10 +173,10 @@ var _nativeInputFieldActive;
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
 
-        if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified') // chrome signal for deadkeys
+        if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified' ||  // chrome signal for deadkeys
+            (e.keyIdentifier !== undefined && e.which === 192) ) // workaround chrome bug that fails to trigger 'Unidentified' in all cases
         {
             _nativeInputFieldActive = YES;
-
             [currentFirstResponder _activateNativeInputElement:_nativeInputField];
         } else
         {
@@ -185,6 +185,7 @@ var _nativeInputFieldActive;
                 [currentFirstResponder insertText:_nativeInputField.innerHTML];
                 [self hideInputElement];
                 _nativeInputFieldActive = NO;
+                [currentFirstResponder updateInsertionPointStateAndRestartTimer:YES];
             }
             _nativeInputField.innerHTML = '';
 
@@ -967,7 +968,11 @@ var _nativeInputFieldActive;
      aNativeField.style.top = _caretDOM.style.top
      aNativeField.style.left = _caretDOM.style.left
      aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
-//FIXME: hide our cared because now the system caret is visible
+
+// hide our cared because now the system caret is visible
+     [_caretTimer invalidate];
+     _caretTimer = nil;
+     [self _hideCaret];
 }
 
 - (CPArray)selectedRanges
@@ -980,7 +985,8 @@ var _nativeInputFieldActive;
 
     [[_window platformWindow] _propagateCurrentDOMEvent:YES];
 
-    if ([event charactersIgnoringModifiers] != 'å') // filter out the constant for dead keys in chrome
+ // filter out the constant for dead keys in chrome
+    if ([event charactersIgnoringModifiers] != 'å') // fixme: prevents deliberate entering of this particular character
         [self interpretKeyEvents:[event]];
 
     _drawCaretPemanently = YES;
@@ -2192,7 +2198,8 @@ var _nativeInputFieldActive;
     if (flag)
     {
         _drawCaret = flag;
-        _caretTimer = [CPTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(_blinkCaret:) userInfo:nil repeats:YES];
+        if (![_caretTimer isValid])
+            _caretTimer = [CPTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(_blinkCaret:) userInfo:nil repeats:YES];
     }
 }
 
