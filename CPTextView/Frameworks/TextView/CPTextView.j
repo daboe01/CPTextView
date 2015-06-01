@@ -149,6 +149,8 @@ var _nativeInputField;
 var _nativeInputFieldKeyUpCalled;
 var _nativeInputFieldActive;
 
+// fixme: system cursor does not hide properly when enlarged-> backport _CPCaret refac 
+
 @implementation _CPNativeInputManager : CPObject
 
 + (void)_endInputSessionWithString:(CPString)aStr
@@ -180,7 +182,7 @@ var _nativeInputFieldActive;
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
 
-        if (e.which == 27 && _nativeInputFieldActive) // escape
+        if (e.which == 27 && _nativeInputFieldActive) // escape during input session
         {
             [self _endInputSessionWithString:''];
             return;
@@ -210,7 +212,7 @@ var _nativeInputFieldActive;
         // on FF (no keyIdentifier) the only way to detect a dead key is the missing keyup event
         if (e.keyIdentifier === undefined)
             setTimeout(function(){
-                if (!_nativeInputFieldActive  && _nativeInputFieldKeyUpCalled == NO && !e.repeat)
+                if (!_nativeInputFieldActive && _nativeInputFieldKeyUpCalled == NO && !e.repeat)
                 {
                     _nativeInputFieldActive = YES;
                     [currentFirstResponder _activateNativeInputElement:_nativeInputField];
@@ -224,7 +226,7 @@ var _nativeInputFieldActive;
         _nativeInputFieldKeyUpCalled = YES;
     }
 
-    _nativeInputField.style.width="64px"
+    _nativeInputField.style.width="64px";
     _nativeInputField.style.zIndex = 10000;
     _nativeInputField.style.position = "absolute";
     _nativeInputField.style.visibility = "visible";
@@ -243,12 +245,12 @@ var _nativeInputFieldActive;
 
     [self hideInputElement];
     currentFirstResponder._DOMElement.appendChild(_nativeInputField);
-    _nativeInputField.focus()
+    _nativeInputField.focus();
 }
 
 + (void)focusForCopyPaste
 {
-    var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+    var currentFirstResponder = [[CPApp mainWindow] firstResponder];
 
     [self hideInputElement];
     currentFirstResponder._DOMElement.appendChild(_nativeInputField);
@@ -276,8 +278,8 @@ var _nativeInputFieldActive;
 
 + (void)hideInputElement
 {
-    _nativeInputField.style.top="-1000px"
-    _nativeInputField.style.left="-1000px"
+    _nativeInputField.style.top="-1000px";
+    _nativeInputField.style.left="-1000px";
 }
 @end
 
