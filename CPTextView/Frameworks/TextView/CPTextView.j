@@ -150,21 +150,21 @@ var _nativeInputFieldKeyUpCalled;
 var _nativeInputFieldActive;
 
 
-// FIXME: also handle native copy/paste here for unfixed safari bug (select all when setSelection is set to a non-zero length)
-// fixme: use one instance for each textview
+// FIXME: make ESC to exit the deadkey manager
 
 @implementation _CPNativeInputManager : CPObject
-
+ 
 + (void)initialize
 {
     _nativeInputField = document.createElement("div");
-    _nativeInputField.contentEditable=YES
+    _nativeInputField.contentEditable=YES;
 
+// fixme: e.which is depreciated. we need to find better ways to identify the keys
     _nativeInputField.onkeyup = function(e)
     {
 
         // filter out the shift-up and friends used to access the deadkeys
-        if (e.which < 32)  // fixme: e.which is depreciated. we need to find a better way
+        if (e.which < 32)
             return;
 
         _nativeInputFieldKeyUpCalled = YES;
@@ -182,6 +182,8 @@ var _nativeInputFieldActive;
         {
             if (_nativeInputFieldActive)
             {
+                var aRange = [currentFirstResponder selectedRange]
+                [currentFirstResponder setSelectedRange:CPMakeRange(aRange.location - 2, 2)]; // fixme: see comment in _activateNativeInputElement:
                 [currentFirstResponder insertText:_nativeInputField.innerHTML];
                 [self hideInputElement];
                 _nativeInputFieldActive = NO;
@@ -236,6 +238,34 @@ var _nativeInputFieldActive;
     [self hideInputElement];
     currentFirstResponder._DOMElement.appendChild(_nativeInputField);
     _nativeInputField.focus()
+}
+
++ (void)focusForCopyPaste
+{
+    var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+
+    [self hideInputElement];
+    currentFirstResponder._DOMElement.appendChild(_nativeInputField);
+
+    if (_nativeInputField.innerHTML.length == 0)
+        _nativeInputField.innerHTML = '-';
+
+    _nativeInputField.focus();
+
+    // select all in the contenteditable div
+    if (document.body.createTextRange)
+    {
+        var range = document.body.createTextRange();
+        range.moveToElementText(_nativeInputField);
+        range.select();
+    } else if (window.getSelection)
+    {
+        var selection = window.getSelection();        
+        var range = document.createRange();
+        range.selectNodeContents(_nativeInputField);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
 }
 
 + (void)hideInputElement
@@ -961,6 +991,9 @@ var _nativeInputFieldActive;
 
         [[CPNotificationCenter defaultCenter] postNotificationName:CPTextViewDidChangeSelectionNotification object:self];
     }
+
+    if (_selectionRange.length > 0)
+       [_CPNativeInputManager focusForCopyPaste];
 }
 
 - (void)_activateNativeInputElement:(DOMElemet)aNativeField
@@ -968,8 +1001,9 @@ var _nativeInputFieldActive;
      aNativeField.style.top = _caretDOM.style.top
      aNativeField.style.left = _caretDOM.style.left
      aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
+     [self insertText:"  "];  // fixme: this hack should at least bypass the undomanager
 
-// hide our cared because now the system caret is visible
+// hide our caret because now the system caret takes over
      [_caretTimer invalidate];
      _caretTimer = nil;
      [self _hideCaret];
