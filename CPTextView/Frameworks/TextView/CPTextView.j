@@ -1004,12 +1004,13 @@ var _nativeInputFieldActive;
        [_CPNativeInputManager focusForCopyPaste];
 }
 
+// interface to the _CPNativeInputManager
 - (void)_activateNativeInputElement:(DOMElemet)aNativeField
 {
      aNativeField.style.top = _caretDOM.style.top
      aNativeField.style.left = _caretDOM.style.left
      aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
-     [self insertText:"  "];  // fixme: this hack should at least bypass the undomanager
+     [self insertText:"  "];  // fixme: this hack to provide the space for the inputmanager should at least bypass the undomanager
 
 // hide our caret because now the system caret takes over
      [_caretTimer invalidate];
@@ -1025,7 +1026,7 @@ var _nativeInputFieldActive;
 - (void)keyDown:(CPEvent)event
 {
 
-    [[_window platformWindow] _propagateCurrentDOMEvent:YES];
+    [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager to work
 
  // filter out the constant for dead keys in chrome
     if ([event charactersIgnoringModifiers] != 'å') // fixme: prevents deliberate entering of this particular character
