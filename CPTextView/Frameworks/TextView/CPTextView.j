@@ -878,13 +878,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager to work
 
-    var modifierFlags = [event modifierFlags],
-        character = [event charactersIgnoringModifiers],
-        selectorNames = [CPKeyBinding selectorsForKey:character modifierFlags:modifierFlags];
-
-    if (selectorNames)
-        [_CPNativeInputManager mute];
-
  // filter out the constant for dead keys in chrome
     if ([event charactersIgnoringModifiers] != 'å') // fixme: prevents deliberate entering of this particular character
         [self interpretKeyEvents:[event]];
@@ -2228,7 +2221,7 @@ var _nativeInputFieldIsMuted;
             return;
         }
 
-        if (!_nativeInputFieldActive && _nativeInputFieldKeyPressedCalled == NO) // chrome: keypressed is not emitted for deadkeys
+        if (!_nativeInputFieldActive && _nativeInputFieldKeyPressedCalled == NO && _nativeInputField.innerHTML.length) // chrome-trigger: keypressed is not emitted for deadkeys
         {
             _nativeInputFieldActive = YES;
             [currentFirstResponder _activateNativeInputElement:_nativeInputField];
@@ -2242,6 +2235,9 @@ var _nativeInputFieldIsMuted;
     }
     _nativeInputField.onkeydown=function(e)
     {
+        if (e.which < 27)
+            return;
+
         if (_nativeInputFieldIsMuted)
         {
             _nativeInputFieldIsMuted = NO;
@@ -2257,7 +2253,7 @@ var _nativeInputFieldIsMuted;
         // on FF (no keyIdentifier) the only way to detect a dead key is the missing keyup event
         if (e.keyIdentifier === undefined)
             setTimeout(function(){
-                if (!_nativeInputFieldActive && _nativeInputFieldKeyUpCalled == NO && !e.repeat)
+                if (!_nativeInputFieldActive && _nativeInputFieldKeyUpCalled == NO && _nativeInputField.innerHTML.length && !e.repeat)
                 {
                     _nativeInputFieldActive = YES;
                     [currentFirstResponder _activateNativeInputElement:_nativeInputField];
