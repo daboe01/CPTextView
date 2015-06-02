@@ -36,6 +36,9 @@
 @class _CPRTFProducer;
 @class _CPRTFParser;
 
+@class _CPCaret;
+@class _CPNativeInputManager;
+
 _MakeRangeFromAbs = function(a1, a2)
 {
     return (a1 < a2) ? CPMakeRange(a1, a2 - a1) : CPMakeRange(a2, a1 - a2);
@@ -143,146 +146,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     kDelegateRespondsTo_textView_willChangeSelectionFromCharacterRange_toCharacterRange = 0x0004,
     kDelegateRespondsTo_textView_shouldChangeTextInRange_replacementString              = 0x0008,
     kDelegateRespondsTo_textView_shouldChangeTypingAttributes_toAttributes              = 0x0010;
-
-
-var _nativeInputField;
-var _nativeInputFieldKeyUpCalled;
-var _nativeInputFieldActive;
-
-// fixme: system cursor does not hide properly when enlarged-> backport _CPCaret refac 
-
-@implementation _CPNativeInputManager : CPObject
-
-+ (void)_endInputSessionWithString:(CPString)aStr
-{
-    _nativeInputFieldActive = NO;
-    var currentFirstResponder = [[CPApp mainWindow] firstResponder]
-    var aRange = [currentFirstResponder selectedRange]
-    [currentFirstResponder setSelectedRange:CPMakeRange(aRange.location - 2, 2)]; // fixme: see comment in _activateNativeInputElement:
-    [currentFirstResponder insertText:aStr];
-    [self hideInputElement];
-    [currentFirstResponder updateInsertionPointStateAndRestartTimer:YES];
-}
-
-+ (void)initialize
-{
-    _nativeInputField = document.createElement("div");
-    _nativeInputField.contentEditable=YES;
-
-// fixme: e.which is depreciated(?). we may need to find better ways to identify the keys
-    _nativeInputField.onkeyup = function(e)
-    {
-       // filter out the shift-up and friends used to access the deadkeys
-        if (e.which < 27)
-            return;
-
-        _nativeInputFieldKeyUpCalled = YES;
-        var currentFirstResponder = [[CPApp mainWindow] firstResponder]
-
-        if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
-            return;
-
-        if (e.which == 27 && _nativeInputFieldActive) // escape during input session
-        {
-            [self _endInputSessionWithString:''];
-            return;
-        }
-
-        if (!_nativeInputFieldActive && _nativeInputFieldKeyPressedCalled == NO) // chrome: keypressed is not emitted for deadkeys
-        {
-            _nativeInputFieldActive = YES;
-            [currentFirstResponder _activateNativeInputElement:_nativeInputField];
-        } else
-        {
-            if (_nativeInputFieldActive)
-                [self _endInputSessionWithString:_nativeInputField.innerHTML];
-
-            _nativeInputField.innerHTML = '';
-        }
-    }
-    _nativeInputField.onkeydown=function(e)
-    {
-        _nativeInputFieldKeyUpCalled = NO;
-        _nativeInputFieldKeyPressedCalled = NO;
-        var currentFirstResponder = [[CPApp mainWindow] firstResponder]
-
-        if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
-            return;
-
-        // on FF (no keyIdentifier) the only way to detect a dead key is the missing keyup event
-        if (e.keyIdentifier === undefined)
-            setTimeout(function(){
-                if (!_nativeInputFieldActive && _nativeInputFieldKeyUpCalled == NO && !e.repeat)
-                {
-                    _nativeInputFieldActive = YES;
-                    [currentFirstResponder _activateNativeInputElement:_nativeInputField];
-                }
-                else if (!_nativeInputFieldActive)
-                    [self hideInputElement];
-            }, 400);
-    }
-    _nativeInputField.onkeypress=function(e)
-    {
-        _nativeInputFieldKeyUpCalled = YES;
-        _nativeInputFieldKeyPressedCalled = YES;
-    }
-
-    _nativeInputField.style.width="64px";
-    _nativeInputField.style.zIndex = 10000;
-    _nativeInputField.style.position = "absolute";
-    _nativeInputField.style.visibility = "visible";
-    _nativeInputField.style.padding = "0px";
-    _nativeInputField.style.margin = "0px";
-    _nativeInputField.style.whiteSpace = "pre";
-    _nativeInputField.style.outline = "0px solid transparent";
-}
-
-+ (void)focus
-{
-    var currentFirstResponder = [[CPApp mainWindow] firstResponder]
-
-    if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
-        return;
-
-    [self hideInputElement];
-    currentFirstResponder._DOMElement.appendChild(_nativeInputField);
-    _nativeInputField.focus();
-}
-
-+ (void)focusForCopyPaste
-{
-    var currentFirstResponder = [[CPApp mainWindow] firstResponder];
-
-    [self hideInputElement];
-    currentFirstResponder._DOMElement.appendChild(_nativeInputField);
-
-    if (_nativeInputField.innerHTML.length == 0)
-        _nativeInputField.innerHTML = '-';  // make sure we have a selection to allow the native pasteboard work in safari
-
-    _nativeInputField.focus();
-
-    // select all in the contenteditable div (http://stackoverflow.com/questions/12243898/how-to-select-all-text-in-contenteditable-div)
-    if (document.body.createTextRange)
-    {
-        var range = document.body.createTextRange();
-        range.moveToElementText(_nativeInputField);
-        range.select();
-    } else if (window.getSelection)
-    {
-        var selection = window.getSelection();        
-        var range = document.createRange();
-        range.selectNodeContents(_nativeInputField);
-        selection.removeAllRanges();
-        selection.addRange(range);
-    }
-}
-
-+ (void)hideInputElement
-{
-    _nativeInputField.style.top="-1000px";
-    _nativeInputField.style.left="-1000px";
-}
-@end
 
 @implementation CPText : CPControl
 {
@@ -504,11 +367,7 @@ var _nativeInputFieldActive;
 
     BOOL            _isFirstResponder;
 
-    BOOL            _drawCaret;
-    BOOL            _drawCaretPemanently;
-    CPTimer         _caretTimer;
-    CPTimer         _scrollingTimer;
-    CPGect          _caretRect;
+    _CPCaret        _caret;
 
     CPFont          _font;
     CPColor         _textColor;
@@ -527,7 +386,6 @@ var _nativeInputFieldActive;
     BOOL            _isEditable;
     BOOL            _isSelectable;
 
-    var             _caretDOM;
     int             _stickyXLocation;
 
     CPArray         _selectionSpans;
@@ -571,7 +429,9 @@ var _nativeInputFieldActive;
         _isVerticallyResizable = YES;
         _isHorizontallyResizable = NO;
 
-        _caretRect = CGRectMake(0,0,1,11);
+        _caret = [[_CPCaret alloc] initWithTextView:self];
+        [_caret setRect:CGRectMake(0, 0, 1, 11)]
+
         [self setBackgroundColor:[CPColor whiteColor]];
     }
 
@@ -887,13 +747,7 @@ var _nativeInputFieldActive;
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
-    _stickyXLocation = _caretRect.origin.x;
-}
-
-- (void)_blinkCaret:(CPTimer)aTimer
-{
-    _drawCaret = (!_drawCaret) || _drawCaretPemanently;
-    [self setNeedsDisplayInRect:_caretRect];
+    _stickyXLocation = _caret._rect.origin.x;
 }
 
 - (id) _createSelectionSpanForRect:(CPRect)aRect andColor:(CPColor)aColor
@@ -956,11 +810,10 @@ var _nativeInputFieldActive;
     if ([self shouldDrawInsertionPoint])
     {
         [self updateInsertionPointStateAndRestartTimer:NO];
-        [self drawInsertionPointInRect:_caretRect color:_insertionPointColor turnedOn:_drawCaret];
+        [self drawInsertionPointInRect:_caret._rect color:_insertionPointColor turnedOn:_caret._drawCaret];
     }
-    else   // <!> FIXME: breaks DOM abstraction, but i did get it working otherwise
-        if (_caretDOM)
-            _caretDOM.style.visibility = "hidden";
+    else
+        [_caret setVisibility:NO];
 }
 
 - (void)setSelectedRange:(CPRange)range
@@ -989,7 +842,7 @@ var _nativeInputFieldActive;
     if (!selecting)
     {
         if (_isFirstResponder)
-            [self updateInsertionPointStateAndRestartTimer:((_selectionRange.length === 0) && ![_caretTimer isValid])];
+            [self updateInsertionPointStateAndRestartTimer:((_selectionRange.length === 0) && ![_caret isBlinking])];
 
         var peekLoc = MAX(0, range.location - 1);
 
@@ -1008,15 +861,12 @@ var _nativeInputFieldActive;
 // interface to the _CPNativeInputManager
 - (void)_activateNativeInputElement:(DOMElemet)aNativeField
 {
-     aNativeField.style.top = _caretDOM.style.top
-     aNativeField.style.left = _caretDOM.style.left
+     aNativeField.style.top = _caret._caretDOM.style.top
+     aNativeField.style.left = _caret._caretDOM.style.left
      aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
      [self insertText:"  "];  // fixme: this hack to provide the space for the inputmanager should at least bypass the undomanager
 
-// hide our caret because now the system caret takes over
-     [_caretTimer invalidate];
-     _caretTimer = nil;
-     [self _hideCaret];
+     [_caret setVisibility:NO];  // hide our caret because now the system caret takes over
 }
 
 - (CPArray)selectedRanges
@@ -1026,20 +876,26 @@ var _nativeInputFieldActive;
 
 - (void)keyDown:(CPEvent)event
 {
-
     [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager to work
+
+    var modifierFlags = [event modifierFlags],
+        character = [event charactersIgnoringModifiers],
+        selectorNames = [CPKeyBinding selectorsForKey:character modifierFlags:modifierFlags];
+
+    if (selectorNames)
+        [_CPNativeInputManager mute];
 
  // filter out the constant for dead keys in chrome
     if ([event charactersIgnoringModifiers] != 'å') // fixme: prevents deliberate entering of this particular character
         [self interpretKeyEvents:[event]];
 
-    _drawCaretPemanently = YES;
+    [_caret setPermanentlyVisible:YES];
 }
 
 - (void)keyUp:(CPEvent)event
 {
     [super keyUp:event];
-    _drawCaretPemanently = NO;
+    [_caret setPermanentlyVisible:NO];
 }
 
 - (void)mouseDown:(CPEvent)event
@@ -1047,10 +903,7 @@ var _nativeInputFieldActive;
     var fraction = [],
         point = [self convertPoint:[event locationInWindow] fromView:nil];
 
-    /* stop _caretTimer */
-    [_caretTimer invalidate];
-    _caretTimer = nil;
-    [self _hideCaret];
+    [_caret setVisibility:NO];
 
     // convert to container coordinate
     point.x -= _textContainerOrigin.x;
@@ -1570,12 +1423,7 @@ var _nativeInputFieldActive;
 {
     if (_isSelectable)
     {
-        if (_caretTimer)
-        {
-            [_caretTimer invalidate];
-            _caretTimer = nil;
-        }
-
+        [_caret stopBlinking];
         [self setSelectedRange:CPMakeRange(0, [_layoutManager numberOfCharacters])];
     }
 }
@@ -1593,7 +1441,7 @@ var _nativeInputFieldActive;
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
-    _stickyXLocation = _caretRect.origin.x;
+    _stickyXLocation = _caret._rect.origin.x;
 }
 
 - (void)deleteBackward:(id)sender ignoreSmart:(BOOL)ignoreFlag
@@ -1690,8 +1538,8 @@ var _nativeInputFieldActive;
 
 - (BOOL)resignFirstResponder
 {
-    [_caretTimer invalidate];
-    _caretTimer = nil;
+    [_caret stopBlinking];
+
     _isFirstResponder = NO;
     [self setNeedsDisplay:YES];
     return YES;
@@ -2189,62 +2037,40 @@ var _nativeInputFieldActive;
 
 - (void)drawInsertionPointInRect:(CGRect)aRect color:(CPColor)aColor turnedOn:(BOOL)flag
 {
-    var style;
-    if (!_caretDOM)
-    {
-        _caretDOM = document.createElement("span");
-        style = _caretDOM.style;
-        style.position = "absolute";
-        style.visibility = "visible";
-        style.padding = "0px";
-        style.margin = "0px";
-        style.whiteSpace = "pre";
-        style.backgroundColor = "black";
-        _caretDOM.style.width = "1px";
-        self._DOMElement.appendChild(_caretDOM);
-    }
-
-    _caretDOM.style.left = (aRect.origin.x) + "px";
-    _caretDOM.style.top = (aRect.origin.y) + "px";
-    _caretDOM.style.height = (aRect.size.height) + "px";
-    _caretDOM.style.visibility = flag ? "visible" : "hidden";
-}
-
-- (void)_hideCaret
-{
-    if (_caretDOM)
-        _caretDOM.style.visibility = "hidden";
+    [_caret setRect:aRect];
+    [_caret setVisibility:flag stop:NO];
 }
 
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
 {
+    var caretRect;
+
     if (_selectionRange.length)
-        [self _hideCaret];
+        [_caret setVisibility:NO];
 
     if (_selectionRange.location >= [_layoutManager numberOfCharacters])    // cursor is "behind" the last chacacter
     {
-        _caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
-        _caretRect.origin.x += _caretRect.size.width;
+        caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
+        caretRect.origin.x += caretRect.size.width;
 
         if (_selectionRange.location > 0 && [[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')
         {
-            _caretRect.origin.y += _caretRect.size.height;
-            _caretRect.origin.x = 0;
+            caretRect.origin.y += caretRect.size.height;
+            caretRect.origin.x = 0;
         }
     }
     else
-        _caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
+    {
+        caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
+    }
 
-    _caretRect.origin.x += _textContainerOrigin.x;
-    _caretRect.origin.y += _textContainerOrigin.y;
-    _caretRect.size.width = 1;
+    caretRect.origin.x += _textContainerOrigin.x;
+    caretRect.origin.y += _textContainerOrigin.y;
+    caretRect.size.width = 1;
+    [_caret setRect:caretRect];
 
     if (flag)
-    {
-        _drawCaret = flag;
-        if (![_caretTimer isValid])
-            _caretTimer = [CPTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(_blinkCaret:) userInfo:nil repeats:YES];
-    }
+        [_caret startBlinking];
 }
 
 - (void)performDragOperation:(CPDraggingInfo)aSender
@@ -2260,3 +2086,249 @@ var _nativeInputFieldActive;
 
 @end
 
+
+@implementation _CPCaret : CPObject
+{
+    BOOL        _drawCaret;
+    BOOL        _permanentlyVisible @accessors(property=permanentlyVisible);
+    CGRect      _rect;
+    CPTextView  _textView;
+    CPTimer     _caretTimer;
+    DOMElement  _caretDOM;
+}
+
+- (void)setRect:(CGRect)aRect
+{
+    _rect = CGRectCreateCopy(aRect);
+
+    _caretDOM.style.left = (aRect.origin.x) + "px";
+    _caretDOM.style.top = (aRect.origin.y) + "px";
+    _caretDOM.style.height = (aRect.size.height) + "px";
+}
+
+- (id)initWithTextView:(CPTextView)aView
+{
+    if (self = [super init])
+    {
+        var style;
+
+        if (!_caretDOM)
+        {
+            _caretDOM = document.createElement("span");
+            style = _caretDOM.style;
+            style.position = "absolute";
+            style.visibility = "visible";
+            style.padding = "0px";
+            style.margin = "0px";
+            style.whiteSpace = "pre";
+            style.backgroundColor = "black";
+            _caretDOM.style.width = "1px";
+            _textView = aView;
+            _textView._DOMElement.appendChild(_caretDOM);
+        }
+    }
+
+    return self;
+}
+
+- (void)setVisibility:(BOOL)visibilityFlag stop:(BOOL)stopFlag
+{
+    _caretDOM.style.visibility = visibilityFlag ? "visible" : "hidden";
+
+    if (! visibilityFlag && stopFlag)
+        [self stopBlinking];
+}
+- (void)setVisibility:(BOOL)visibilityFlag
+{
+    [self setVisibility:visibilityFlag stop:YES];
+}
+- (void)_blinkCaret:(CPTimer)aTimer
+{
+    _drawCaret = (!_drawCaret) || _permanentlyVisible;
+    [_textView setNeedsDisplayInRect:_rect];
+}
+
+- (void)startBlinking
+{
+    _drawCaret = YES;
+
+    if ([self isBlinking])
+        return;
+
+    _caretTimer = [CPTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(_blinkCaret:) userInfo:nil repeats:YES];
+}
+
+- (void)isBlinking
+{
+    return [_caretTimer isValid];
+}
+
+- (void)stopBlinking
+{
+    _drawCaret = NO;
+
+    if (_caretTimer)
+    {
+        [_caretTimer invalidate];
+        _caretTimer = nil;
+    }
+}
+
+@end
+
+
+var _nativeInputField;
+var _nativeInputFieldKeyUpCalled;
+var _nativeInputFieldActive;
+var _nativeInputFieldIsMuted;
+
+// fixme: system cursor does not hide properly when enlarged-> backport _CPCaret refac 
+
+@implementation _CPNativeInputManager : CPObject
+
++ (void)_endInputSessionWithString:(CPString)aStr
+{
+    _nativeInputFieldActive = NO;
+    var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+    var aRange = [currentFirstResponder selectedRange]
+    [currentFirstResponder setSelectedRange:CPMakeRange(aRange.location - 2, 2)]; // fixme: see comment in _activateNativeInputElement:
+    [currentFirstResponder insertText:aStr];
+    [self hideInputElement];
+    [currentFirstResponder updateInsertionPointStateAndRestartTimer:YES];
+}
+
++ (void)initialize
+{
+    _nativeInputField = document.createElement("div");
+    _nativeInputField.contentEditable=YES;
+
+// fixme: e.which is depreciated(?). we may need to find better ways to identify the keys
+    _nativeInputField.onkeyup = function(e)
+    {
+
+        if (_nativeInputFieldIsMuted)
+        {
+            _nativeInputFieldIsMuted = NO;
+            return;
+        }
+       // filter out the shift-up and friends used to access the deadkeys
+        if (e.which < 27)
+            return;
+
+        _nativeInputFieldKeyUpCalled = YES;
+        var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+
+        if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
+            return;
+
+        if (e.which == 27 && _nativeInputFieldActive) // escape was pressed during input session
+        {
+            [self _endInputSessionWithString:''];
+            return;
+        }
+
+        if (!_nativeInputFieldActive && _nativeInputFieldKeyPressedCalled == NO) // chrome: keypressed is not emitted for deadkeys
+        {
+            _nativeInputFieldActive = YES;
+            [currentFirstResponder _activateNativeInputElement:_nativeInputField];
+        } else
+        {
+            if (_nativeInputFieldActive)
+                [self _endInputSessionWithString:_nativeInputField.innerHTML];
+
+            _nativeInputField.innerHTML = '';
+        }
+    }
+    _nativeInputField.onkeydown=function(e)
+    {
+        if (_nativeInputFieldIsMuted)
+        {
+            _nativeInputFieldIsMuted = NO;
+            return;
+        }
+        _nativeInputFieldKeyUpCalled = NO;
+        _nativeInputFieldKeyPressedCalled = NO;
+        var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+
+        if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
+            return;
+
+        // on FF (no keyIdentifier) the only way to detect a dead key is the missing keyup event
+        if (e.keyIdentifier === undefined)
+            setTimeout(function(){
+                if (!_nativeInputFieldActive && _nativeInputFieldKeyUpCalled == NO && !e.repeat)
+                {
+                    _nativeInputFieldActive = YES;
+                    [currentFirstResponder _activateNativeInputElement:_nativeInputField];
+                }
+                else if (!_nativeInputFieldActive)
+                    [self hideInputElement];
+            }, 400);
+    }
+    _nativeInputField.onkeypress=function(e)
+    {
+        _nativeInputFieldKeyUpCalled = YES;
+        _nativeInputFieldKeyPressedCalled = YES;
+    }
+
+    _nativeInputField.style.width="64px";
+    _nativeInputField.style.zIndex = 10000;
+    _nativeInputField.style.position = "absolute";
+    _nativeInputField.style.visibility = "visible";
+    _nativeInputField.style.padding = "0px";
+    _nativeInputField.style.margin = "0px";
+    _nativeInputField.style.whiteSpace = "pre";
+    _nativeInputField.style.outline = "0px solid transparent";
+}
+
++ (void)mute
+{
+    _nativeInputFieldIsMuted = YES;
+}
+
++ (void)focus
+{
+    var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+
+    if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
+        return;
+
+    [self hideInputElement];
+    currentFirstResponder._DOMElement.appendChild(_nativeInputField);
+    _nativeInputField.focus();
+}
+
++ (void)focusForCopyPaste
+{
+    var currentFirstResponder = [[CPApp mainWindow] firstResponder];
+
+    [self hideInputElement];
+    currentFirstResponder._DOMElement.appendChild(_nativeInputField);
+
+    if (_nativeInputField.innerHTML.length == 0)
+        _nativeInputField.innerHTML = '-';  // make sure we have a selection to allow the native pasteboard work in safari
+
+    _nativeInputField.focus();
+
+    // select all in the contenteditable div (http://stackoverflow.com/questions/12243898/how-to-select-all-text-in-contenteditable-div)
+    if (document.body.createTextRange)
+    {
+        var range = document.body.createTextRange();
+        range.moveToElementText(_nativeInputField);
+        range.select();
+    } else if (window.getSelection)
+    {
+        var selection = window.getSelection();        
+        var range = document.createRange();
+        range.selectNodeContents(_nativeInputField);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+}
+
++ (void)hideInputElement
+{
+    _nativeInputField.style.top="-1000px";
+    _nativeInputField.style.left="-1000px";
+}
+@end
