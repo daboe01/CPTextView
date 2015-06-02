@@ -188,8 +188,7 @@ var _nativeInputFieldActive;
             return;
         }
 
-        if (!_nativeInputFieldActive && e.keyIdentifier === 'Unidentified' ||  // main chrome/safari signal for deadkeys
-            (e.keyIdentifier !== undefined && e.which === 192) ) // workaround chrome bug that fails to trigger 'Unidentified' in all cases
+        if (!_nativeInputFieldActive && _nativeInputFieldKeyPressedCalled == NO) // chrome: keypressed is not emitted for deadkeys
         {
             _nativeInputFieldActive = YES;
             [currentFirstResponder _activateNativeInputElement:_nativeInputField];
@@ -204,6 +203,7 @@ var _nativeInputFieldActive;
     _nativeInputField.onkeydown=function(e)
     {
         _nativeInputFieldKeyUpCalled = NO;
+        _nativeInputFieldKeyPressedCalled = NO;
         var currentFirstResponder = [[CPApp mainWindow] firstResponder]
 
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
@@ -224,6 +224,7 @@ var _nativeInputFieldActive;
     _nativeInputField.onkeypress=function(e)
     {
         _nativeInputFieldKeyUpCalled = YES;
+        _nativeInputFieldKeyPressedCalled = YES;
     }
 
     _nativeInputField.style.width="64px";
