@@ -2223,8 +2223,9 @@ var _nativeInputFieldIsMuted;
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
 
-        if (_nativeInputField.innerHTML.charCodeAt(0) == 229 ||
-            _nativeInputField.innerHTML.charCodeAt(0) == 197) // å and Å need to be filtered out in keyDown: due to chrome inserting 229 on a deadkey
+        var charCode = _nativeInputField.innerHTML.charCodeAt(0);
+
+        if (charCode == 229 || charCode == 197) // å and Å need to be filtered out in keyDown: due to chrome inserting 229 on a deadkey
         {
             [currentFirstResponder insertText:_nativeInputField.innerHTML];
             _nativeInputField.innerHTML = '';
