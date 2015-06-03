@@ -870,7 +870,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
      aNativeField.style.top = _caret._caretDOM.style.top
      aNativeField.style.left = _caret._caretDOM.style.left
      aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
-     [self insertText:"  "];  // fixme: this hack to provide the space for the inputmanager should at least bypass the undomanager
+     aNativeField.style.color = [[_typingAttributes objectForKey:CPForegroundColorAttributeName] cssString];
+
+     [self insertText:"  "];  // FIXME: this hack to provide the appropriate space for the inputmanager should at least bypass the undomanager
+// it would be more elegant to insert a token that provides the space in the typesetter similar to the tab character
 
      [_caret setVisibility:NO];  // hide our caret because now the system caret takes over
 }
@@ -884,8 +887,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager to work
 
- // filter out the constant for dead keys in chrome
-    if ([event charactersIgnoringModifiers] != 'å') // fixme: prevents deliberate entering of this particular character
+    if ([event charactersIgnoringModifiers].charCodeAt(0) != 229) // filter out 229 because this would be inserted in chrome on each deadkey
         [self interpretKeyEvents:[event]];
 
     [_caret setPermanentlyVisible:YES];
@@ -2218,6 +2220,14 @@ var _nativeInputFieldIsMuted;
 
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
+
+        if (_nativeInputField.innerHTML.charCodeAt(0) == 229 ||
+            _nativeInputField.innerHTML.charCodeAt(0) == 197) // å and Å need to be filtered out in keyDown: due to chrome inserting 229 on a deadkey
+        {
+            [currentFirstResponder insertText:_nativeInputField.innerHTML];
+            _nativeInputField.innerHTML = '';
+            return;
+        }
 
         if (e.which == 27 && _nativeInputFieldActive) // escape was pressed during input session
         {
