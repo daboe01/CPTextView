@@ -741,7 +741,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         }
     }
 
-    [self setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0)];
+    [self _setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0) affinity:0 stillSelecting:NO overwriteTypingAttributes:NO];
 
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
@@ -821,7 +821,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self setSelectedRange:range affinity:0 stillSelecting:NO];
 }
 
-- (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity /* unused */ )affinity stillSelecting:(BOOL)selecting
+- (void)_setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity)affinity stillSelecting:(BOOL)selecting overwriteTypingAttributes:(BOOL) doOverwrite
 {
     var maxRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
     range = CPIntersectionRange(maxRange, range);
@@ -849,13 +849,19 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         if ((_isNewlineCharacter([[_textStorage string] characterAtIndex:peekLoc])))
             peekLoc++;
 
-        [self setTypingAttributes:[_textStorage attributesAtIndex:peekLoc effectiveRange:nil]];
+        if (doOverwrite)
+            [self setTypingAttributes:[_textStorage attributesAtIndex:peekLoc effectiveRange:nil]];
 
         [[CPNotificationCenter defaultCenter] postNotificationName:CPTextViewDidChangeSelectionNotification object:self];
     }
 
     if (_selectionRange.length > 0)
        [_CPNativeInputManager focusForCopyPaste];
+}
+
+- (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity)affinity stillSelecting:(BOOL)selecting
+{
+    [self _setSelectedRange:range affinity:affinity stillSelecting:selecting overwriteTypingAttributes:YES];
 }
 
 // interface to the _CPNativeInputManager
@@ -2053,9 +2059,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         }
     }
     else
-    {
         caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
-    }
 
     caretRect.origin.x += _textContainerOrigin.x;
     caretRect.origin.y += _textContainerOrigin.y;
@@ -2250,6 +2254,7 @@ var _nativeInputFieldIsMuted;
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
 
+// FIXME: we need a more robust way to identify the gecko engine (they may decide to support keyIdentifier in the future)
         // on FF (no keyIdentifier) the only way to detect a dead key is the missing keyup event
         if (e.keyIdentifier === undefined)
             setTimeout(function(){
