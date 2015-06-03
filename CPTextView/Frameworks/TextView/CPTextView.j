@@ -867,6 +867,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 // interface to the _CPNativeInputManager
 - (void)_activateNativeInputElement:(DOMElemet)aNativeField
 {
+//#ifdef(DOM)...
      aNativeField.style.top = _caret._caretDOM.style.top
      aNativeField.style.left = _caret._caretDOM.style.left
      aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
@@ -2202,7 +2203,6 @@ var _nativeInputFieldIsMuted;
     _nativeInputField = document.createElement("div");
     _nativeInputField.contentEditable=YES;
 
-// fixme: e.which is depreciated(?). we may need to find better ways to identify the keys
     _nativeInputField.onkeyup = function(e)
     {
 
@@ -2211,7 +2211,9 @@ var _nativeInputFieldIsMuted;
             _nativeInputFieldIsMuted = NO;
             return;
         }
-       // filter out the shift-up and friends used to access the deadkeys
+
+        // filter out the shift-up and friends used to access the deadkeys
+        // fixme: e.which is depreciated(?). we may need to find better ways to identify modifier-keys
         if (e.which < 27)
             return;
 
@@ -2229,6 +2231,7 @@ var _nativeInputFieldIsMuted;
             return;
         }
 
+        // fixme: e.which is depreciated(?). we may need to find better ways to identify the ESC
         if (e.which == 27 && _nativeInputFieldActive) // escape was pressed during input session
         {
             [self _endInputSessionWithString:''];
@@ -2264,9 +2267,8 @@ var _nativeInputFieldIsMuted;
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
 
-// FIXME: we need a more robust way to identify the gecko engine (they may decide to support keyIdentifier in the future)
-        // on FF (no keyIdentifier) the only way to detect a dead key is the missing keyup event
-        if (e.keyIdentifier === undefined)
+        // on FF the only way to detect a dead key is the missing keyup event
+        if (CPBrowserIsEngine(CPGeckoBrowserEngine))
             setTimeout(function(){
                 if (!_nativeInputFieldActive && _nativeInputFieldKeyUpCalled == NO && _nativeInputField.innerHTML.length && !e.repeat)
                 {
