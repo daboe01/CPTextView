@@ -2236,7 +2236,7 @@ var _nativeInputFieldIsMuted;
         }
 
         // filter out the shift-up and friends used to access the deadkeys
-        // fixme: e.which is depreciated(?) We may need to find a better way to identify the modifier-key-ups
+        // fixme: e.which is depreciated(?) -> find a better way to identify the modifier-keyups
         if (e.which < 27)
             return;
 
