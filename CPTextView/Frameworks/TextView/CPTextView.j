@@ -2229,7 +2229,6 @@ var _nativeInputFieldIsMuted;
 
     _nativeInputField.onkeyup = function(e)
     {
-
         if (_nativeInputFieldIsMuted)
         {
             _nativeInputFieldIsMuted = NO;
@@ -2237,7 +2236,7 @@ var _nativeInputFieldIsMuted;
         }
 
         // filter out the shift-up and friends used to access the deadkeys
-        // fixme: e.which is depreciated(?). we may need to find a better way to identify modifier-keys
+        // fixme: e.which is depreciated(?) We may need to find a better way to identify the modifier-key-ups
         if (e.which < 27)
             return;
 
@@ -2256,7 +2255,7 @@ var _nativeInputFieldIsMuted;
             return;
         }
 
-        if (!_nativeInputFieldActive && _nativeInputFieldKeyPressedCalled == NO && _nativeInputField.innerHTML.length) // chrome-trigger: keypressed is not emitted for deadkeys
+        if (!_nativeInputFieldActive && _nativeInputFieldKeyPressedCalled == NO && _nativeInputField.innerHTML.length) // chrome-trigger: keypressed is omitted for deadkeys
         {
             _nativeInputFieldActive = YES;
             [currentFirstResponder _activateNativeInputElement:_nativeInputField];
@@ -2270,9 +2269,6 @@ var _nativeInputFieldIsMuted;
     }
     _nativeInputField.onkeydown=function(e)
     {
-        if (e.which < 27)
-            return;
-
         if (_nativeInputFieldIsMuted)
         {
             _nativeInputFieldIsMuted = NO;
@@ -2285,7 +2281,7 @@ var _nativeInputFieldIsMuted;
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
 
-        // on FF the only way to detect a dead key is the missing keyup event
+        // FF-trigger: here the best way to detect a dead key is the missing keyup event
         if (CPBrowserIsEngine(CPGeckoBrowserEngine))
             setTimeout(function(){
                 if (!_nativeInputFieldActive && _nativeInputFieldKeyUpCalled == NO && _nativeInputField.innerHTML.length && !e.repeat)
