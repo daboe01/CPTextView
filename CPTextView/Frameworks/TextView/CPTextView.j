@@ -1446,8 +1446,23 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     _stickyXLocation = _caret._rect.origin.x;
 }
 
+// alert ESC pressed during native input
+- (void)cancelOperation:(id)sender
+{
+    if ([_CPNativeInputManager isNativeInputFieldActive])
+    {
+        [_CPNativeInputManager cancelCurrentNativeInputSession];
+    }
+}
+
 - (void)deleteBackward:(id)sender ignoreSmart:(BOOL)ignoreFlag
 {
+    if ([_CPNativeInputManager isNativeInputFieldActive])
+    {
+        [_CPNativeInputManager cancelCurrentNativeInputSession];
+        return;
+    }
+
     var changedRange;
 
     if (CPEmptyRange(_selectionRange) && _selectionRange.location > 0)
@@ -2187,6 +2202,15 @@ var _nativeInputFieldIsMuted;
 
 @implementation _CPNativeInputManager : CPObject
 
++ (BOOL) isNativeInputFieldActive
+{
+    return _nativeInputFieldActive;
+}
++ (void) cancelCurrentNativeInputSession
+{
+    [self _endInputSessionWithString:''];
+}
+
 + (void)_endInputSessionWithString:(CPString)aStr
 {
     _nativeInputFieldActive = NO;
@@ -2213,7 +2237,7 @@ var _nativeInputFieldIsMuted;
         }
 
         // filter out the shift-up and friends used to access the deadkeys
-        // fixme: e.which is depreciated(?). we may need to find better ways to identify modifier-keys
+        // fixme: e.which is depreciated(?). we may need to find a better way to identify modifier-keys
         if (e.which < 27)
             return;
 
@@ -2229,13 +2253,6 @@ var _nativeInputFieldIsMuted;
         {
             [currentFirstResponder insertText:_nativeInputField.innerHTML];
             _nativeInputField.innerHTML = '';
-            return;
-        }
-
-        // fixme: e.which is depreciated(?). we may need to find better ways to identify the ESC
-        if (e.which == 27 && _nativeInputFieldActive) // escape was pressed during input session
-        {
-            [self _endInputSessionWithString:''];
             return;
         }
 
