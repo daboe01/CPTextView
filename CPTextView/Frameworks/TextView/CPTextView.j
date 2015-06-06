@@ -2300,7 +2300,7 @@ var _CPCopyPlaceholder = '-';
         // FF-trigger: here the best way to detect a dead key is the missing keyup event
         if (CPBrowserIsEngine(CPGeckoBrowserEngine))
             setTimeout(function(){
-                if (!_nativeInputFieldActive && _nativeInputFieldKeyUpCalled == NO && _nativeInputField.innerHTML.length && !e.repeat)
+                if (!_nativeInputFieldActive && _nativeInputFieldKeyUpCalled == NO && _nativeInputField.innerHTML.length && _nativeInputField.innerHTML != _CPCopyPlaceholder && !e.repeat)
                 {
                     _nativeInputFieldActive = YES;
                     [currentFirstResponder _activateNativeInputElement:_nativeInputField];
