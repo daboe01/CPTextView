@@ -2307,7 +2307,7 @@ var _CPCopyPlaceholder = '-';
                 }
                 else if (!_nativeInputFieldActive)
                     [self hideInputElement];
-            }, 400);
+            }, 200);
     }
     _nativeInputField.onkeypress=function(e)
     {
