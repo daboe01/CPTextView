@@ -902,6 +902,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)mouseDown:(CPEvent)event
 {
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
+
     var fraction = [],
         point = [self convertPoint:[event locationInWindow] fromView:nil];
 
@@ -1157,6 +1159,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)moveLeftAndModifySelection:(id)sender
 {
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
     if (_isSelectable)
     {
        [self _extendSelectionIntoDirection:-1 granularity:CPSelectByCharacter];
@@ -1164,16 +1167,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void)moveBackward:(id)sender
 {
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
     [self moveLeft:sender];
 }
 
 - (void)moveBackwardAndModifySelection:(id)sender
 {
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
     [self moveLeftAndModifySelection:sender];
 }
 
 - (void)moveRightAndModifySelection:(id)sender
 {
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
+
     if (_isSelectable)
     {
        [self _extendSelectionIntoDirection:+1 granularity:CPSelectByCharacter];
@@ -1181,6 +1188,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (void)moveLeft:(id)sender
 {
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
+
     if (_isSelectable)
     {
         [self _establishSelection:CPMakeRange(_selectionRange.location - 1, 0) byExtending:NO];
@@ -1415,6 +1424,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)moveRight:(id)sender
 {
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
+
     if (_isSelectable)
     {
         [self _establishSelection:CPMakeRange(CPMaxRange(_selectionRange) + 1, 0) byExtending:NO];
