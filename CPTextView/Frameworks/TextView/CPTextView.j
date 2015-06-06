@@ -2201,10 +2201,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 @end
 
 
-var _nativeInputField;
-var _nativeInputFieldKeyUpCalled;
-var _nativeInputFieldActive;
-var _nativeInputFieldIsMuted;
+var _nativeInputField,
+    _nativeInputFieldKeyUpCalled,
+    _nativeInputFieldActive,
+    _nativeInputFieldIsMuted;
+
+var _CPCopyPlaceholder = '-';
 
 // fixme: system cursor does not hide properly when enlarged-> backport _CPCaret refac 
 
@@ -2269,7 +2271,7 @@ var _nativeInputFieldIsMuted;
             return;
         }
 
-        if (!_nativeInputFieldActive && _nativeInputFieldKeyPressedCalled == NO && _nativeInputField.innerHTML.length) // chrome-trigger: keypressed is omitted for deadkeys
+        if (!_nativeInputFieldActive && _nativeInputFieldKeyPressedCalled == NO && _nativeInputField.innerHTML.length && _nativeInputField.innerHTML != _CPCopyPlaceholder) // chrome-trigger: keypressed is omitted for deadkeys
         {
             _nativeInputFieldActive = YES;
             [currentFirstResponder _activateNativeInputElement:_nativeInputField];
@@ -2348,7 +2350,7 @@ var _nativeInputFieldIsMuted;
     currentFirstResponder._DOMElement.appendChild(_nativeInputField);
 
     if (_nativeInputField.innerHTML.length == 0)
-        _nativeInputField.innerHTML = '-';  // make sure we have a selection to allow the native pasteboard work in safari
+        _nativeInputField.innerHTML = _CPCopyPlaceholder;  // make sure we have a selection to allow the native pasteboard work in safari
 
     _nativeInputField.focus();
 
