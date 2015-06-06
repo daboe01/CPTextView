@@ -1449,10 +1449,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 // alert ESC pressed during native input
 - (void)cancelOperation:(id)sender
 {
-    if ([_CPNativeInputManager isNativeInputFieldActive])
-    {
-        [_CPNativeInputManager cancelCurrentNativeInputSession];
-    }
+    [super cancelOperation:sender];
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
 }
 
 - (void)deleteBackward:(id)sender ignoreSmart:(BOOL)ignoreFlag
@@ -2210,7 +2208,13 @@ var _nativeInputFieldIsMuted;
 {
     [self _endInputSessionWithString:''];
 }
++ (void) cancelCurrentInputSessionIfNeeded
+{
+    if (!_nativeInputFieldActive)
+        return;
 
+    [self cancelCurrentNativeInputSession];
+}
 + (void)_endInputSessionWithString:(CPString)aStr
 {
     _nativeInputFieldActive = NO;
