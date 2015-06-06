@@ -1587,6 +1587,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     return _typingAttributes;
 }
 
+- (CPDictionary)_attributesForFontPanel
+{
+    var attributes = [[_textStorage attributesAtIndex:CPMaxRange(_selectionRange) effectiveRange:nil] copy];
+
+    if (![attributes containsKey:CPForegroundColorAttributeName])
+        [attributes setObject:[self textColor] forKey:CPForegroundColorAttributeName];
+
+    return attributes;
+}
+
 - (void)setSelectedTextAttributes:(CPDictionary)attributes
 {
     _selectedTextAttributes = attributes;
