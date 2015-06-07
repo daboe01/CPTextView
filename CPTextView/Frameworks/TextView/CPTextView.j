@@ -142,9 +142,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)paste:(id)sender
 {
-    if ([CPApp currentEvent]._DOMEvent.target != _CPNativeInputField)
-        return;
-
     var pasteboard = [CPPasteboard generalPasteboard],
       //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
         stringForPasting = [pasteboard stringForType:CPStringPboardType];
@@ -409,8 +406,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)paste:(id)sender
 {
-    if ([CPApp currentEvent]._DOMEvent.target != _CPNativeInputField)
-        return;
+    [[[CPApp keyWindow] platformWindow] _propagateCurrentDOMEvent:NO]; // prevent double pasting from the additional 'synthetic' paste event
 
     if (_copySelectionGranularity > 0 && _selectionRange.location > 0)
     {
@@ -2332,7 +2328,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 + (void)hideInputElement
 {
-    _CPNativeInputField.style.top="-1000px";
-    _CPNativeInputField.style.left="-1000px";
+    _CPNativeInputField.style.top="-10000px";
+    _CPNativeInputField.style.left="-10000px";
 }
 @end
