@@ -1521,7 +1521,18 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     _isFirstResponder = NO;
     [self setNeedsDisplay:YES];
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
+
     return YES;
+}
+
+- (void)_enrichEssentialTypingAttributes:(CPDictionary)attributes
+{
+    if (![attributes containsKey:CPFontAttributeName])
+        [attributes setObject:[self font] forKey:CPFontAttributeName];
+
+    if (![attributes containsKey:CPForegroundColorAttributeName])
+        [attributes setObject:[self textColor] forKey:CPForegroundColorAttributeName];
 }
 
 - (void)setTypingAttributes:(CPDictionary)attributes
@@ -1534,12 +1545,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     else
     {
         _typingAttributes = [attributes copy];
-        /* check that new attributes contains essentials one's */
-        if (![_typingAttributes containsKey:CPFontAttributeName])
-            [_typingAttributes setObject:[self font] forKey:CPFontAttributeName];
-
-        if (![_typingAttributes containsKey:CPForegroundColorAttributeName])
-            [_typingAttributes setObject:[self textColor] forKey:CPForegroundColorAttributeName];
+        [self _enrichEssentialTypingAttributes:_typingAttributes];
     }
 
     [[CPNotificationCenter defaultCenter] postNotificationName:CPTextViewDidChangeTypingAttributesNotification
@@ -1555,8 +1561,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     var attributes = [[_textStorage attributesAtIndex:CPMaxRange(_selectionRange) effectiveRange:nil] copy];
 
-    if (![attributes containsKey:CPForegroundColorAttributeName])
-        [attributes setObject:[self textColor] forKey:CPForegroundColorAttributeName];
+    [self _enrichEssentialTypingAttributes:attributes];
 
     return attributes;
 }
