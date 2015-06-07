@@ -181,7 +181,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)paste:(id)sender
 {
-    if(CPPlatformHasBug(CPJavaScriptPasteRequiresEditableTarget) && ![CPApp currentEvent]._isFake)
+    if(![CPApp currentEvent]._isFake)
         return;
 
     var pasteboard = [CPPasteboard generalPasteboard],
@@ -452,6 +452,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         if (!_isWhitespaceCharacter([[_textStorage string] characterAtIndex:_selectionRange.location - 1]))
         {
+document.title="padding left"
             [self insertText:" "];
         }
     }
@@ -460,7 +461,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (_copySelectionGranularity > 0)
     {
-        if (!_isWhitespaceCharacter([[_textStorage string] characterAtIndex:CPMaxRange(_selectionRange)]) && !_isNewlineCharacter([[_textStorage string] characterAtIndex:MAX(0, _selectionRange.location - 1)]))
+        if (!_isWhitespaceCharacter([[_textStorage string] characterAtIndex:CPMaxRange(_selectionRange)]) &&
+            !_isNewlineCharacter([[_textStorage string] characterAtIndex:MAX(0, _selectionRange.location - 1)]))
         {
             [self insertText:" "];
         }
@@ -867,13 +869,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 // interface to the _CPNativeInputManager
 - (void)_activateNativeInputElement:(DOMElemet)aNativeField
 {
+     [self insertText:'  '];  // FIXME: this hack to provide the appropriate space for the inputmanager should at least bypass the undomanager
+     var caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location - 2, 1) inTextContainer:_textContainer];
+     caretRect.origin.x += 2;
+
 //#ifdef(DOM)...
-     aNativeField.style.top = _caret._caretDOM.style.top
-     aNativeField.style.left = _caret._caretDOM.style.left
+     aNativeField.style.left = caretRect.origin.x+"px";
+     aNativeField.style.top = caretRect.origin.y+"px";
      aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
      aNativeField.style.color = [[_typingAttributes objectForKey:CPForegroundColorAttributeName] cssString];
 
-     [self insertText:"  "];  // FIXME: this hack to provide the appropriate space for the inputmanager should at least bypass the undomanager
 // it would be more elegant to insert a token that provides the space in the typesetter similar to the tab character
 
      [_caret setVisibility:NO];  // hide our caret because now the system caret takes over
@@ -2214,6 +2219,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 var _nativeInputField,
     _nativeInputFieldKeyUpCalled,
+    _nativeInputFieldKeyPressedCalled,
     _nativeInputFieldActive,
     _nativeInputFieldIsMuted;
 
