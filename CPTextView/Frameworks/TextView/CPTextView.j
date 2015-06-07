@@ -820,10 +820,11 @@ document.title="padding left"
 
 - (void)setSelectedRange:(CPRange)range
 {
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
     [self setSelectedRange:range affinity:0 stillSelecting:NO];
 }
 
-- (void)_setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity)affinity stillSelecting:(BOOL)selecting overwriteTypingAttributes:(BOOL) doOverwrite
+- (void)_setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity)affinity stillSelecting:(BOOL)selecting overwriteTypingAttributes:(BOOL)doOverwrite
 {
     var maxRange = CPMakeRange(0, [_layoutManager numberOfCharacters]);
     range = CPIntersectionRange(maxRange, range);
@@ -858,7 +859,7 @@ document.title="padding left"
     }
 
     if (_selectionRange.length > 0)
-       [_CPNativeInputManager focusForCopyPaste];
+       [_CPNativeInputManager focusForClipboard];
 }
 
 - (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity)affinity stillSelecting:(BOOL)selecting
@@ -869,17 +870,16 @@ document.title="padding left"
 // interface to the _CPNativeInputManager
 - (void)_activateNativeInputElement:(DOMElemet)aNativeField
 {
-     [self insertText:'  '];  // FIXME: this hack to provide the appropriate space for the inputmanager should at least bypass the undomanager
+     [self insertText:'  '];  // FIXME: this hack to provide the visual space for the inputmanager should at least bypass the undomanager
+                              // it would be more elegant to insert a token that provides the space in the typesetter similar to the tab character
      var caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location - 2, 1) inTextContainer:_textContainer];
-     caretRect.origin.x += 2;
+     caretRect.origin.x += 2; // two pixel offset to the LHS character
 
 //#ifdef(DOM)...
      aNativeField.style.left = caretRect.origin.x+"px";
      aNativeField.style.top = caretRect.origin.y+"px";
      aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
      aNativeField.style.color = [[_typingAttributes objectForKey:CPForegroundColorAttributeName] cssString];
-
-// it would be more elegant to insert a token that provides the space in the typesetter similar to the tab character
 
      [_caret setVisibility:NO];  // hide our caret because now the system caret takes over
 }
@@ -907,8 +907,6 @@ document.title="padding left"
 
 - (void)mouseDown:(CPEvent)event
 {
-    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
-
     var fraction = [],
         point = [self convertPoint:[event locationInWindow] fromView:nil];
 
@@ -1164,7 +1162,6 @@ document.title="padding left"
 
 - (void)moveLeftAndModifySelection:(id)sender
 {
-    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
     if (_isSelectable)
     {
        [self _extendSelectionIntoDirection:-1 granularity:CPSelectByCharacter];
@@ -1172,20 +1169,16 @@ document.title="padding left"
 }
 - (void)moveBackward:(id)sender
 {
-    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
     [self moveLeft:sender];
 }
 
 - (void)moveBackwardAndModifySelection:(id)sender
 {
-    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
     [self moveLeftAndModifySelection:sender];
 }
 
 - (void)moveRightAndModifySelection:(id)sender
 {
-    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
-
     if (_isSelectable)
     {
        [self _extendSelectionIntoDirection:+1 granularity:CPSelectByCharacter];
@@ -1193,8 +1186,6 @@ document.title="padding left"
 }
 - (void)moveLeft:(id)sender
 {
-    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
-
     if (_isSelectable)
     {
         [self _establishSelection:CPMakeRange(_selectionRange.location - 1, 0) byExtending:NO];
@@ -1429,8 +1420,6 @@ document.title="padding left"
 
 - (void)moveRight:(id)sender
 {
-    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
-
     if (_isSelectable)
     {
         [self _establishSelection:CPMakeRange(CPMaxRange(_selectionRange) + 1, 0) byExtending:NO];
@@ -2359,7 +2348,7 @@ var _CPCopyPlaceholder = '-';
     _nativeInputField.focus();
 }
 
-+ (void)focusForCopyPaste
++ (void)focusForClipboard
 {
     var currentFirstResponder = [[CPApp mainWindow] firstResponder];
 
