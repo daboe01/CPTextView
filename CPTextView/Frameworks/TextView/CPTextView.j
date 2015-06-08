@@ -862,7 +862,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)mouseDown:(CPEvent)event
 {
-    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];  // handle ESC during native input
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
 
     var fraction = [],
         point = [self convertPoint:[event locationInWindow] fromView:nil];
