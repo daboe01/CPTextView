@@ -2182,7 +2182,7 @@ var _CPCopyPlaceholder = '-';
 }
 + (void) cancelCurrentNativeInputSession
 {
-    [self _endInputSessionWithString:''];
+    [self _endInputSessionWithString:_CPNativeInputField.innerHTML];
 }
 + (void) cancelCurrentInputSessionIfNeeded
 {
