@@ -1405,7 +1405,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 // alert ESC pressed during native input
 - (void)cancelOperation:(id)sender
 {
-    [super cancelOperation:sender];
     [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
 }
 
