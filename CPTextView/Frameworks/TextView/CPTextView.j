@@ -132,7 +132,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 }
 
-- (void)paste:(id)sender
+- (id)_stringForPasting
 {
     var pasteboard = [CPPasteboard generalPasteboard],
       //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
@@ -144,6 +144,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (![self isRichText] && [stringForPasting isKindOfClass:[CPAttributedString class]])
         stringForPasting = stringForPasting._string;
+
+    return stringForPasting;
+}
+
+- (void)paste:(id)sender
+{
+    var stringForPasting = [self _stringForPasting];
 
     if (stringForPasting)
         [self insertText:stringForPasting];
@@ -400,6 +407,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     [[_window platformWindow] _propagateCurrentDOMEvent:NO]; // prevent double pasting from the additional 'synthetic' paste event
 
+    var stringForPasting = [self _stringForPasting];
+
+    if (!stringForPasting)
+       return;
+
     if (_copySelectionGranularity > 0 && _selectionRange.location > 0)
     {
         if (!_isWhitespaceCharacter([[_textStorage string] characterAtIndex:_selectionRange.location - 1]))
@@ -408,7 +420,31 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         }
     }
 
-    [super paste:sender];
+    if (_copySelectionGranularity == CPSelectByParagraph)
+    {
+        if ([stringForPasting isKindOfClass:[CPString class]])
+        {
+            var i = 0;
+
+            while (_isWhitespaceCharacter([stringForPasting characterAtIndex:i]))
+                i++;
+
+            if (i)
+                stringForPasting = [stringForPasting stringByReplacingCharactersInRange:CPMakeRange(0, i) withString:''];
+        }
+        else
+        {
+            var str = stringForPasting._string,
+                i = 0;
+
+            while (_isWhitespaceCharacter([str characterAtIndex:i]))
+                i++;
+
+            [stringForPasting replaceCharactersInRange:CPMakeRange(0, i) withString:''];
+        }
+    }
+
+    [self insertText:stringForPasting];
 
     if (_copySelectionGranularity > 0)
     {
