@@ -2249,7 +2249,7 @@ var _CPCopyPlaceholder = '-';
 
         // filter out the shift-up, cursor keys and friends used to access the deadkeys
         // fixme: e.which is depreciated(?) -> find a better way to identify the modifier-keyups
-        if (e.which < 27 || e.which == 92 || e.which == 93)
+        if (e.which < 27 || e.which == 91 || e.which == 93) // include apple command keys
             return;
 
         _CPNativeInputFieldKeyUpCalled = YES;
