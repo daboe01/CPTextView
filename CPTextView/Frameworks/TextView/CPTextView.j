@@ -422,25 +422,21 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (_copySelectionGranularity == CPSelectByParagraph)
     {
+        var peekStr = stringForPasting,
+            i = 0;
+
         if ([stringForPasting isKindOfClass:[CPString class]])
+            peekStr = stringForPasting._string,
+
+        while (_isWhitespaceCharacter([peekStr characterAtIndex:i]))
+            i++;
+
+        if (i)
         {
-            var i = 0;
-
-            while (_isWhitespaceCharacter([stringForPasting characterAtIndex:i]))
-                i++;
-
-            if (i)
+            if ([stringForPasting isKindOfClass:[CPString class]])
                 stringForPasting = [stringForPasting stringByReplacingCharactersInRange:CPMakeRange(0, i) withString:''];
-        }
-        else
-        {
-            var str = stringForPasting._string,
-                i = 0;
-
-            while (_isWhitespaceCharacter([str characterAtIndex:i]))
-                i++;
-
-            [stringForPasting replaceCharactersInRange:CPMakeRange(0, i) withString:''];
+            else
+                [stringForPasting replaceCharactersInRange:CPMakeRange(0, i) withString:''];
         }
     }
 
