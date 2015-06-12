@@ -425,7 +425,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         var peekStr = stringForPasting,
             i = 0;
 
-        if ([stringForPasting isKindOfClass:[CPString class]])
+        if (![stringForPasting isKindOfClass:[CPString class]])
             peekStr = stringForPasting._string;
 
         while (_isWhitespaceCharacter([peekStr characterAtIndex:i]))
