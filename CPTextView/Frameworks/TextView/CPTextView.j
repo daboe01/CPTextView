@@ -426,7 +426,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             i = 0;
 
         if ([stringForPasting isKindOfClass:[CPString class]])
-            peekStr = stringForPasting._string,
+            peekStr = stringForPasting._string;
 
         while (_isWhitespaceCharacter([peekStr characterAtIndex:i]))
             i++;
