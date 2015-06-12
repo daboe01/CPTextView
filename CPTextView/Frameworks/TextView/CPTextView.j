@@ -1442,16 +1442,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)deleteBackward:(id)sender ignoreSmart:(BOOL)ignoreFlag
 {
-    if ([_CPNativeInputManager isNativeInputFieldActive])
-    {
-        [_CPNativeInputManager cancelCurrentNativeInputSession];
-        return;
-    }
-
     var changedRange;
 
     if (CPEmptyRange(_selectionRange) && _selectionRange.location > 0)
-         changedRange = CPMakeRange(_selectionRange.location - 1, 1);
+        changedRange = CPMakeRange(_selectionRange.location - 1, 1);
     else
         changedRange = _selectionRange;
 
@@ -2245,7 +2239,7 @@ var _CPCopyPlaceholder = '-';
 
         // filter out the shift-up, cursor keys and friends used to access the deadkeys
         // fixme: e.which is depreciated(?) -> find a better way to identify the modifier-keyups
-        if (e.which < 27 || e.which == 91 || e.which == 93) // include apple command keys
+        if (e.which != 8 && e.which < 27 || e.which == 91 || e.which == 93) // include apple command keys
             return;
 
         _CPNativeInputFieldKeyUpCalled = YES;
