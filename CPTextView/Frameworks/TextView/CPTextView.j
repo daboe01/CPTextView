@@ -116,20 +116,24 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (selectedRange.length < 1)
             return;
 
-    var pasteboard = [CPPasteboard generalPasteboard],
-        stringForPasting = [[self stringValue] substringWithRange:selectedRange];
+    var pasteboard = [CPPasteboard generalPasteboard];
 
     [pasteboard declareTypes:[CPStringPboardType] owner:nil];
+    [pasteboard setString:[[self stringValue] substringWithRange:selectedRange] forType:CPStringPboardType];
 
-    if ([self isRichText])
+    if ([self isRichText] && [self respondsToSelector:@selector(textStorage)])
     {
-       // crude hack to make rich pasting possible in chrome and firefox. this requires a RTF roundtrip, unfortunately
-        var richData =  [_CPRTFProducer produceRTF:[[self textStorage] attributedSubstringFromRange:selectedRange] documentAttributes:@{}];
-        [pasteboard setString:richData forType:CPStringPboardType];
-    }
-    else
-        [pasteboard setString:stringForPasting forType:CPStringPboardType];
+        var stringForPasting = [[self textStorage] attributedSubstringFromRange:CPMakeRangeCopy(selectedRange)];
 
+        if (stringForPasting._rangeEntries.length > 1)
+        {
+       //   crude hack to make rich pasting possible in chrome and firefox. simply put rtf on the plain pasteboard
+       //   [pasteboard declareTypes:[CPStringPboardType, CPRichStringPboardType] owner:nil];
+
+            var richData =  [_CPRTFProducer produceRTF:stringForPasting documentAttributes:@{}];
+            [pasteboard setString:richData forType:CPStringPboardType];
+        }
+    }
 }
 
 - (id)_stringForPasting
