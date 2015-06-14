@@ -127,10 +127,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
         if (stringForPasting._rangeEntries.length > 1)
         {
-       //   crude hack to make rich pasting possible in chrome and firefox. simply put rtf on the plain pasteboard
-       //   [pasteboard declareTypes:[CPStringPboardType, CPRichStringPboardType] owner:nil];
-
             var richData =  [_CPRTFProducer produceRTF:stringForPasting documentAttributes:@{}];
+       //   [pasteboard declareTypes:[CPStringPboardType, CPRichStringPboardType] owner:nil];
+       //   crude hack to make rich pasting possible in chrome and firefox. simply put rtf on the plain pasteboard
             [pasteboard setString:richData forType:CPStringPboardType];
         }
     }
