@@ -2309,7 +2309,7 @@ var _CPCopyPlaceholder = '-';
             if(_CPNativeInputFieldActive)
                 setTimeout(function(){
                     [self cancelCurrentInputSessionIfNeeded];
-                }, 200);
+                }, 500);
         }, false)
 
     _CPNativeInputField.style.width="64px";
