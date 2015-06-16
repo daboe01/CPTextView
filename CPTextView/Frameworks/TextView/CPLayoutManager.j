@@ -240,8 +240,8 @@ var _objectsInRange = function(aList, aRange)
 
     for (var i = 0; i < count; i++)
     {
-        //_glyphsFrames[i] = CGRectMake(origin.x, origin.y+(height-someAdvancements[i].height), someAdvancements[i].width, someAdvancements[i].height);
         _glyphsFrames[i] = CGRectMake(origin.x, origin.y, someAdvancements[i].width, height);
+        //_glyphsFrames[i] = CGRectMake(origin.x, origin.y+(height-someAdvancements[i].height), someAdvancements[i].width, someAdvancements[i].height);
         origin.x += someAdvancements[i].width;
     }
 }
