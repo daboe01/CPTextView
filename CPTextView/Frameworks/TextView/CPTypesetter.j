@@ -205,6 +205,7 @@ var CPSystemTypesetterFactory;
         currentContainer:(CPTextContainer)aContainer
         advancements:(CPArray)advancements
         lineCount:(unsigned)lineCount
+        sameLine:(BOOL)sameLine
 {
     var myX = 0,
         rect = CGRectMake(lineOrigin.x, lineOrigin.y, _lineWidth, _lineHeight),
@@ -299,8 +300,8 @@ var CPSystemTypesetterFactory;
             if (!_currentFont)
                 _currentFont = [_textStorage font] || [CPFont systemFontOfSize:12.0];
 
-            ascent = ["x" sizeWithFont:_currentFont].height; //FIXME
-            descent = 0;    //FIXME
+            ascent = [_currentFont ascender]
+            descent = [_currentFont descender]
             leading = (ascent - descent) * 0.2; // FAKE leading
         }
 
@@ -341,7 +342,7 @@ var CPSystemTypesetterFactory;
                 }
         }
 
-        advancements.push(rangeWidth - prevRangeWidth);
+        advancements.push(CPMakeSize(rangeWidth - prevRangeWidth, ascent));
         prevRangeWidth = _lineWidth = rangeWidth;
 
         if (lineOrigin.x + rangeWidth > containerSize.width)
@@ -362,7 +363,7 @@ var CPSystemTypesetterFactory;
 
         if (isNewline || isTabStop)
         {
-            if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainer:_currentTextContainer advancements:advancements lineCount:numLines])
+            if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainer:_currentTextContainer advancements:advancements lineCount:numLines sameLine:!isNewline])
                 return;
 
             if (isTabStop)
@@ -413,7 +414,7 @@ var CPSystemTypesetterFactory;
     // this is to "flush" the remaining characters
     if (lineRange.length)
     {
-        [self _flushRange:lineRange lineOrigin:lineOrigin currentContainer:_currentTextContainer advancements:advancements lineCount:numLines];
+        [self _flushRange:lineRange lineOrigin:lineOrigin currentContainer:_currentTextContainer advancements:advancements lineCount:numLines sameLine:NO];
     }
 
     if (_isNewlineCharacter(theString.charAt(theString.length - 1)))
