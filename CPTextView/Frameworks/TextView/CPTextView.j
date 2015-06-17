@@ -2192,8 +2192,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 var _CPNativeInputField,
     _CPNativeInputFieldKeyUpCalled,
     _CPNativeInputFieldKeyPressedCalled,
-    _CPNativeInputFieldActive,
-    _CPNativeInputFieldIsMuted;
+    _CPNativeInputFieldActive;
 
 var _CPCopyPlaceholder = '-';
 
@@ -2234,12 +2233,6 @@ var _CPCopyPlaceholder = '-';
 
     _CPNativeInputField.onkeyup = function(e)
     {
-        if (_CPNativeInputFieldIsMuted)
-        {
-            _CPNativeInputFieldIsMuted = NO;
-            return;
-        }
-
         // filter out the shift-up, cursor keys and friends used to access the deadkeys
         // fixme: e.which is depreciated(?) -> find a better way to identify the modifier-keyups
         if (e.which != 8 && e.which != 13 && e.which < 27 || e.which == 91 || e.which == 93) // include apple command keys
@@ -2281,11 +2274,6 @@ var _CPCopyPlaceholder = '-';
     }
     _CPNativeInputField.onkeydown=function(e)
     {
-        if (_CPNativeInputFieldIsMuted)
-        {
-            _CPNativeInputFieldIsMuted = NO;
-            return;
-        }
         _CPNativeInputFieldKeyUpCalled = NO;
         _CPNativeInputFieldKeyPressedCalled = NO;
         var currentFirstResponder = [[CPApp mainWindow] firstResponder]
@@ -2327,11 +2315,6 @@ var _CPCopyPlaceholder = '-';
     _CPNativeInputField.style.margin = "0px";
     _CPNativeInputField.style.whiteSpace = "pre";
     _CPNativeInputField.style.outline = "0px solid transparent";
-}
-
-+ (void)mute
-{
-    _CPNativeInputFieldIsMuted = YES;
 }
 
 + (void)focus
