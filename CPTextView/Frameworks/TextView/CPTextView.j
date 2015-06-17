@@ -2245,10 +2245,11 @@ var _CPCopyPlaceholder = '-';
         if (e.which != 8 && e.which != 13 && e.which < 27 || e.which == 91 || e.which == 93) // include apple command keys
             return;
 
-        if(_CPNativeInputFieldActive && _CPNativeInputField.innerHTML.slice(-1) == ">")  // exit when safari inserts tags
+        if(_CPNativeInputFieldActive && _CPNativeInputField.innerHTML.slice(-1) == ">")  // exit when safari starts inserting tags
         {
             _CPNativeInputField.innerHTML=''
             [self cancelCurrentNativeInputSession];
+            return;
         }
 
         _CPNativeInputFieldKeyUpCalled = YES;
