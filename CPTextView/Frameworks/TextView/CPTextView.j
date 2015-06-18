@@ -2229,7 +2229,7 @@ var _CPCopyPlaceholder = '-';
 + (void)initialize
 {
     _CPNativeInputField = document.createElement("div");
-    _CPNativeInputField.contentEditable=YES;
+    _CPNativeInputField.contentEditable = YES;
 
     _CPNativeInputField.onkeyup = function(e)
     {
@@ -2244,6 +2244,7 @@ var _CPCopyPlaceholder = '-';
             [self cancelCurrentNativeInputSession];
             return;
         }
+
 
         _CPNativeInputFieldKeyUpCalled = YES;
         var currentFirstResponder = [[CPApp mainWindow] firstResponder]
