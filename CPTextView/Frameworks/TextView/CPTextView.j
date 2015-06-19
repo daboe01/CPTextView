@@ -2272,7 +2272,7 @@ var _CPCopyPlaceholder = '-';
             _CPNativeInputField.innerHTML = '';
         }
     }
-    _CPNativeInputField.onkeydown=function(e)
+    _CPNativeInputField.onkeydown = function(e)
     {
         if(e.metaKey)  // do not interfere with native copy-paste
         {
@@ -2341,24 +2341,13 @@ var _CPCopyPlaceholder = '-';
         var pasteboard = [CPPasteboard generalPasteboard],
             string;
         var currentFirstResponder = [[CPApp mainWindow] firstResponder];
-        string = [[currentFirstResponder stringValue] substringWithRange:[currentFirstResponder selectedRange]];
-        e.clipboardData.setData('text/plain', string);
 
-        [pasteboard declareTypes:[CPStringPboardType] owner:nil];
-        [pasteboard setString:string forType:CPStringPboardType];
+       [currentFirstResponder copy:currentFirstResponder];
+      //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
+        stringForPasting = [pasteboard stringForType:CPStringPboardType];
 
-        if ([currentFirstResponder isRichText] && [currentFirstResponder respondsToSelector:@selector(textStorage)])
-        {
-            var stringForPasting = [[currentFirstResponder textStorage] attributedSubstringFromRange:CPMakeRangeCopy([currentFirstResponder selectedRange])];
-
-            if (stringForPasting._rangeEntries.length > 1)
-            {
-                var richData =  [_CPRTFProducer produceRTF:stringForPasting documentAttributes:@{}];
-                [pasteboard setString:richData forType:CPStringPboardType];
-                e.clipboardData.setData('text/plain', richData);
-          //    e.clipboardData.setData('application/rtf', richData); // does not seem to work
-            }
-        }
+        e.clipboardData.setData('text/plain', stringForPasting);
+     // e.clipboardData.setData('application/rtf', stringForPasting); // does not seem to work
 
         e.preventDefault();
         e.stopPropagation();
