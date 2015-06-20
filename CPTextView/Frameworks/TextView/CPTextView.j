@@ -111,6 +111,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)copy:(id)sender
 {
+    [_CPNativeInputManager setLastCopyWasNative:[sender isKindOfClass:[_CPNativeInputManager class]]];
+
     var selectedRange = [self selectedRange];
 
     if (selectedRange.length < 1)
@@ -2192,13 +2194,23 @@ var _CPNativeInputField,
     _CPNativeInputFieldKeyUpCalled,
     _CPNativeInputFieldKeyPressedCalled,
     _CPNativeInputFieldActive,
-    _CPNativeInputFieldWasCopyPaste;
+    _CPNativeInputFieldWasCopyPaste,
+    _CPNativeInputFieldLastCopyWasNative;
 
 var _CPCopyPlaceholder = '-';
 
 @implementation _CPNativeInputManager : CPObject
 
-+ (BOOL) isNativeInputFieldActive
++ (BOOL)lastCopyWasNative
+{
+    return _CPNativeInputFieldLastCopyWasNative;
+}
++ (void)setLastCopyWasNative:(BOOL)flag
+{
+    _CPNativeInputFieldLastCopyWasNative = flag;
+}
+
++ (BOOL)isNativeInputFieldActive
 {
     return _CPNativeInputFieldActive;
 }
@@ -2335,8 +2347,13 @@ var _CPCopyPlaceholder = '-';
 
         var pasteboard = [CPPasteboard generalPasteboard];
         [pasteboard declareTypes:[CPStringPboardType] owner:nil];
-        var data = e.clipboardData.getData('text/plain');
-        [pasteboard setString:data forType:CPStringPboardType];
+
+        if (_CPNativeInputFieldLastCopyWasNative)
+        {
+            var data = e.clipboardData.getData('text/plain');
+           [pasteboard setString:data forType:CPStringPboardType];
+        }
+
         var currentFirstResponder = [[CPApp mainWindow] firstResponder];
         [currentFirstResponder paste:self];
 
