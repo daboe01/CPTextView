@@ -141,7 +141,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
       //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
         stringForPasting = [pasteboard stringForType:CPStringPboardType];
 
-
     if ([stringForPasting hasPrefix:"{\\rtf1\\ansi"])
         stringForPasting = [[_CPRTFParser new] parseRTF:stringForPasting];
 
@@ -2193,7 +2192,7 @@ var _CPNativeInputField,
     _CPNativeInputFieldKeyUpCalled,
     _CPNativeInputFieldKeyPressedCalled,
     _CPNativeInputFieldActive,
-    _CPNativeInputFieldIsMuted;
+    _CPNativeInputFieldWasCopyPaste;
 
 var _CPCopyPlaceholder = '-';
 
@@ -2230,20 +2229,22 @@ var _CPCopyPlaceholder = '-';
 + (void)initialize
 {
     _CPNativeInputField = document.createElement("div");
-    _CPNativeInputField.contentEditable=YES;
+    _CPNativeInputField.contentEditable = YES;
 
     _CPNativeInputField.onkeyup = function(e)
     {
-        if (_CPNativeInputFieldIsMuted)
+        // filter out the shift-up, cursor keys and friends used to access the deadkeys
+        // fixme: e.which is depreciated(?) -> find a better way to identify the modifier-keyups
+        if (e.which != 8 && e.which != 13 && e.which < 27 || e.which == 91 || e.which == 93) // include apple command keys
+            return;
+
+        if(_CPNativeInputFieldActive && _CPNativeInputField.innerHTML.slice(-1) == ">")  // exit when safari starts inserting tags
         {
-            _CPNativeInputFieldIsMuted = NO;
+            _CPNativeInputField.innerHTML=''
+            [self cancelCurrentNativeInputSession];
             return;
         }
 
-        // filter out the shift-up, cursor keys and friends used to access the deadkeys
-        // fixme: e.which is depreciated(?) -> find a better way to identify the modifier-keyups
-        if (e.which != 8 && e.which < 27 || e.which == 91 || e.which == 93) // include apple command keys
-            return;
 
         _CPNativeInputFieldKeyUpCalled = YES;
         var currentFirstResponder = [[CPApp mainWindow] firstResponder]
@@ -2272,16 +2273,23 @@ var _CPCopyPlaceholder = '-';
             _CPNativeInputField.innerHTML = '';
         }
     }
-    _CPNativeInputField.onkeydown=function(e)
+    _CPNativeInputField.onkeydown = function(e)
     {
-        if (_CPNativeInputFieldIsMuted)
+        if(e.metaKey)  // do not interfere with native copy-paste
         {
-            _CPNativeInputFieldIsMuted = NO;
-            return;
+            _CPNativeInputFieldWasCopyPaste = NO;
+            e.stopPropagation();
+            setTimeout(function(){
+                if (!_CPNativeInputFieldWasCopyPaste)
+                    [[[CPApp mainWindow] platformWindow] keyEvent:e];
+            }, 200);
+
+            return true;
         }
+
         _CPNativeInputFieldKeyUpCalled = NO;
         _CPNativeInputFieldKeyPressedCalled = NO;
-        var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+        var currentFirstResponder = [[CPApp mainWindow] firstResponder];
 
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
@@ -2297,12 +2305,20 @@ var _CPCopyPlaceholder = '-';
                 else if (!_CPNativeInputFieldActive)
                     [self hideInputElement];
             }, 200);
-    }
+   }
     _CPNativeInputField.onkeypress=function(e)
     {
         _CPNativeInputFieldKeyUpCalled = YES;
         _CPNativeInputFieldKeyPressedCalled = YES;
     }
+
+    if (CPBrowserIsEngine(CPGeckoBrowserEngine))
+        _CPNativeInputField.addEventListener("input", function() {
+            if(_CPNativeInputFieldActive)
+                setTimeout(function(){
+                    [self cancelCurrentInputSessionIfNeeded];
+                }, 500);
+        }, false)
 
     _CPNativeInputField.style.width="64px";
     _CPNativeInputField.style.zIndex = 10000;
@@ -2312,11 +2328,43 @@ var _CPCopyPlaceholder = '-';
     _CPNativeInputField.style.margin = "0px";
     _CPNativeInputField.style.whiteSpace = "pre";
     _CPNativeInputField.style.outline = "0px solid transparent";
-}
 
-+ (void)mute
-{
-    _CPNativeInputFieldIsMuted = YES;
+    _CPNativeInputField.onpaste = function(e)
+    {
+        _CPNativeInputFieldWasCopyPaste = YES;
+
+        var pasteboard = [CPPasteboard generalPasteboard];
+        [pasteboard declareTypes:[CPStringPboardType] owner:nil];
+        var data = e.clipboardData.getData('text/plain');
+        [pasteboard setString:data forType:CPStringPboardType];
+        var currentFirstResponder = [[CPApp mainWindow] firstResponder];
+        [currentFirstResponder paste:currentFirstResponder];
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        return false;
+    }
+    _CPNativeInputField.oncopy = function(e)
+    {
+        _CPNativeInputFieldWasCopyPaste = YES;
+
+        var pasteboard = [CPPasteboard generalPasteboard],
+            string,
+            currentFirstResponder = [[CPApp mainWindow] firstResponder];
+
+        [currentFirstResponder copy:currentFirstResponder];
+      //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
+        stringForPasting = [pasteboard stringForType:CPStringPboardType];
+
+        e.clipboardData.setData('text/plain', stringForPasting);
+     // e.clipboardData.setData('application/rtf', stringForPasting); // does not seem to work
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        return false;
+    }
 }
 
 + (void)focus
