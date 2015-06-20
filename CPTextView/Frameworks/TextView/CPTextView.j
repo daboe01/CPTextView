@@ -2338,7 +2338,7 @@ var _CPCopyPlaceholder = '-';
         var data = e.clipboardData.getData('text/plain');
         [pasteboard setString:data forType:CPStringPboardType];
         var currentFirstResponder = [[CPApp mainWindow] firstResponder];
-        [currentFirstResponder paste:currentFirstResponder];
+        [currentFirstResponder paste:self];
 
         e.preventDefault();
         e.stopPropagation();
@@ -2353,7 +2353,7 @@ var _CPCopyPlaceholder = '-';
             string,
             currentFirstResponder = [[CPApp mainWindow] firstResponder];
 
-        [currentFirstResponder copy:currentFirstResponder];
+        [currentFirstResponder copy:self];
       //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
         stringForPasting = [pasteboard stringForType:CPStringPboardType];
 
