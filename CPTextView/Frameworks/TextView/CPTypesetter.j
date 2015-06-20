@@ -52,6 +52,8 @@ var _measuringContext,
 
 function _widthOfStringForFont(aString, aFont)
 {
+    var peek,
+        cssString = [aFont cssString];
 
     if (!_measuringContext)
         _measuringContext = CGBitmapGraphicsContextCreate();
@@ -60,12 +62,9 @@ function _widthOfStringForFont(aString, aFont)
     {
         var teststring = "0123456879abcdefghiklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.-()";
         _didTestCanvasSizingValid = YES;
-        _measuringContext.font = [aFont cssString];
+        _measuringContext.font = cssString;
         _isCanvasSizingInvalid = ABS([teststring sizeWithFont:aFont].width -_measuringContext.measureText(teststring).width) > 2;
     }
-
-    var peek,
-        cssString = [aFont cssString];
 
     if (!_sizingCache)
         _sizingCache = [];
