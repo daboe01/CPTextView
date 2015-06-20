@@ -2355,7 +2355,10 @@ var _CPCopyPlaceholder = '-';
         }
 
         var currentFirstResponder = [[CPApp mainWindow] firstResponder];
-        [currentFirstResponder paste:self];
+
+        setTimeout(function(){   // prevent dom-flickering
+            [currentFirstResponder paste:self];
+        }, 20);
 
         e.preventDefault();
         e.stopPropagation();
