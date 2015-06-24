@@ -2253,16 +2253,8 @@ var _CPCopyPlaceholder = '-';
         if (e.which == 8)    // safari backspace fix
             _CPNativeInputFieldKeyPressedCalled = YES;
 
-        if(_CPNativeInputFieldActive && _CPNativeInputField.innerHTML.slice(-1) == ">")  // exit when safari starts inserting tags
-        {
-            _CPNativeInputField.innerHTML=''
-            [self cancelCurrentNativeInputSession];
-            return;
-        }
-
-
         _CPNativeInputFieldKeyUpCalled = YES;
-        var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+        var currentFirstResponder = [[CPApp mainWindow] firstResponder];
 
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
@@ -2282,6 +2274,9 @@ var _CPCopyPlaceholder = '-';
             [currentFirstResponder _activateNativeInputElement:_CPNativeInputField];
         } else
         {
+            if (_CPNativeInputField.innerHTML.length > 1)
+                _CPNativeInputField.innerHTML = '';
+
             if (_CPNativeInputFieldActive)
                 [self _endInputSessionWithString:_CPNativeInputField.innerHTML];
 
