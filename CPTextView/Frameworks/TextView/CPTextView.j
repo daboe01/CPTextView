@@ -418,7 +418,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (_copySelectionGranularity > 0 && _selectionRange.location > 0)
     {
-        if (!_isWhitespaceCharacter([[_textStorage string] characterAtIndex:_selectionRange.location - 1]))
+        if (!_isWhitespaceCharacter([[_textStorage string] characterAtIndex:_selectionRange.location - 1]) && 
+            _selectionRange.location != [_layoutManager numberOfCharacters])
         {
             [self insertText:" "];
         }
@@ -449,7 +450,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_copySelectionGranularity > 0)
     {
         if (!_isWhitespaceCharacter([[_textStorage string] characterAtIndex:CPMaxRange(_selectionRange)]) &&
-            !_isNewlineCharacter([[_textStorage string] characterAtIndex:MAX(0, _selectionRange.location - 1)]))
+            !_isNewlineCharacter([[_textStorage string] characterAtIndex:MAX(0, _selectionRange.location - 1)]) &&
+            _selectionRange.location != [_layoutManager numberOfCharacters])
         {
             [self insertText:" "];
         }
