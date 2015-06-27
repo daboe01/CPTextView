@@ -843,7 +843,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [[CPNotificationCenter defaultCenter] postNotificationName:CPTextViewDidChangeSelectionNotification object:self];
     }
 
-    if (_selectionRange.length > 0)
+    if (!selecting && _selectionRange.length > 0)
        [_CPNativeInputManager focusForClipboard];
 }
 
@@ -881,7 +881,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager to work
 
-    if (![_CPNativeInputManager isNativeInputFieldActive] && [event charactersIgnoringModifiers].charCodeAt(0) != 229) // filter out 229 because this would be inserted in chrome on each deadkey
+    if ([_CPNativeInputManager isNativeInputFieldActive])
+       return;
+
+    if ([event charactersIgnoringModifiers].charCodeAt(0) != 229) // filter out 229 because this would be inserted in chrome on each deadkey
         [self interpretKeyEvents:[event]];
 
     [_caret setPermanentlyVisible:YES];
@@ -2214,11 +2217,14 @@ var _CPCopyPlaceholder = '-';
 {
     return _CPNativeInputFieldActive;
 }
-+ (void) cancelCurrentNativeInputSession
++ (void)cancelCurrentNativeInputSession
 {
+    if (_CPNativeInputField.innerHTML.length > 2)
+        _CPNativeInputField.innerHTML = '';
+
     [self _endInputSessionWithString:_CPNativeInputField.innerHTML];
 }
-+ (void) cancelCurrentInputSessionIfNeeded
++ (void)cancelCurrentInputSessionIfNeeded
 {
     if (!_CPNativeInputFieldActive)
         return;
@@ -2243,21 +2249,24 @@ var _CPCopyPlaceholder = '-';
     _CPNativeInputField = document.createElement("div");
     _CPNativeInputField.contentEditable = YES;
 
-    _CPNativeInputField.onkeyup = function(e)
+    _CPNativeInputField.addEventListener("keyup", function(e)
     {
+        _CPNativeInputFieldKeyUpCalled = YES;
         // filter out the shift-up, cursor keys and friends used to access the deadkeys
         // fixme: e.which is depreciated(?) -> find a better way to identify the modifier-keyups
-        if (e.which != 8 && e.which != 13 && e.which < 27 || e.which == 91 || e.which == 93) // include apple command keys
-            return;
+        if (e.which < 27 || e.which == 91 || e.which == 93) // include apple command keys
+        {
+            if (_CPNativeInputField.innerHTML.length == 0 || _CPNativeInputField.innerHTML.length > 2) // backspace
+                [self cancelCurrentInputSessionIfNeeded];
 
-        if (e.which == 8)    // safari backspace fix
-            _CPNativeInputFieldKeyPressedCalled = YES;
+            return false; // prevent the default behaviour
+        }
 
-        _CPNativeInputFieldKeyUpCalled = YES;
+
         var currentFirstResponder = [[CPApp mainWindow] firstResponder];
 
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
-            return;
+            return false; // prevent the default behaviour
 
         var charCode = _CPNativeInputField.innerHTML.charCodeAt(0);
 
@@ -2268,22 +2277,22 @@ var _CPCopyPlaceholder = '-';
             return;
         }
 
-        if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyPressedCalled == NO && _CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder) // chrome-trigger: keypressed is omitted for deadkeys
+        if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyPressedCalled == NO && _CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && _CPNativeInputField.innerHTML.length < 3) // chrome-trigger: keypressed is omitted for deadkeys
         {
             _CPNativeInputFieldActive = YES;
             [currentFirstResponder _activateNativeInputElement:_CPNativeInputField];
         } else
         {
-            if (_CPNativeInputField.innerHTML.length > 1)
-                _CPNativeInputField.innerHTML = '';
-
             if (_CPNativeInputFieldActive)
                 [self _endInputSessionWithString:_CPNativeInputField.innerHTML];
 
             _CPNativeInputField.innerHTML = '';
         }
-    }
-    _CPNativeInputField.onkeydown = function(e)
+
+        return false; // prevent the default behaviour
+    }, true);
+
+    _CPNativeInputField.addEventListener("keydown", function(e)
     {
         if(e.metaKey)  // do not interfere with native copy-paste
         {
@@ -2307,7 +2316,7 @@ var _CPCopyPlaceholder = '-';
         // FF-trigger: here the best way to detect a dead key is the missing keyup event
         if (CPBrowserIsEngine(CPGeckoBrowserEngine))
             setTimeout(function(){
-                if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyUpCalled == NO && _CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && !e.repeat)
+                if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyUpCalled == NO && _CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && _CPNativeInputField.innerHTML.length < 3 && !e.repeat)
                 {
                     _CPNativeInputFieldActive = YES;
                     [currentFirstResponder _activateNativeInputElement:_CPNativeInputField];
@@ -2315,20 +2324,25 @@ var _CPCopyPlaceholder = '-';
                 else if (!_CPNativeInputFieldActive)
                     [self hideInputElement];
             }, 200);
-   }
-    _CPNativeInputField.onkeypress=function(e)
+        return false;
+    }, true); // capture mode
+
+    _CPNativeInputField.addEventListener("keypress", function(e)
     {
         _CPNativeInputFieldKeyUpCalled = YES;
         _CPNativeInputFieldKeyPressedCalled = YES;
-    }
+        return false;
+    }, true); // capture mode
 
     if (CPBrowserIsEngine(CPGeckoBrowserEngine))
         _CPNativeInputField.addEventListener("input", function() {
             if(_CPNativeInputFieldActive)
                 setTimeout(function(){
-                    [self cancelCurrentInputSessionIfNeeded];
+                    if (_CPNativeInputField.innerHTML.length > 1)
+                        [self cancelCurrentInputSessionIfNeeded];
                 }, 500);
-        }, false)
+           return false;
+        }, true)
 
     _CPNativeInputField.style.width="64px";
     _CPNativeInputField.style.zIndex = 10000;
@@ -2349,7 +2363,7 @@ var _CPCopyPlaceholder = '-';
         if (_CPNativeInputFieldLastCopyWasNative)
         {
             var data = e.clipboardData.getData('text/plain');
-           [pasteboard setString:data forType:CPStringPboardType];
+            [pasteboard setString:data forType:CPStringPboardType];
         }
 
         var currentFirstResponder = [[CPApp mainWindow] firstResponder];
@@ -2357,9 +2371,6 @@ var _CPCopyPlaceholder = '-';
         setTimeout(function(){   // prevent dom-flickering
             [currentFirstResponder paste:self];
         }, 20);
-
-        e.preventDefault();
-        e.stopPropagation();
 
         return false;
     }
@@ -2377,9 +2388,6 @@ var _CPCopyPlaceholder = '-';
 
         e.clipboardData.setData('text/plain', stringForPasting);
      // e.clipboardData.setData('application/rtf', stringForPasting); // does not seem to work
-
-        e.preventDefault();
-        e.stopPropagation();
 
         return false;
     }
@@ -2402,35 +2410,37 @@ var _CPCopyPlaceholder = '-';
         e.clipboardData.setData('text/plain', stringForPasting);
      // e.clipboardData.setData('application/rtf', stringForPasting); // does not seem to work
 
-        e.preventDefault();
-        e.stopPropagation();
-
         return false;
     }
 }
 
 + (void)focus
 {
-    var currentFirstResponder = [[CPApp mainWindow] firstResponder]
+
+    var currentFirstResponder = [[CPApp mainWindow] firstResponder];
 
     if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
         return;
 
     [self hideInputElement];
+
+
+    // only append the _CPNativeInputField if it is not already there
+    var children = currentFirstResponder._DOMElement.childNodes,
+        l = children.length;
+
+    for (var i = 0; i < l; i++)
+    {
+        if (children[i] === _CPNativeInputField)   // we are (almost) done
+        {
+            if (document.activeElement !== _CPNativeInputField) // focus the _CPNativeInputField if necessary
+                _CPNativeInputField.focus();
+
+            return;
+        }
+    }
+
     currentFirstResponder._DOMElement.appendChild(_CPNativeInputField);
-    _CPNativeInputField.focus();
-}
-
-+ (void)focusForClipboard
-{
-    var currentFirstResponder = [[CPApp mainWindow] firstResponder];
-
-    [self hideInputElement];
-    currentFirstResponder._DOMElement.appendChild(_CPNativeInputField);
-
-    if (_CPNativeInputField.innerHTML.length == 0)
-        _CPNativeInputField.innerHTML = _CPCopyPlaceholder;  // make sure we have a selection to allow the native pasteboard work in safari
-
     _CPNativeInputField.focus();
 
     // select all in the contenteditable div (http://stackoverflow.com/questions/12243898/how-to-select-all-text-in-contenteditable-div)
@@ -2447,6 +2457,14 @@ var _CPCopyPlaceholder = '-';
         selection.removeAllRanges();
         selection.addRange(range);
     }
+}
+
++ (void)focusForClipboard
+{
+    if (_CPNativeInputField.innerHTML.length == 0)
+        _CPNativeInputField.innerHTML = _CPCopyPlaceholder;  // make sure we have a selection to allow the native pasteboard work in safari
+
+    [self focus];
 }
 
 + (void)hideInputElement
