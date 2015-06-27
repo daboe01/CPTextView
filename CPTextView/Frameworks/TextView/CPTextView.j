@@ -2257,7 +2257,6 @@ var _CPCopyPlaceholder = '-';
             return false; // prevent the default behaviour
         }
 
-
         var currentFirstResponder = [[CPApp mainWindow] firstResponder];
 
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
