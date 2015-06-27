@@ -2416,7 +2416,6 @@ var _CPCopyPlaceholder = '-';
 
 + (void)focus
 {
-
     var currentFirstResponder = [[CPApp mainWindow] firstResponder];
 
     if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
@@ -2446,7 +2445,7 @@ var _CPCopyPlaceholder = '-';
 
 + (void)focusForClipboard
 {
-    if (_CPNativeInputField.innerHTML.length == 0)
+    if (!_CPNativeInputFieldActive && _CPNativeInputField.innerHTML.length == 0)
         _CPNativeInputField.innerHTML = _CPCopyPlaceholder;  // make sure we have a selection to allow the native pasteboard work in safari
 
     [self focus];
