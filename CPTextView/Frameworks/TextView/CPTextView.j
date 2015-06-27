@@ -2442,6 +2442,14 @@ var _CPCopyPlaceholder = '-';
 
     currentFirstResponder._DOMElement.appendChild(_CPNativeInputField);
     _CPNativeInputField.focus();
+}
+
++ (void)focusForClipboard
+{
+    if (_CPNativeInputField.innerHTML.length == 0)
+        _CPNativeInputField.innerHTML = _CPCopyPlaceholder;  // make sure we have a selection to allow the native pasteboard work in safari
+
+    [self focus];
 
     // select all in the contenteditable div (http://stackoverflow.com/questions/12243898/how-to-select-all-text-in-contenteditable-div)
     if (document.body.createTextRange)
@@ -2457,14 +2465,6 @@ var _CPCopyPlaceholder = '-';
         selection.removeAllRanges();
         selection.addRange(range);
     }
-}
-
-+ (void)focusForClipboard
-{
-    if (_CPNativeInputField.innerHTML.length == 0)
-        _CPNativeInputField.innerHTML = _CPCopyPlaceholder;  // make sure we have a selection to allow the native pasteboard work in safari
-
-    [self focus];
 }
 
 + (void)hideInputElement
