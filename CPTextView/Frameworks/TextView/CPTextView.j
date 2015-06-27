@@ -698,39 +698,23 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)insertText:(CPString)aString
 {
     var isAttributed = [aString isKindOfClass:CPAttributedString],
-        string = (isAttributed)?[aString string]:aString;
+        string = isAttributed ? [aString string]:aString;
 
     if (![self shouldChangeTextInRange:CPMakeRangeCopy(_selectionRange) replacementString:string])
         return;
 
+    if (!isAttributed)
+        aString = [[CPAttributedString alloc] initWithString:aString attributes:_typingAttributes];
 
-    if (isAttributed)
-    {
-        [[[[self window] undoManager] prepareWithInvocationTarget:self]
-                _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length])
-                withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)]];
-        [[[self window] undoManager] setActionName:@"Replace rich text"];
 
-        [_textStorage replaceCharactersInRange:CPMakeRangeCopy(_selectionRange) withAttributedString:aString];
-    }
-    else
-    {
-        [[[self window] undoManager] setActionName:@"Replace plain text"];
-        if (_isRichText)
-        {
-            aString = [[CPAttributedString alloc] initWithString:aString attributes:_typingAttributes];
-            [[[[self window] undoManager] prepareWithInvocationTarget:self]
-                _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length])
-                withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)]];
-            [_textStorage replaceCharactersInRange:CPMakeRangeCopy(_selectionRange) withAttributedString:aString];
-        }
-        else
-        {
-            [[[[self window] undoManager] prepareWithInvocationTarget:self] _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length])
-                                                                                           withString:[[self string] substringWithRange:CPMakeRangeCopy(_selectionRange)]];
-            [_textStorage replaceCharactersInRange: CPMakeRangeCopy(_selectionRange) withString:aString];
-        }
-    }
+    var undoManager = [[self window] undoManager];
+    [undoManager setActionName:@"Replace/insert text"];
+
+    [[undoManager prepareWithInvocationTarget:self]
+                    _replaceCharactersInRange:CPMakeRange(_selectionRange.location, [aString length])
+                         withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)]];
+
+    [_textStorage replaceCharactersInRange:CPMakeRangeCopy(_selectionRange) withAttributedString:aString];
 
     [self _setSelectedRange:CPMakeRange(_selectionRange.location + [string length], 0) affinity:0 stillSelecting:NO overwriteTypingAttributes:NO];
     _startTrackingLocation = _selectionRange.location;
@@ -856,7 +840,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)_activateNativeInputElement:(DOMElemet)aNativeField
 {
     var attributes=[[self typingAttributes] copy];
- // [attributes setObject:[CPColor colorWithRed:1 green:1 blue:1 alpha:0] forKey:CPForegroundColorAttributeName]; // make it invisible
+    [attributes setObject:[CPColor colorWithRed:1 green:1 blue:1 alpha:0] forKey:CPForegroundColorAttributeName]; // make it invisible
     var placeholderString = [[CPAttributedString alloc] initWithString:aNativeField.innerHTML attributes:attributes];
     [self insertText:placeholderString];  // FIXME: this hack to provide the visual space for the inputmanager should at least bypass the undomanager
 
@@ -1563,6 +1547,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (!attributes)
         attributes = [CPDictionary dictionary];
+
+    if (!_isRichText)
+        return;
 
     if (_delegateRespondsToSelectorMask & kDelegateRespondsTo_textView_shouldChangeTypingAttributes_toAttributes)
         _typingAttributes = [_delegate textView:self shouldChangeTypingAttributes:_typingAttributes toAttributes:attributes];
