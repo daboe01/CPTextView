@@ -150,6 +150,7 @@ var _objectsInRange = function(aList, aRange)
 @implementation _CPLineFragment : CPObject
 {
     CPArray         _glyphsFrames @accessors(getter=glyphFrames);
+    CPArray         _glyphsOffsets;
 
     BOOL            _isInvalid;
     BOOL            _isLast;
@@ -238,11 +239,12 @@ var _objectsInRange = function(aList, aRange)
         height = _usedRect.size.height;
 
     _glyphsFrames = new Array(count);
+    _glyphsOffsets = new Array(count);
 
     for (var i = 0; i < count; i++)
     {
-        _glyphsFrames[i] = CGRectMake(origin.x, origin.y, someAdvancements[i].width, height);
-// _glyphsFrames[i] = CGRectMake(origin.x, origin.y+(height-someAdvancements[i].height), someAdvancements[i].width, someAdvancements[i].height); // basic support for baseline alignment is already there
+        _glyphsFrames[i] = CGRectMake(origin.x, origin.y - someAdvancements[i].descent, someAdvancements[i].width, height);
+        _glyphsOffsets[i] = height-someAdvancements[i].height + someAdvancements[i].descent;
         origin.x += someAdvancements[i].width;
     }
 }
@@ -315,7 +317,7 @@ var _objectsInRange = function(aList, aRange)
 
         var loc = run._range.location - _runs[0]._range.location;
         orig.x = _glyphsFrames[loc].origin.x + aPoint.x;
-        orig.y = _glyphsFrames[loc].origin.y + aPoint.y;
+        orig.y = _glyphsFrames[loc].origin.y + aPoint.y + _glyphsOffsets[loc];
         run.elem.style.left = (orig.x) + "px";
         run.elem.style.top = (orig.y) + "px";
 
