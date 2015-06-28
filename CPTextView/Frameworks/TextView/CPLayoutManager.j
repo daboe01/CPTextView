@@ -1054,6 +1054,15 @@ var _objectsInRange = function(aList, aRange)
     return nil;
 }
 
+- (CGPoint)_realCharacterLocationAtLocation:(unsigned)location
+{
+    var lineFragment = _objectWithLocationInRange(_lineFragments, location),
+        index = location - lineFragment._range.location;
+
+    return CGPointMake(lineFragment._glyphsFrames[index].origin.x,
+                       lineFragment._glyphsFrames[index].origin.y + lineFragment._glyphsOffsets[index]);
+}
+
 - (void)setLineFragmentRect:(CGRect)fragmentRect forGlyphRange:(CPRange)glyphRange usedRect:(CGRect)usedRect
 {
     var lineFragment = _objectWithLocationInRange(_lineFragments, glyphRange.location);
