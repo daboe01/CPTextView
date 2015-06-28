@@ -234,9 +234,16 @@ var CPSystemTypesetterFactory;
     [_layoutManager setLocation:CPMakePoint(myX, _lineBase) forStartOfGlyphRange:lineRange];
     [_layoutManager _setAdvancements:advancements forGlyphRange:lineRange];
 
-    if (!sameLine)
+    if (!sameLine) //fix the _lineFragments when fontsizes differ
     {
-//FIXME: sameLine should result in fixing the _lineFragments, e.g. when fontsizes differ
+        var l = _lineFragments.length,
+            maxHeight = 0;
+
+        for (var i = 0 ; i < l ; i++)
+            maxHeight = MAX(maxHeight, _lineFragments[i]._fragmentRect.size.height);
+
+        for (var i = 0 ; i < l ; i++)
+            [_lineFragments[i] _adjustForHeight:maxHeight];
     }
 
     if (!lineCount)  // do not rescue on first line
@@ -325,7 +332,7 @@ var CPSystemTypesetterFactory;
         measuringRange.length++;
 
         var currentChar = theString[glyphIndex],  // use pure javascript methods for performance reasons
-            rangeWidth = _widthOfStringForFont(theString.substr(measuringRange.location, measuringRange.length), _currentFont).width  + currentAnchor;
+            rangeWidth = _widthOfStringForFont(theString.substr(measuringRange.location, measuringRange.length), _currentFont).width + currentAnchor;
 
         switch (currentChar)    // faster than sending actionForControlCharacterAtIndex: called for each char.
         {

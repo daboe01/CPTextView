@@ -242,9 +242,18 @@ var _objectsInRange = function(aList, aRange)
     for (var i = 0; i < count; i++)
     {
         _glyphsFrames[i] = CGRectMake(origin.x, origin.y, someAdvancements[i].width, height);
-        //_glyphsFrames[i] = CGRectMake(origin.x, origin.y+(height-someAdvancements[i].height), someAdvancements[i].width, someAdvancements[i].height);
+// _glyphsFrames[i] = CGRectMake(origin.x, origin.y+(height-someAdvancements[i].height), someAdvancements[i].width, someAdvancements[i].height); // basic support for baseline alignment is already there
         origin.x += someAdvancements[i].width;
     }
+}
+- (void)_adjustForHeight:(double)height
+{
+    var count = _glyphsFrames.length;
+
+    for (var i = 0; i < count; i++)
+        _glyphsFrames[i].origin.y += (height - _fragmentRect.size.height);
+
+    _fragmentRect.size.height=height;
 }
 
 - (CPString)description
