@@ -327,6 +327,9 @@ var CPSystemTypesetterFactory;
         lineRange.length++;
         measuringRange.length++;
 
+        _lineHeight = MAX(_lineHeight, ascent - descent + leading);
+        _lineBase = MAX(_lineBase, ascent);
+
         var currentChar = theString[glyphIndex],  // use pure javascript methods for performance reasons
             rangeWidth = _widthOfStringForFont(theString.substr(measuringRange.location, measuringRange.length), _currentFont).width + currentAnchor;
 
@@ -372,9 +375,6 @@ var CPSystemTypesetterFactory;
             isWordWrapped = YES;
             glyphIndex = CPMaxRange(lineRange) - 1;  // start the line starts directly at current character
         }
-
-        _lineHeight = MAX(_lineHeight, ascent - descent + leading);
-        _lineBase = MAX(_lineBase, ascent);
 
         if (isNewline || isTabStop)
         {
