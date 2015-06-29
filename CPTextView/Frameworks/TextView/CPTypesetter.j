@@ -314,7 +314,7 @@ var CPSystemTypesetterFactory;
 
             ascent = [_currentFont ascender]
             descent = [_currentFont descender]
-            leading = (ascent - descent) * 0.2; // FAKE leading
+            leading = (ascent - descent) * 0.2; // FAKE<!>
         }
 
         if (previousFont !== _currentFont)
