@@ -348,6 +348,7 @@ var CPSystemTypesetterFactory;
             }  // fallthrough intentional
             case  ' ':
                 wrapRange = CPMakeRangeCopy(lineRange);
+                wrapRange._height = _lineHeight;
                 wrapWidth = rangeWidth;
                 break;
             default:
@@ -369,6 +370,7 @@ var CPSystemTypesetterFactory;
             {
                 lineRange = wrapRange;
                _lineWidth = wrapWidth;
+               _lineHeight = wrapRange._height;
             }
 
             isNewline = YES;
