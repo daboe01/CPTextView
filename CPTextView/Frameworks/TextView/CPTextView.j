@@ -39,7 +39,6 @@
 @class _CPCaret;
 @class _CPNativeInputManager;
 
-
 _MakeRangeFromAbs = function(a1, a2)
 {
     return (a1 < a2) ? CPMakeRange(a1, a2 - a1) : CPMakeRange(a2, a1 - a2);
@@ -410,8 +409,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)paste:(id)sender
 {
     var e = [CPApp currentEvent]._DOMEvent;
-
-    if (e.currentTarget == document) // this is somehow necessary to prevent double pasting
+    if (e && e.currentTarget == document) // this is somehow necessary to prevent double pasting
         return;
 
     var stringForPasting = [self _stringForPasting];
@@ -1340,7 +1338,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       var fragment = [_layoutManager _firstLineFragmentForLineFromLocation:_selectionRange.location];
+       var nglyphs = [_layoutManager numberOfCharacters],
+           loc = nglyphs == _selectionRange.location ? MAX(0, _selectionRange.location - 1) : _selectionRange.location;
+           fragment = [_layoutManager _firstLineFragmentForLineFromLocation:loc];
 
         if (fragment)
             [self _establishSelection:CPMakeRange(fragment._range.location, 0) byExtending:flag];
@@ -1360,7 +1360,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         var fragment = [_layoutManager _lastLineFragmentForLineFromLocation:_selectionRange.location];
         if (fragment)
         {
-            var loc = MAX(0, CPMaxRange(fragment._range) - 1);
+            var nglyphs = [_layoutManager numberOfCharacters],
+                loc = nglyphs == CPMaxRange(fragment._range) ? nglyphs : MAX(0, CPMaxRange(fragment._range) - 1);
+
             [self _establishSelection:CPMakeRange(loc, 0) byExtending:flag];
         }
     }
@@ -2320,6 +2322,57 @@ var _CPCopyPlaceholder = '-';
         return false;
     }, true); // capture mode
 
+    if (CPBrowserIsEngine(CPGeckoBrowserEngine))
+    {
+        _CPNativeInputField.onpaste = function(e)
+        {
+            var pasteboard = [CPPasteboard generalPasteboard];
+            [pasteboard declareTypes:[CPStringPboardType] owner:nil];
+
+             var data = e.clipboardData.getData('text/plain');
+            [pasteboard setString:data forType:CPStringPboardType];
+ 
+            var currentFirstResponder = [[CPApp mainWindow] firstResponder];
+
+            setTimeout(function(){   // prevent dom-flickering
+                [currentFirstResponder paste:self];
+            }, 20);
+            return false;
+        }
+        _CPNativeInputField.oncopy = function(e)
+        {
+            var pasteboard = [CPPasteboard generalPasteboard],
+                string,
+                currentFirstResponder = [[CPApp mainWindow] firstResponder];
+
+            [currentFirstResponder copy:self];
+        //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
+            stringForPasting = [pasteboard stringForType:CPStringPboardType];
+            e.clipboardData.setData('text/plain', stringForPasting);
+         // e.clipboardData.setData('application/rtf', stringForPasting); // does not seem to work
+            return false;
+
+        }
+        _CPNativeInputField.oncut = function(e)
+        {
+
+            var pasteboard = [CPPasteboard generalPasteboard],
+                string,
+                currentFirstResponder = [[CPApp mainWindow] firstResponder];
+
+            setTimeout(function(){   // prevent dom-flickering
+                [currentFirstResponder cut:self];
+            }, 20);
+
+            [currentFirstResponder copy:self];  // this is necessary because cut will only execute in the future
+        //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
+            stringForPasting = [pasteboard stringForType:CPStringPboardType];
+
+            e.clipboardData.setData('text/plain', stringForPasting);
+         // e.clipboardData.setData('application/rtf', stringForPasting); // does not seem to work
+            return false;
+        }
+    }
 }
 
 + (void)focus
