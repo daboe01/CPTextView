@@ -1014,7 +1014,7 @@ var _objectsInRange = function(aList, aRange)
 
     return nil;
 }
-- (id)_firstLineFragmentForLineFromLocation:(unsigned)location
+- (id)_firstLineFragmentForLineFromLocation:(unsigned)location inTextContainer:(CPTextContainer)aContainer
 {
     var l = _lineFragments.length;
 
@@ -1035,7 +1035,7 @@ var _objectsInRange = function(aList, aRange)
 
     return nil;
 }
-- (id)_lastLineFragmentForLineFromLocation:(unsigned)location
+- (id)_lastLineFragmentForLineFromLocation:(unsigned)location inTextContainer:(CPTextContainer)aContainer
 {
     var l = _lineFragments.length;
 
