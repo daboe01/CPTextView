@@ -106,7 +106,6 @@ var _sortRange = function(location, anObject)
         return CPOrderedAscending;
 }
 
-//<!> fixme: filter for a textContainer
 var _objectWithLocationInRange = function(aList, aLocation)
 {
     var index = [aList _indexOfObject: aLocation sortedByFunction:_sortRange context:nil];
@@ -244,8 +243,9 @@ var _objectsInRange = function(aList, aRange)
 
     for (var i = 0; i < count; i++)
     {
-        _glyphsFrames[i] = CGRectMake(origin.x, origin.y - someAdvancements[i].descent, someAdvancements[i].width, height);
-        _glyphsOffsets[i] = height-someAdvancements[i].height + someAdvancements[i].descent;
+        _glyphsFrames[i] = CGRectMake(origin.x, origin.y, someAdvancements[i].width, height);
+        _glyphsFrames[i]._descent = someAdvancements[i].descent
+        _glyphsOffsets[i] = height - someAdvancements[i].height;
         origin.x += someAdvancements[i].width;
     }
 }
@@ -1055,7 +1055,7 @@ var _objectsInRange = function(aList, aRange)
     return nil;
 }
 
-- (double)_characterOffsetAtLocation:(unsigned)location inTextContainer:(CPTextContainer)aContainer
+- (double)_characterOffsetAtLocation:(unsigned)location
 {
     var lineFragment = _objectWithLocationInRange(_lineFragments, location);
 
@@ -1065,6 +1065,17 @@ var _objectsInRange = function(aList, aRange)
     var index = location - lineFragment._range.location;
 
     return lineFragment._glyphsOffsets[index];
+}
+- (double)_descentAtLocation:(unsigned)location
+{
+    var lineFragment = _objectWithLocationInRange(_lineFragments, location);
+
+    if (!lineFragment)
+        return 0.0;
+
+    var index = location - lineFragment._range.location;
+
+    return lineFragment._glyphsFrames[index]._descent;
 }
 
 - (void)setLineFragmentRect:(CGRect)fragmentRect forGlyphRange:(CPRange)glyphRange usedRect:(CGRect)usedRect
@@ -1273,10 +1284,13 @@ var _objectsInRange = function(aList, aRange)
             {
                 if (CPLocationInRange(fragment._range.location + j, selectedCharRange))
                 {
+                    var correctedRect = CGRectCreateCopy(frames[j]);
+                    correctedRect.size.height -= frames[j]._descent;
+                    correctedRect.origin.y -= frames[j]._descent;
                     if (!rect)
-                        rect = CGRectCreateCopy(frames[j]);
+                        rect = CGRectCreateCopy(correctedRect);
                     else
-                        rect = CGRectUnion(rect, frames[j]);
+                        rect = CGRectUnion(rect, correctedRect);
 
                     if (_isNewlineCharacter([[_textStorage string] characterAtIndex:MAX(0, CPMaxRange(selectedCharRange) - 1)]))
                     {

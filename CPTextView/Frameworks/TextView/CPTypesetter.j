@@ -349,6 +349,7 @@ var CPSystemTypesetterFactory;
             case  ' ':
                 wrapRange = CPMakeRangeCopy(lineRange);
                 wrapRange._height = _lineHeight;
+                wrapRange._base = _lineBase;
                 wrapWidth = rangeWidth;
                 break;
             default:
@@ -371,6 +372,7 @@ var CPSystemTypesetterFactory;
                 lineRange = wrapRange;
                _lineWidth = wrapWidth;
                _lineHeight = wrapRange._height;
+               _lineBase = wrapRange._base;
             }
 
             isNewline = YES;

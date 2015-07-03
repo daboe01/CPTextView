@@ -846,7 +846,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self insertText:placeholderString];  // FIXME: this hack to provide the visual space for the inputmanager should at least bypass the undomanager
 
     var caretOrigin = [_layoutManager boundingRectForGlyphRange:CPMakeRange(MAX(0, _selectionRange.location - 1), 1) inTextContainer:_textContainer].origin;
-    caretOrigin.y += [_layoutManager _characterOffsetAtLocation:MAX(0, _selectionRange.location - 1) inTextContainer:_textContainer];
+    caretOrigin.y += [_layoutManager _characterOffsetAtLocation:MAX(0, _selectionRange.location - 1)];
     caretOrigin.x += 2; // two pixel offset to the LHS character
 
 //#ifdef(DOM)...
@@ -1051,9 +1051,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         var fraction = [],
             sindex = [self selectedRange].location,
             rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(sindex, 1) inTextContainer:_textContainer],
-            point = rectSource.origin;
+            point = CGPointCreateCopy(rectSource.origin);
 
-        if (point.y <= 0)
+        if (point.y <= 3)
             return;
 
         if (_stickyXLocation)
@@ -1066,6 +1066,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
         if (fraction[0] > 0.5)
             dindex++;
+//debugger
 
         [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
         _stickyXLocation = oldStickyLoc;
@@ -2066,13 +2067,18 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     else
         caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
-    var caretOffset = [_layoutManager _characterOffsetAtLocation:_selectionRange.location inTextContainer:_textContainer],
-        oldYPosition = CGRectGetMaxY(caretRect);
+    var caretOffset = [_layoutManager _characterOffsetAtLocation:_selectionRange.location],
+        oldYPosition = CGRectGetMaxY(caretRect),
+        caretDescend = [_layoutManager _descentAtLocation:_selectionRange.location];
 
     if (caretOffset > 0)
     {
         caretRect.origin.y += caretOffset;
         caretRect.size.height = oldYPosition - caretRect.origin.y;
+    }
+    if (caretDescend < 0)
+    {
+        caretRect.size.height -= caretDescend;
     }
 
     caretRect.origin.x += _textContainerOrigin.x;
