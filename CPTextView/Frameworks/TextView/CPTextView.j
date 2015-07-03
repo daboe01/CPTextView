@@ -1053,7 +1053,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(sindex, 1) inTextContainer:_textContainer],
             point = CGPointCreateCopy(rectSource.origin);
 
-        if (point.y <= 3)
+        if (point.y <= 2)
             return;
 
         if (_stickyXLocation)
@@ -1340,7 +1340,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_isSelectable)
     {
        var nglyphs = [_layoutManager numberOfCharacters],
-           loc = nglyphs == _selectionRange.location ? MAX(0, _selectionRange.location - 1) : _selectionRange.location;
+           loc = nglyphs == _selectionRange.location ? MAX(0, _selectionRange.location - 1) : _selectionRange.location,
            fragment = [_layoutManager _firstLineFragmentForLineFromLocation:loc];
 
         if (fragment)
