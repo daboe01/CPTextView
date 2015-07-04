@@ -393,11 +393,30 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [_caret setRect:CGRectMake(0, 0, 1, 11)]
 
         [self setBackgroundColor:[CPColor whiteColor]];
+
+        [[CPNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidResignKey:) name:CPWindowDidResignKeyNotification object:_window];
+        [[CPNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeKey:) name:CPWindowDidBecomeKeyNotification object:_window];
     }
 
     [self registerForDraggedTypes:[CPColorDragType]];
 
     return self;
+}
+- (void)windowDidResignKey:(CPNotification)aNotification
+{
+    [self resignFirstResponder];
+}
+- (void)windowDidBecomeKey:(CPNotification)aNotification
+{
+    if ([self _isFirstResponder])
+        [self updateInsertionPointStateAndRestartTimer:YES];
+}
+
+- (void)removeFromSuperview
+{
+    [[CPNotificationCenter defaultCenter] removeObserver:self name:CPWindowDidResignKeyNotification object:_window];
+    [[CPNotificationCenter defaultCenter] removeObserver:self name:CPWindowDidBecomeKeyNotification object:_window];
+    [super removeFromSuperview];
 }
 
 - (void)copy:(id)sender
@@ -2067,9 +2086,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     else
         caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
-    var caretOffset = [_layoutManager _characterOffsetAtLocation:_selectionRange.location],
+    var nglyphs= [_layoutManager numberOfCharacters],
+        loc = (_selectionRange.location === nglyphs && nglyphs > 0) ? _selectionRange.location - 1 : _selectionRange.location,
+        caretOffset = [_layoutManager _characterOffsetAtLocation:loc],
         oldYPosition = CGRectGetMaxY(caretRect),
-        caretDescend = [_layoutManager _descentAtLocation:_selectionRange.location];
+        caretDescend = [_layoutManager _descentAtLocation:loc];
 
     if (caretOffset > 0)
     {
@@ -2077,9 +2098,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         caretRect.size.height = oldYPosition - caretRect.origin.y;
     }
     if (caretDescend < 0)
-    {
         caretRect.size.height -= caretDescend;
-    }
 
     caretRect.origin.x += _textContainerOrigin.x;
     caretRect.origin.y += _textContainerOrigin.y;
@@ -2182,7 +2201,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)stopBlinking
 {
-    _drawCaret = NO;
+    _drawCaret = YES;
 
     if (_caretTimer)
     {
