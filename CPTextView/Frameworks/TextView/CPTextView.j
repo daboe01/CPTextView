@@ -349,6 +349,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     int             _stickyXLocation;
 
     CPArray         _selectionSpans;
+    CPTimer         _scrollingTimer;
 }
 
 - (id)initWithFrame:(CGRect)aFrame textContainer:(CPTextContainer)aContainer
