@@ -104,7 +104,7 @@
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12.0]] forKeys: [CPFontAttributeName]]]];
 
 
-[_textView insertText:"\n\naaaa\n"];
+[_textView insertText:"\n\n\n\naaaa\n"];
 [_textView insertText:"aaaa\n"];
 [_textView insertText:"aaaa\n"];
 [_textView insertText:"aaaa\n"];
