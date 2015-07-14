@@ -527,7 +527,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)_windowDidBecomeKey:(CPNotification)aNotification
 {
-    if ([[self window] isKeyWindow] && [[self window] firstResponder] === self)
+    if ([self _isFocused])
         [self updateInsertionPointStateAndRestartTimer:YES];
 }
 
