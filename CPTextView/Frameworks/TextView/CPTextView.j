@@ -442,7 +442,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)_windowDidBecomeKey:(CPNotification)aNotification
 {
     if ([[self window] isKeyWindow] && [[self window] firstResponder] === self)
-        [self updateInsertionPointStateAndRestartTimer:YES];
+        [self _becomeFirstResponder];
 }
 
 - (void)copy:(id)sender
@@ -1552,17 +1552,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     return NO;
 }
-
-- (BOOL)becomeFirstResponder
+- (void)_becomeFirstResponder
 {
-    [super becomeFirstResponder]
     _isFirstResponder = YES;
     [self updateInsertionPointStateAndRestartTimer:YES];
     [[CPFontManager sharedFontManager] setSelectedFont:[self font] isMultiple:NO];
     [self setNeedsDisplay:YES];
 
     [[CPRunLoop currentRunLoop] performSelector:@selector(focus) target:[_CPNativeInputManager class] argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+}
 
+- (BOOL)becomeFirstResponder
+{
+    [super becomeFirstResponder];
+    [self _becomeFirstResponder];
     return YES;
 }
 
