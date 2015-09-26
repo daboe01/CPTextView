@@ -2104,7 +2104,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_selectionRange.length)
         [_caret setVisibility:NO];
 
-    if (_selectionRange.location >= [_layoutManager numberOfCharacters])    // cursor is "behind" the last chacacter
+    if (_selectionRange.location >= nglyphs)    // cursor is "behind" the last chacacter
     {
         caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
 
