@@ -1209,7 +1209,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        [self _establishSelection:CPMakeRange(_selectionRange.location - 1, 0) byExtending:NO];
+        [self _establishSelection:CPMakeRange(_selectionRange.location - (_selectionRange.length ? 0 : 1), 0) byExtending:NO];
     }
 }
 
