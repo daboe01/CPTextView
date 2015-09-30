@@ -1446,7 +1446,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        [self _establishSelection:CPMakeRange(CPMaxRange(_selectionRange) + 1, 0) byExtending:NO];
+        [self _establishSelection:CPMakeRange(CPMaxRange(_selectionRange) + (_selectionRange.length ? 0 : 1), 0) byExtending:NO];
     }
 }
 
