@@ -665,9 +665,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setEditable:(BOOL)flag
 {
+    [self willChangeValueForKey:"editable"]
     _isEditable = flag;
     if (flag)
         _isSelectable = flag;
+    [self didChangeValueForKey:"editable"]
 }
 
 - (BOOL)isSelectable
@@ -677,9 +679,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setSelectable:(BOOL)flag
 {
+    [self willChangeValueForKey:"selectable"]
     _isSelectable = flag;
     if (flag)
         _isEditable = flag;
+    [self didChangeValueForKey:"selectable"]
 }
 
 - (void)doCommandBySelector:(SEL)aSelector
