@@ -878,7 +878,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 
     if (!selecting && _selectionRange.length > 0)
-       [_CPNativeInputManager focusForClipboard];
+       [_CPNativeInputManager focusForClipboardOfTextView:self];
 }
 
 - (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity)affinity stillSelecting:(BOOL)selecting
@@ -915,7 +915,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)keyDown:(CPEvent)event
 {
     var propagateFlag = CPBrowserIsEngine(CPGeckoBrowserEngine)? NO : YES;
-
     [[_window platformWindow] _propagateCurrentDOMEvent:propagateFlag];  // necessary for the _CPNativeInputManager to work in Chrome
 
     if ([_CPNativeInputManager isNativeInputFieldActive])
@@ -1566,7 +1565,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [[CPFontManager sharedFontManager] setSelectedFont:[self font] isMultiple:NO];
     [self setNeedsDisplay:YES];
 
-    [[CPRunLoop currentRunLoop] performSelector:@selector(focus) target:[_CPNativeInputManager class] argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+    [[CPRunLoop currentRunLoop] performSelector:@selector(focusForTextView:) target:[_CPNativeInputManager class] argument:self order:0 modes:[CPDefaultRunLoopMode]];
 }
 
 - (BOOL)becomeFirstResponder
@@ -2326,7 +2325,6 @@ var _CPCopyPlaceholder = '-';
         {
             if (_CPNativeInputField.innerHTML.length == 0 || _CPNativeInputField.innerHTML.length > 2) // backspace
                 [self cancelCurrentInputSessionIfNeeded];
-
             return false; // prevent the default behaviour
         }
 
@@ -2442,15 +2440,12 @@ var _CPCopyPlaceholder = '-';
     }
 }
 
-+ (void)focus
++ (void)focusForTextView:(CPTextView)currentFirstResponder
 {
-    var currentFirstResponder = [[CPApp mainWindow] firstResponder];
-
     if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
         return;
 
     [self hideInputElement];
-
 
     // only append the _CPNativeInputField if it is not already there
     var children = currentFirstResponder._DOMElement.childNodes,
@@ -2471,12 +2466,12 @@ var _CPCopyPlaceholder = '-';
     _CPNativeInputField.focus();
 }
 
-+ (void)focusForClipboard
++ (void)focusForClipboardOfTextView:(CPTextView)textview
 {
     if (!_CPNativeInputFieldActive && _CPNativeInputField.innerHTML.length == 0)
         _CPNativeInputField.innerHTML = _CPCopyPlaceholder;  // make sure we have a selection to allow the native pasteboard work in safari
 
-    [self focus];
+    [self focusForTextView:textview];
 
     // select all in the contenteditable div (http://stackoverflow.com/questions/12243898/how-to-select-all-text-in-contenteditable-div)
     if (document.body.createTextRange)
