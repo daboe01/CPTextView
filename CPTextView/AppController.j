@@ -24,7 +24,7 @@
     
     [contentView setBackgroundColor:[CPColor colorWithWhite:0.5 alpha:1.0]];
 
-    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0, 370,200)];
+    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 50, 370,200)];
   //  [_textView setBackgroundColor:[CPColor whiteColor]];
 
     var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, 400,400)];
@@ -39,6 +39,24 @@
     [theWindow orderFront:self];
 }
 
+- (void) openSheet:(id)sender
+{
+    var plusPopover =[CPPopover new];
+    [plusPopover setDelegate:self];
+    [plusPopover setAnimates:NO];
+    [plusPopover setBehavior:CPPopoverBehaviorTransient];
+    [plusPopover setAppearance:CPPopoverAppearanceMinimal];
+    var myViewController=[CPViewController new];
+    [plusPopover setContentViewController:myViewController];
+    var textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];
+textView._tag=2000;
+    [scrollView setDocumentView:textView]; 
+    [myViewController setView:scrollView];
+    [plusPopover showRelativeToRect:NULL ofView:sender preferredEdge:nil];
+    [[textView window] makeFirstResponder:textView];
+
+}
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
    // CPLogRegister(CPLogConsole);
@@ -47,9 +65,14 @@
         contentView = [theWindow contentView];
     
     [contentView setBackgroundColor:[CPColor colorWithWhite:0.95 alpha:1.0]];
+    var mybutton=[[CPButton alloc] initWithFrame:CGRectMake(0, 0,50, 25)];
+    [mybutton setTitle:"Open sheet"]
+    [mybutton setTarget:self]
+    [mybutton setAction:@selector(openSheet:)]
+    [contentView addSubview:mybutton]
 
-    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
-    _textView2 = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
+    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 50,500,500)];
+    _textView2 = [[CPTextView alloc] initWithFrame:CGRectMake(0, 50,500,500)];
     _textView2._isRichText = NO;
     [_textView setBackgroundColor:[CPColor whiteColor]];
     [_textView2 setBackgroundColor:[CPColor whiteColor]];
