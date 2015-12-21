@@ -48,9 +48,10 @@
     [plusPopover setAppearance:CPPopoverAppearanceMinimal];
     var myViewController=[CPViewController new];
     [plusPopover setContentViewController:myViewController];
-    var textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
-    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];
-textView._tag=2000;
+    var textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 0, 200, 10)];
+    [textView setBackgroundColor:[CPColor whiteColor]];
+    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, 200, 150)];
+
     [scrollView setDocumentView:textView]; 
     [myViewController setView:scrollView];
     [plusPopover showRelativeToRect:NULL ofView:sender preferredEdge:nil];

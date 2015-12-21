@@ -795,6 +795,17 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     return ret;
 }
 
+// remove unnecessary canvas cleaning from CPView implementation
+- (void)displayRectIgnoringOpacity:(CGRect)aRect inContext:(CPGraphicsContext)aGraphicsContext
+{    if ([self isHidden])
+       return;
+
+   [self lockFocus];
+
+   [self drawRect:aRect];
+   [self unlockFocus];
+}
+
 - (void)drawRect:(CGRect)aRect
 {
     var range = [_layoutManager glyphRangeForBoundingRect:aRect inTextContainer:_textContainer];
