@@ -1105,25 +1105,30 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)moveUp:(id)sender
 {
-    if (_isSelectable)
-    {
-        var dindex = [self selectedRange].location;
-            rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(dindex, 1) inTextContainer:_textContainer];
+    if (![self isSelectable])
+        return;
 
-        if (rectSource.origin.x > 0)
-            dindex = [_layoutManager glyphIndexForPoint:CGPointMake(0, rectSource.origin.y + 1) inTextContainer:_textContainer fractionOfDistanceThroughGlyph:nil];
+    var dindex = [self selectedRange].location;
 
-        if (dindex < 1)
-            return;
+    if (dindex < 1)
+        return;
 
-        rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(dindex - 1, 1) inTextContainer:_textContainer];
-        dindex = [_layoutManager glyphIndexForPoint:CGPointMake(_stickyXLocation, rectSource.origin.y + 1) inTextContainer:_textContainer fractionOfDistanceThroughGlyph:nil];
+    var rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(dindex, 1) inTextContainer:_textContainer];
 
-        var  oldStickyLoc = _stickyXLocation;
-        [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
-        _stickyXLocation = oldStickyLoc;
-        [self scrollRangeToVisible:CPMakeRange(dindex, 0)]
-    }
+    if (!(dindex === [_layoutManager numberOfCharacters] && _isNewlineCharacter([[_textStorage string] characterAtIndex:dindex - 1])))
+        dindex = [_layoutManager glyphIndexForPoint:CGPointMake(0, rectSource.origin.y + 1) inTextContainer:_textContainer fractionOfDistanceThroughGlyph:nil];
+
+    if (dindex < 1)
+       return;
+
+    rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(dindex - 1, 1) inTextContainer:_textContainer];
+    dindex = [_layoutManager glyphIndexForPoint:CGPointMake(_stickyXLocation, rectSource.origin.y + 1) inTextContainer:_textContainer fractionOfDistanceThroughGlyph:nil];
+
+    var  oldStickyLoc = _stickyXLocation;
+    [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
+    _stickyXLocation = oldStickyLoc;
+
+    [self scrollRangeToVisible:CPMakeRange(dindex, 0)];
 }
 - (void)moveUpAndModifySelection:(id)sender
 {
