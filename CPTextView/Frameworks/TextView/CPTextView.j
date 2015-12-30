@@ -801,7 +801,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
        return;
 
    [self lockFocus];
-
    [self drawRect:aRect];
    [self unlockFocus];
 }
@@ -1108,26 +1107,19 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        var fraction = [],
-            sindex = [self selectedRange].location,
-            rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(sindex, 1) inTextContainer:_textContainer],
-            point = CGPointCreateCopy(rectSource.origin);
+        var dindex = [self selectedRange].location;
+            rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(dindex, 1) inTextContainer:_textContainer];
 
-        if (point.y <= 2)
+        if (rectSource.origin.x > 0)
+            dindex = [_layoutManager glyphIndexForPoint:CGPointMake(0, rectSource.origin.y + 1) inTextContainer:_textContainer fractionOfDistanceThroughGlyph:nil];
+
+        if (dindex < 1)
             return;
 
-        if (_stickyXLocation)
-            point.x = _stickyXLocation;
+        rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(dindex - 1, 1) inTextContainer:_textContainer];
+        dindex = [_layoutManager glyphIndexForPoint:CGPointMake(_stickyXLocation, rectSource.origin.y + 1) inTextContainer:_textContainer fractionOfDistanceThroughGlyph:nil];
 
-        point.y -= 2;    // FIXME
-
-        var dindex= [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction],
-            oldStickyLoc = _stickyXLocation;
-
-        if (fraction[0] > 0.5)
-            dindex++;
-//debugger
-
+        var  oldStickyLoc = _stickyXLocation;
         [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
         _stickyXLocation = oldStickyLoc;
         [self scrollRangeToVisible:CPMakeRange(dindex, 0)]
