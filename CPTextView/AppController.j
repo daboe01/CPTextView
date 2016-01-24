@@ -72,7 +72,7 @@
     [mybutton setAction:@selector(openSheet:)]
     [contentView addSubview:mybutton]
 
-    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 50,500,500)];
+    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 0,500,500)];
     _textView2 = [[CPTextView alloc] initWithFrame:CGRectMake(0, 50,500,500)];
     _textView2._isRichText = NO;
     [_textView setBackgroundColor:[CPColor whiteColor]];
