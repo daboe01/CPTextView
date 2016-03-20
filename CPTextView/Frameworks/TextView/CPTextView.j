@@ -265,7 +265,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setString:(CPString)aString
 {
-    [self replaceCharactersInRange:CPMakeRange(0, [[self string] length]) withString:aString];
+    [self replaceCharactersInRange:CPMakeRange(0, 0) withString:aString];
 }
 
 - (void)setUsesFontPanel:(BOOL)flag
