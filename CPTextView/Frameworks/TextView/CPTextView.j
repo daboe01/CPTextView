@@ -925,8 +925,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)keyDown:(CPEvent)event
 {
-    var propagateFlag = CPBrowserIsEngine(CPGeckoBrowserEngine)? NO : YES;
-    [[_window platformWindow] _propagateCurrentDOMEvent:propagateFlag];  // necessary for the _CPNativeInputManager to work in Chrome
+    [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager
 
     if ([_CPNativeInputManager isNativeInputFieldActive])
        return;
