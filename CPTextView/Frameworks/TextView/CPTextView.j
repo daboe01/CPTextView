@@ -801,9 +801,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {    if ([self isHidden])
        return;
 
-   [self lockFocus];
+  // [self lockFocus];
    [self drawRect:aRect];
-   [self unlockFocus];
+  // [self unlockFocus];
 }
 
 - (void)drawRect:(CGRect)aRect
