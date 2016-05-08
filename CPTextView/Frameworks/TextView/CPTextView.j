@@ -265,7 +265,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setString:(CPString)aString
 {
-    [self replaceCharactersInRange:CPMakeRange(0, [[self string] length]) withString:aString];
+    [self replaceCharactersInRange:CPMakeRange(0, 0) withString:aString];
 }
 
 - (void)setUsesFontPanel:(BOOL)flag
@@ -527,8 +527,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)_windowDidBecomeKey:(CPNotification)aNotification
 {
+<<<<<<< HEAD
     if ([self _isFocused])
         [self updateInsertionPointStateAndRestartTimer:YES];
+=======
+    if ([[self window] isKeyWindow] && [[self window] firstResponder] === self)
+        [self _becomeFirstResponder];
+>>>>>>> master
 }
 
 - (void)copy:(id)sender
@@ -676,6 +681,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)setString:(CPString)aString
 {
     [_textStorage replaceCharactersInRange:CPMakeRange(0, [_layoutManager numberOfCharacters]) withString:aString];
+    [self setSelectedRange:CPMakeRange(0, [aString length])]
     [self didChangeText];
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
@@ -751,9 +757,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setEditable:(BOOL)flag
 {
+    [self willChangeValueForKey:"editable"]
     _isEditable = flag;
     if (flag)
         _isSelectable = flag;
+    [self didChangeValueForKey:"editable"]
 }
 
 - (BOOL)isSelectable
@@ -763,9 +771,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setSelectable:(BOOL)flag
 {
+    [self willChangeValueForKey:"selectable"]
     _isSelectable = flag;
     if (flag)
         _isEditable = flag;
+    [self didChangeValueForKey:"selectable"]
 }
 
 - (void)doCommandBySelector:(SEL)aSelector
@@ -815,7 +825,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
                 withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(aRange)]];
 
     [_textStorage replaceCharactersInRange:aRange withAttributedString:aString];
-    [self _fixupReplaceForRange:CPMakeRange(aRange.location, [aString length])];
+    [self _fixupReplaceForRange:CPMakeRange(CPMaxRange(aRange), 0)];
 }
 - (void)_replaceCharactersInRange:(CPRange)aRange withString:(CPString)aString
 {
@@ -824,7 +834,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
                 withString:[[self string] substringWithRange:CPMakeRangeCopy(aRange)]];
 
     [_textStorage replaceCharactersInRange:CPMakeRangeCopy(aRange) withString:aString];
-    [self _fixupReplaceForRange:CPMakeRange(aRange.location, [aString length])];
+    [self _fixupReplaceForRange:CPMakeRange(CPMaxRange(aRange), 0)];
 }
 
 - (void)insertText:(CPString)aString
@@ -875,6 +885,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     ret.style.zIndex = -1000;
     ret.oncontextmenu = ret.onmousedown = ret.onmouseup = ret.onselectstart = function () { return false; };
     return ret;
+}
+
+// remove unnecessary canvas cleaning from CPView implementation
+- (void)displayRectIgnoringOpacity:(CGRect)aRect inContext:(CPGraphicsContext)aGraphicsContext
+{    if ([self isHidden])
+       return;
+
+  // [self lockFocus];
+   [self drawRect:aRect];
+  // [self unlockFocus];
 }
 
 - (void)drawRect:(CGRect)aRect
@@ -960,7 +980,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 
     if (!selecting && _selectionRange.length > 0)
-       [_CPNativeInputManager focusForClipboard];
+       [_CPNativeInputManager focusForClipboardOfTextView:self];
 }
 
 - (void)setSelectedRange:(CPRange)range affinity:(CPSelectionAffinity)affinity stillSelecting:(BOOL)selecting
@@ -996,7 +1016,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)keyDown:(CPEvent)event
 {
-    [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager to work
+    [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager
 
     if ([_CPNativeInputManager isNativeInputFieldActive])
        return;
@@ -1175,32 +1195,34 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)moveUp:(id)sender
 {
-    if (_isSelectable)
-    {
-        var fraction = [],
-            sindex = [self selectedRange].location,
-            rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(sindex, 1) inTextContainer:_textContainer],
-            point = CGPointCreateCopy(rectSource.origin);
+    if (![self isSelectable])
+        return;
 
-        if (point.y <= 2)
-            return;
+    var dindex = [self selectedRange].location;
 
-        if (_stickyXLocation)
-            point.x = _stickyXLocation;
+    if (dindex < 1)
+        return;
 
-        point.y -= 2;    // FIXME
+    var rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(dindex, 1) inTextContainer:_textContainer];
 
-        var dindex= [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction],
-            oldStickyLoc = _stickyXLocation;
+    if (!(dindex === [_layoutManager numberOfCharacters] && _isNewlineCharacter([[_textStorage string] characterAtIndex:dindex - 1])))
+        dindex = [_layoutManager glyphIndexForPoint:CGPointMake(0, rectSource.origin.y + 1) inTextContainer:_textContainer fractionOfDistanceThroughGlyph:nil];
 
-        if (fraction[0] > 0.5)
-            dindex++;
-//debugger
+    if (dindex < 1)
+       return;
 
-        [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
-        _stickyXLocation = oldStickyLoc;
-        [self scrollRangeToVisible:CPMakeRange(dindex, 0)]
-    }
+    var fraction = [];
+    rectSource = [_layoutManager boundingRectForGlyphRange:CPMakeRange(dindex - 1, 1) inTextContainer:_textContainer];
+    dindex = [_layoutManager glyphIndexForPoint:CGPointMake(_stickyXLocation, rectSource.origin.y + 1) inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
+
+    if (fraction[0] > 0.5)
+        dindex++;
+
+    var  oldStickyLoc = _stickyXLocation;
+    [self _establishSelection:CPMakeRange(dindex,0) byExtending:NO];
+    _stickyXLocation = oldStickyLoc;
+
+    [self scrollRangeToVisible:CPMakeRange(dindex, 0)];
 }
 - (void)moveUpAndModifySelection:(id)sender
 {
@@ -1292,7 +1314,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        [self _establishSelection:CPMakeRange(_selectionRange.location - 1, 0) byExtending:NO];
+        [self _establishSelection:CPMakeRange(_selectionRange.location - (_selectionRange.length ? 0 : 1), 0) byExtending:NO];
     }
 }
 
@@ -1525,7 +1547,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        [self _establishSelection:CPMakeRange(CPMaxRange(_selectionRange) + 1, 0) byExtending:NO];
+        [self _establishSelection:CPMakeRange(CPMaxRange(_selectionRange) + (_selectionRange.length ? 0 : 1), 0) byExtending:NO];
     }
 }
 
@@ -1576,6 +1598,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         changedRange.length++;
 
     [self _deleteForRange:changedRange];
+    _startTrackingLocation = _selectionRange.location;
 }
 
 - (void)deleteBackward:(id)sender
@@ -1637,17 +1660,20 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     return NO;
 }
-
-- (BOOL)becomeFirstResponder
+- (void)_becomeFirstResponder
 {
-    [super becomeFirstResponder]
     _isFirstResponder = YES;
     [self updateInsertionPointStateAndRestartTimer:YES];
     [[CPFontManager sharedFontManager] setSelectedFont:[self font] isMultiple:NO];
     [self setNeedsDisplay:YES];
 
-    [[CPRunLoop currentRunLoop] performSelector:@selector(focus) target:[_CPNativeInputManager class] argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+    [[CPRunLoop currentRunLoop] performSelector:@selector(focusForTextView:) target:[_CPNativeInputManager class] argument:self order:0 modes:[CPDefaultRunLoopMode]];
+}
 
+- (BOOL)becomeFirstResponder
+{
+    [super becomeFirstResponder];
+    [self _becomeFirstResponder];
     return YES;
 }
 
@@ -2105,43 +2131,45 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (CPMaxRange(proposedRange) > textStorageLength)
         proposedRange.length = textStorageLength - proposedRange.location;
 
-    var string = [_textStorage string];
+    var string = [_textStorage string],
+        regex,
+        loc = proposedRange.location;
+
 
     switch (granularity)
     {
         case CPSelectByWord:
-            var wordRange = [self _characterRangeForIndex:proposedRange.location inRange:proposedRange asDefinedByRegex:[[self class] _wordBoundaryRegex] skip:YES];
-
-            if (proposedRange.length)
-                wordRange = CPUnionRange(wordRange, [self _characterRangeForIndex:CPMaxRange(proposedRange) inRange:proposedRange asDefinedByRegex:[[self class] _wordBoundaryRegex] skip:NO]);
-
-            return wordRange;
-
+            regex = [[self class] _wordBoundaryRegex];
+            break;
         case CPSelectByParagraph:
-            var parRange = [self _characterRangeForIndex:proposedRange.location inRange:proposedRange asDefinedByRegex:[[self class] _paragraphBoundaryRegex] skip:YES];
-
-            if (proposedRange.length)
-                parRange = CPUnionRange(parRange, [self _characterRangeForIndex:CPMaxRange(proposedRange)
-                                                                        inRange:proposedRange
-                                                               asDefinedByRegex:[[self class] _paragraphBoundaryRegex]
-                                                                           skip:YES]);
-            // mac-like paragraph selection with triple clicks
-            if ([self _isCharacterAtIndex:CPMaxRange(parRange) granularity:CPSelectByParagraph])
-                parRange.length++;
-
-            if (parRange.location > 0 && _isNewlineCharacter([[_textStorage string] characterAtIndex:parRange.location]))
-            {
-                parRange = CPUnionRange(parRange,
-                                                [self _characterRangeForIndex:parRange.location - 1
-                                                                      inRange:proposedRange
-                                                             asDefinedByRegex:[[self class] _paragraphBoundaryRegex]
-                                                                         skip:YES])
-            }
-            return parRange;
-
+            regex = [[self class] _paragraphBoundaryRegex];
+            break;
         default:
             return proposedRange;
     }
+
+    if (loc > 0 && _isNewlineCharacter([string characterAtIndex:loc]))
+        loc--;
+
+    var granularRange = [self _characterRangeForIndex:loc inRange:proposedRange asDefinedByRegex:regex skip:YES];
+
+    if (proposedRange.length == 0 && _isNewlineCharacter([string characterAtIndex:proposedRange.location]))
+        return _MakeRangeFromAbs(_isNewlineCharacter([string characterAtIndex:loc])? proposedRange.location : granularRange.location, proposedRange.location + 1);
+
+    if (proposedRange.length)
+        granularRange = CPUnionRange(granularRange, [self _characterRangeForIndex:CPMaxRange(proposedRange)
+                                                                          inRange:proposedRange
+                                                                 asDefinedByRegex:regex
+                                                                             skip:YES]);
+
+    switch (granularity)
+    {
+        case CPSelectByParagraph:
+            if (_isNewlineCharacter([string characterAtIndex:CPMaxRange(granularRange)]))
+                granularRange.length++;
+    }
+
+    return granularRange;
 }
 
 - (void)setSelectionGranularity:(CPSelectionGranularity)granularity
@@ -2177,14 +2205,22 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)updateInsertionPointStateAndRestartTimer:(BOOL)flag
 {
-    var caretRect;
+    var caretRect,
+        nglyphs = [_layoutManager numberOfCharacters];
 
     if (_selectionRange.length)
         [_caret setVisibility:NO];
 
-    if (_selectionRange.location >= [_layoutManager numberOfCharacters])    // cursor is "behind" the last chacacter
+    if (_selectionRange.location >= nglyphs)    // cursor is "behind" the last chacacter
     {
         caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(MAX(0,_selectionRange.location - 1), 1) inTextContainer:_textContainer];
+
+        if (!nglyphs)
+        {
+            var f = [_typingAttributes objectForKey:CPFontAttributeName];
+            caretRect.size.height = [f size];
+            caretRect.origin.y = ([f ascender] - [f descender]) * 0.5;
+        }
         caretRect.origin.x += caretRect.size.width;
 
         if (_selectionRange.location > 0 && [[_textStorage string] characterAtIndex:_selectionRange.location - 1] === '\n')
@@ -2196,8 +2232,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     else
         caretRect = [_layoutManager boundingRectForGlyphRange:CPMakeRange(_selectionRange.location, 1) inTextContainer:_textContainer];
 
-    var nglyphs= [_layoutManager numberOfCharacters],
-        loc = (_selectionRange.location === nglyphs && nglyphs > 0) ? _selectionRange.location - 1 : _selectionRange.location,
+    var loc = (_selectionRange.location === nglyphs && nglyphs > 0) ? _selectionRange.location - 1 : _selectionRange.location,
         caretOffset = [_layoutManager _characterOffsetAtLocation:loc],
         oldYPosition = CGRectGetMaxY(caretRect),
         caretDescend = [_layoutManager _descentAtLocation:loc];
@@ -2323,6 +2358,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 @end
 
 var _CPNativeInputField,
+    _CPNativeInputFieldLastValue,
     _CPNativeInputFieldKeyUpCalled,
     _CPNativeInputFieldKeyPressedCalled,
     _CPNativeInputFieldActive,
@@ -2363,7 +2399,7 @@ var _CPCopyPlaceholder = '-';
 {
     _CPNativeInputFieldActive = NO;
 
-    var currentFirstResponder = [[CPApp mainWindow] firstResponder],
+    var currentFirstResponder = [[CPApp keyWindow] firstResponder],
         placeholderRange = CPMakeRange([currentFirstResponder selectedRange].location - 1, 1);
 
     [currentFirstResponder setSelectedRange:placeholderRange];
@@ -2394,11 +2430,10 @@ var _CPCopyPlaceholder = '-';
         {
             if (_CPNativeInputField.innerHTML.length == 0 || _CPNativeInputField.innerHTML.length > 2) // backspace
                 [self cancelCurrentInputSessionIfNeeded];
-
             return false; // prevent the default behaviour
         }
 
-        var currentFirstResponder = [[CPApp mainWindow] firstResponder];
+        var currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return false; // prevent the default behaviour
@@ -2412,7 +2447,7 @@ var _CPCopyPlaceholder = '-';
             return;
         }
 
-        if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyPressedCalled == NO && _CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && _CPNativeInputField.innerHTML.length < 3) // chrome-trigger: keypressed is omitted for deadkeys
+        if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyPressedCalled == NO && _CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && _CPNativeInputField.innerHTML.length < 3 && _CPNativeInputFieldLastValue !== _CPNativeInputField.innerHTML) // chrome-trigger: keypressed is omitted for deadkeys and cursor keys
         {
             _CPNativeInputFieldActive = YES;
             [currentFirstResponder _activateNativeInputElement:_CPNativeInputField];
@@ -2429,9 +2464,10 @@ var _CPCopyPlaceholder = '-';
 
     _CPNativeInputField.addEventListener("keydown", function(e)
     {
+        _CPNativeInputFieldLastValue = _CPNativeInputField.innerHTML;
         _CPNativeInputFieldKeyUpCalled = NO;
         _CPNativeInputFieldKeyPressedCalled = NO;
-        var currentFirstResponder = [[CPApp mainWindow] firstResponder];
+        var currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
         if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
             return;
@@ -2467,7 +2503,7 @@ var _CPCopyPlaceholder = '-';
              var data = e.clipboardData.getData('text/plain');
             [pasteboard setString:data forType:CPStringPboardType];
  
-            var currentFirstResponder = [[CPApp mainWindow] firstResponder];
+            var currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
             setTimeout(function(){   // prevent dom-flickering
                 [currentFirstResponder paste:self];
@@ -2478,7 +2514,7 @@ var _CPCopyPlaceholder = '-';
         {
             var pasteboard = [CPPasteboard generalPasteboard],
                 string,
-                currentFirstResponder = [[CPApp mainWindow] firstResponder];
+                currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
             [currentFirstResponder copy:self];
         //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
@@ -2493,7 +2529,7 @@ var _CPCopyPlaceholder = '-';
 
             var pasteboard = [CPPasteboard generalPasteboard],
                 string,
-                currentFirstResponder = [[CPApp mainWindow] firstResponder];
+                currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
             setTimeout(function(){   // prevent dom-flickering
                 [currentFirstResponder cut:self];
@@ -2510,15 +2546,12 @@ var _CPCopyPlaceholder = '-';
     }
 }
 
-+ (void)focus
++ (void)focusForTextView:(CPTextView)currentFirstResponder
 {
-    var currentFirstResponder = [[CPApp mainWindow] firstResponder];
-
     if (![currentFirstResponder respondsToSelector:@selector(_activateNativeInputElement:)])
         return;
 
     [self hideInputElement];
-
 
     // only append the _CPNativeInputField if it is not already there
     var children = currentFirstResponder._DOMElement.childNodes,
@@ -2539,12 +2572,12 @@ var _CPCopyPlaceholder = '-';
     _CPNativeInputField.focus();
 }
 
-+ (void)focusForClipboard
++ (void)focusForClipboardOfTextView:(CPTextView)textview
 {
     if (!_CPNativeInputFieldActive && _CPNativeInputField.innerHTML.length == 0)
         _CPNativeInputField.innerHTML = _CPCopyPlaceholder;  // make sure we have a selection to allow the native pasteboard work in safari
 
-    [self focus];
+    [self focusForTextView:textview];
 
     // select all in the contenteditable div (http://stackoverflow.com/questions/12243898/how-to-select-all-text-in-contenteditable-div)
     if (document.body.createTextRange)

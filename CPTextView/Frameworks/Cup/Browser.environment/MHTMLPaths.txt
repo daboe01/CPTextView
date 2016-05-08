@@ -1,1 +1,0 @@
-@STATIC;1.0;u;32;Resources/cancel-highlighted.png72;mhtml:Browser.environment/MHTMLData.txt!Resources/cancel-highlighted.pngu;20;Resources/cancel.png60;mhtml:Browser.environment/MHTMLData.txt!Resources/cancel.pngu;21;Resources/spinner.gif61;mhtml:Browser.environment/MHTMLData.txt!Resources/spinner.gif

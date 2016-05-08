@@ -24,7 +24,7 @@
     
     [contentView setBackgroundColor:[CPColor colorWithWhite:0.5 alpha:1.0]];
 
-    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0, 370,200)];
+    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 50, 370,200)];
   //  [_textView setBackgroundColor:[CPColor whiteColor]];
 
     var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, 400,400)];
@@ -39,6 +39,25 @@
     [theWindow orderFront:self];
 }
 
+- (void) openSheet:(id)sender
+{
+    var plusPopover =[CPPopover new];
+    [plusPopover setDelegate:self];
+    [plusPopover setAnimates:NO];
+    [plusPopover setBehavior:CPPopoverBehaviorTransient];
+    [plusPopover setAppearance:CPPopoverAppearanceMinimal];
+    var myViewController=[CPViewController new];
+    [plusPopover setContentViewController:myViewController];
+    var textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 0, 200, 10)];
+    [textView setBackgroundColor:[CPColor whiteColor]];
+    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, 200, 150)];
+
+    [scrollView setDocumentView:textView]; 
+    [myViewController setView:scrollView];
+    [plusPopover showRelativeToRect:NULL ofView:sender preferredEdge:nil];
+    [[textView window] makeFirstResponder:textView];
+
+}
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
    // CPLogRegister(CPLogConsole);
@@ -47,9 +66,14 @@
         contentView = [theWindow contentView];
     
     [contentView setBackgroundColor:[CPColor colorWithWhite:0.95 alpha:1.0]];
+    var mybutton=[[CPButton alloc] initWithFrame:CGRectMake(0, 0,50, 25)];
+    [mybutton setTitle:"Open sheet"]
+    [mybutton setTarget:self]
+    [mybutton setAction:@selector(openSheet:)]
+    [contentView addSubview:mybutton]
 
-    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
-    _textView2 = [[CPTextView alloc] initWithFrame:CGRectMake(0,0,500,500)];
+    _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 0,500,500)];
+    _textView2 = [[CPTextView alloc] initWithFrame:CGRectMake(0, 50,500,500)];
     _textView2._isRichText = NO;
     [_textView setBackgroundColor:[CPColor whiteColor]];
     [_textView2 setBackgroundColor:[CPColor whiteColor]];
@@ -100,11 +124,10 @@
 
     [_textView insertText:[[CPAttributedString alloc] initWithString:@" proin, this is text in boldface " 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont boldFontWithName:"Arial" size:12]] forKeys: [CPFontAttributeName]]]];
-    [_textView insertText:[[CPAttributedString alloc] initWithString:@"\t111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus" 
+    [_textView insertText:[[CPAttributedString alloc] initWithString:@"\t111111 neque cr as eget lectus neque cr as eget lectus cr as eget lectus>" 
                 attributes:[CPDictionary dictionaryWithObjects:[ [CPFont fontWithName:"Arial" size:12.0]] forKeys: [CPFontAttributeName]]]];
 
 
-[_textView insertText:"\n\n\n\naaaa\n"];
 [_textView insertText:"aaaa\n"];
 [_textView insertText:"aaaa\n"];
 [_textView insertText:"aaaa\n"];
