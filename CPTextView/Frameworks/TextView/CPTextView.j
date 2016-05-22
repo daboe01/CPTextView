@@ -682,7 +682,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     [self willChangeValueForKey:"selectable"]
     _isSelectable = flag;
-    if (flag)
+    if (!flag)
         _isEditable = flag;
     [self didChangeValueForKey:"selectable"]
 }
