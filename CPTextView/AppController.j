@@ -98,7 +98,7 @@
     var item = [mainMenu insertItemWithTitle:@"Edit" action:nil keyEquivalent:nil atIndex:0],
         editMenu = [[CPMenu alloc] initWithTitle:@"Edit Menu"];
  
-   [_textView2 insertText:"RTF goes here"];
+    [_textView2 insertText:"RTF goes here"];
 
     [editMenu addItemWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"];
     [editMenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"];
@@ -132,6 +132,8 @@
 [_textView insertText:"aaaa\n"];
 [_textView insertText:"aaaa\n"];
 [_textView insertText:"aaaa\n"];
+
+[_textView setTextColor:[CPColor redColor]];
 
     [theWindow orderFront:self];
     [CPMenu setMenuBarVisible:YES];

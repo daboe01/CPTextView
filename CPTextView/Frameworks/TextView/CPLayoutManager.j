@@ -359,7 +359,7 @@ var _objectsInRange = function(aList, aRange)
     {
         // FIXME <!>  newFragmentRuns[i].elem.style.left !== oldFragmentRuns[i].elem.style.left && compare CSS-strings
         if (newFragmentRuns[i].string !== oldFragmentRuns[i].string ||
-            !_RectEqualToRectHorizontally(newLineFragment._fragmentRect, _fragmentRect))
+            !_RectEqualToRectHorizontally(newLineFragment._fragmentRect, _fragmentRect) || newFragmentRuns[i].elem.style.color !== oldFragmentRuns[i].elem.style.color)
         {
             return NO;
         }
@@ -792,8 +792,8 @@ var _objectsInRange = function(aList, aRange)
 - (void)textStorage:(CPTextStorage)textStorage edited:(unsigned)mask range:(CPRange)charRange changeInLength:(int)delta invalidatedRange:(CPRange)invalidatedRange
 {
     var actualRange = CPMakeRange(CPNotFound,0);
-    [self invalidateLayoutForCharacterRange: invalidatedRange isSoft:NO actualCharacterRange:actualRange];
-    [self invalidateDisplayForGlyphRange: actualRange];
+    [self invalidateLayoutForCharacterRange:invalidatedRange isSoft:NO actualCharacterRange:actualRange];
+    [self invalidateDisplayForGlyphRange:actualRange];
 }
 
 - (CPRange)glyphRangeForBoundingRect:(CGRect)aRect inTextContainer:(CPTextContainer)container
