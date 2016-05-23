@@ -1779,8 +1779,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)setTextColor:(CPColor)aColor
 {
+    _textColor = [aColor copy];
     [self setTextColor:aColor range:CPMakeRange(0, [_layoutManager numberOfCharacters])];
-    [_typingAttributes setObject:aColor forKey:CPForegroundColorAttributeName];
+    [_typingAttributes setObject:_textColor forKey:CPForegroundColorAttributeName];
 }
 
 - (void)setTextColor:(CPColor)aColor range:(CPRange)range
