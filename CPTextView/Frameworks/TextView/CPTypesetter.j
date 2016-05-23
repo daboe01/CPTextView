@@ -66,8 +66,8 @@ function _widthOfStringForFont(aString, aFont)
     if (!_sizingCache)
         _sizingCache = [];
 
-    if (_sizingCache[cssString] !== undefined && (peek = _sizingCache[cssString][aString]) !== undefined)
-        return peek;
+    if (_sizingCache[cssString] !== undefined && _sizingCache[cssString].hasOwnProperty(aString))
+        return _sizingCache[cssString][aString];
 
     if (_sizingCache[cssString] === undefined)
         _sizingCache[cssString] = [];
