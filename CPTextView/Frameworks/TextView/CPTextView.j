@@ -1687,6 +1687,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [_textStorage setFont:_font];
     }
 
+    var currentAttributes = [_textStorage attributesAtIndex:range.location effectiveRange:nil] || _typingAttributes;
+
+    [[[[self window] undoManager] prepareWithInvocationTarget:self]
+                                                      setFont:[currentAttributes objectForKey:CPFontAttributeName] || _font
+                                                        range:CPMakeRangeCopy(range)];
+
     [_textStorage addAttribute:CPFontAttributeName value:font range:CPMakeRangeCopy(range)];
     [_layoutManager _validateLayoutAndGlyphs];
 }
@@ -1706,7 +1712,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var currRange = CPMakeRange(_selectionRange.location, 0),
         oldFont,
         attributes,
-        scrollRange = CPMakeRange(CPMaxRange(_selectionRange), 0);
+        scrollRange = CPMakeRange(CPMaxRange(_selectionRange), 0),
+        undoManager = [[self window] undoManager];
+
+    [undoManager beginUndoGrouping];
 
     if (_isRichText)
     {
@@ -1733,6 +1742,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self setFont:[sender convertFont:oldFont] range:CPMakeRange(0,length)];
         scrollRange = CPMakeRange(length, 0);
     }
+
+    [undoManager endUndoGrouping];
+
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self setNeedsDisplay:YES];
@@ -1788,8 +1800,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var currentAttributes = [_textStorage attributesAtIndex:range.location effectiveRange:nil] || _typingAttributes;
 
     [[[[self window] undoManager] prepareWithInvocationTarget:self]
-                setTextColor:[currentAttributes objectForKey:CPForegroundColorAttributeName]
-                range:CPMakeRangeCopy(range)];
+                                                 setTextColor:[currentAttributes objectForKey:CPForegroundColorAttributeName] || _textColor
+                                                        range:CPMakeRangeCopy(range)];
 
     if (!CPEmptyRange(range))
     {
