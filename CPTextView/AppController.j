@@ -133,7 +133,7 @@
 [_textView insertText:"aaaa\n"];
 [_textView insertText:"aaaa\n"];
 
-[_textView setTextColor:[CPColor redColor]];
+//[_textView setTextColor:[CPColor redColor]];
 
     [theWindow orderFront:self];
     [CPMenu setMenuBarVisible:YES];

@@ -243,7 +243,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
 
-- (void)setFont:(CPFont)aFont rang:(CPRange)aRange
+- (void)setFont:(CPFont)aFont range:(CPRange)aRange
 {
     CPLog.error(@"-[CPText "+_cmd+"] subclass responsibility");
 }
@@ -1689,7 +1689,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     [_textStorage addAttribute:CPFontAttributeName value:font range:CPMakeRangeCopy(range)];
     [_layoutManager _validateLayoutAndGlyphs];
-    [self scrollRangeToVisible:CPMakeRange(CPMaxRange(range), 0)];
 }
 
 - (CPFont)font
@@ -1789,14 +1788,14 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (!CPEmptyRange(range))
     {
         if (aColor)
-            [_textStorage addAttribute:CPForegroundColorAttributeName value:aColor range:range];
+            [_textStorage addAttribute:CPForegroundColorAttributeName value:aColor range:CPMakeRangeCopy(range)];
         else
-            [_textStorage removeAttribute:CPForegroundColorAttributeName range:range];
+            [_textStorage removeAttribute:CPForegroundColorAttributeName range:CPMakeRangeCopy(range)];
     }
     else
         [_typingAttributes setObject:aColor forKey:CPForegroundColorAttributeName];
 
-    [_layoutManager textStorage:_textStorage edited:0 range:range changeInLength:0 invalidatedRange:range];
+    [_layoutManager textStorage:_textStorage edited:0 range:range changeInLength:0 invalidatedRange:CPMakeRangeCopy(range)];
     [_layoutManager _validateLayoutAndGlyphs];
 }
 
