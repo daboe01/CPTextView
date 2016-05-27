@@ -2416,7 +2416,8 @@ var _CPCopyPlaceholder = '-';
             var pasteboard = [CPPasteboard generalPasteboard];
             [pasteboard declareTypes:[CPStringPboardType] owner:nil];
 
-             var data = e.clipboardData.getData('text/plain');
+            var data = e.clipboardData.getData('text/plain');
+
             [pasteboard setString:data forType:CPStringPboardType];
  
             var currentFirstResponder = [[CPApp keyWindow] firstResponder];
@@ -2433,10 +2434,9 @@ var _CPCopyPlaceholder = '-';
                 currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
             [currentFirstResponder copy:self];
-        //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
-            stringForPasting = [pasteboard stringForType:CPStringPboardType];
+            var stringForPasting = [pasteboard stringForType:CPStringPboardType];
+            e.clipboardData.setData('text/rtf', stringForPasting); // does not seem to work
             e.clipboardData.setData('text/plain', stringForPasting);
-         // e.clipboardData.setData('application/rtf', stringForPasting); // does not seem to work
             return false;
 
         }
@@ -2453,7 +2453,7 @@ var _CPCopyPlaceholder = '-';
 
             [currentFirstResponder copy:self];  // this is necessary because cut will only execute in the future
         //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
-            stringForPasting = [pasteboard stringForType:CPStringPboardType];
+            var stringForPasting = [pasteboard stringForType:CPStringPboardType];
 
             e.clipboardData.setData('text/plain', stringForPasting);
          // e.clipboardData.setData('application/rtf', stringForPasting); // does not seem to work
