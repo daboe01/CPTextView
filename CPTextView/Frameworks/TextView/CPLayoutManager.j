@@ -361,12 +361,12 @@ var _objectsInRange = function(aList, aRange)
 
     for (var i = 0; i < l; i++)
     {
-        // FIXME <!>  newFragmentRuns[i].elem.style.left !== oldFragmentRuns[i].elem.style.left && compare CSS-strings
         if (newFragmentRuns[i].string !== oldFragmentRuns[i].string ||
-            !_RectEqualToRectHorizontally(newLineFragment._fragmentRect, _fragmentRect) || newFragmentRuns[i].elem.style.color !== oldFragmentRuns[i].elem.style.color)
-        {
+            !_RectEqualToRectHorizontally(newLineFragment._fragmentRect, _fragmentRect ||
+            newFragmentRuns[i].elem.style.color !== oldFragmentRuns[i].elem.style.color ||
+            newFragmentRuns[i].elem.style.fontFamily !== oldFragmentRuns[i]. elem.style.fontFamily ||
+            newFragmentRuns[i].elem.style.fontSize !== oldFragmentRuns[i]. elem.style.fontSize))
             return NO;
-        }
     }
 
     return YES;
