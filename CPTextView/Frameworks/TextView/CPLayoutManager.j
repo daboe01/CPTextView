@@ -222,8 +222,7 @@ var _objectsInRange = function(aList, aRange)
                  font = [attributes objectForKey:CPFontAttributeName];
 
             var color = [attributes objectForKey:CPForegroundColorAttributeName],
-                elem = [self createDOMElementWithText:string andFont:font andColor:color],
-                run = {_range:CPMakeRangeCopy(effectiveRange), elem:elem, string:string};
+                run = {_range:CPMakeRangeCopy(effectiveRange), color:color, font:font, elem:nil, string:string};
 
             _runs.push(run);
         }
@@ -310,7 +309,13 @@ var _objectsInRange = function(aList, aRange)
     {
         var run = runs[i];
 
-        if (run.DOMactive && !run.DOMpatched || !run.elem)
+
+        if (!run.elem && CPRectIntersectsRect([_textContainer._textView exposedRect], _fragmentRect))
+        {
+            run.elem=[self createDOMElementWithText:run.string andFont:run.font andColor:run.color];
+        }
+
+        if (run.DOMactive && !run.DOMpatched)
             continue;
 
         if(!_glyphsFrames)
@@ -319,19 +324,18 @@ var _objectsInRange = function(aList, aRange)
         var loc = run._range.location - _runs[0]._range.location;
         orig.x = _glyphsFrames[loc].origin.x + aPoint.x;
         orig.y = _glyphsFrames[loc].origin.y + aPoint.y + _glyphsOffsets[loc];
-        run.elem.style.left = (orig.x) + "px";
-        run.elem.style.top = (orig.y) + "px";
 
-        if (!run.DOMactive)
-            _textContainer._textView._DOMElement.appendChild(run.elem);
-
-        run.DOMactive = YES;
-        run.DOMpatched = NO;
-
-        if (run.underline)
+        if(run.elem)
         {
-            // <!> FIXME
+            run.elem.style.left = (orig.x) + "px";
+            run.elem.style.top = (orig.y) + "px";
+
+            if (!run.DOMactive)
+                _textContainer._textView._DOMElement.appendChild(run.elem);
+
+            run.DOMactive = YES;
         }
+        run.DOMpatched = NO;
     }
 }
 
@@ -378,7 +382,7 @@ var _objectsInRange = function(aList, aRange)
     {
         _runs[i]._range.location += rangeOffset;
 
-        if (verticalOffset)
+        if (verticalOffset && _runs[i].elem)
         {
             _runs[i].elem.top = (_runs[i].elem.top + verticalOffset) + 'px';
             _runs[i].DOMpatched = YES;
@@ -585,7 +589,6 @@ var _objectsInRange = function(aList, aRange)
 
     if (_removeInvalidLineFragmentsRange && _removeInvalidLineFragmentsRange.length && _lineFragments.length)
     {
-     //   [[_lineFragments subarrayWithRange:_removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
         [_lineFragments removeObjectsInRange:_removeInvalidLineFragmentsRange];
         [[_lineFragmentsForRescue subarrayWithRange:_removeInvalidLineFragmentsRange] makeObjectsPerformSelector:@selector(invalidate)];
     }

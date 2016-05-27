@@ -349,6 +349,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     int             _stickyXLocation;
 
     CPArray         _selectionSpans;
+    CPView          _observedClipView;
+    CGRect          _exposedRect;
     CPTimer         _scrollingTimer;
 }
 
@@ -431,6 +433,90 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     [super _addObservers];
     [self _setObserveWindowKeyNotifications:YES];
+    [self _startObservingClipView];
+}
+- (void)_startObservingClipView
+{
+    if (!_observedClipView)
+        return;
+
+    var defaultCenter = [CPNotificationCenter defaultCenter];
+
+    [_observedClipView setPostsFrameChangedNotifications:YES];
+    [_observedClipView setPostsBoundsChangedNotifications:YES];
+
+    [defaultCenter addObserver:self
+                          selector:@selector(superviewFrameChanged:)
+                              name:CPViewFrameDidChangeNotification
+                            object:_observedClipView];
+
+    [defaultCenter addObserver:self
+                      selector:@selector(superviewBoundsChanged:)
+                          name:CPViewBoundsDidChangeNotification
+                        object:_observedClipView];
+}
+- (CGRect)exposedRect
+{
+    if (!_exposedRect)
+    {
+        var superview = [self superview];
+
+        if ([superview isKindOfClass:[CPClipView class]])
+            _exposedRect = [superview bounds];
+        else
+            _exposedRect = [self bounds];
+    }
+
+    return _exposedRect;
+}
+
+/*!
+    @ignore
+*/
+- (void)superviewBoundsChanged:(CPNotification)aNotification
+{
+    _exposedRect = nil;
+    [self setNeedsDisplay:YES];
+ //?   [self setNeedsLayout];
+}
+
+/*!
+    @ignore
+*/
+- (void)superviewFrameChanged:(CPNotification)aNotification
+{
+    _exposedRect = nil;
+}
+
+- (void)viewWillMoveToSuperview:(CPView)aView
+{
+    if ([aView isKindOfClass:[CPClipView class]])
+    {
+        _observedClipView = aView;
+    }
+    else
+    {
+        [self _stopObservingClipView];
+        _observedClipView = nil;
+    }
+
+    [super viewWillMoveToSuperview:aView];
+}
+
+- (void)_stopObservingClipView
+{
+    if (!_observedClipView)
+        return;
+
+    var defaultCenter = [CPNotificationCenter defaultCenter];
+
+    [defaultCenter removeObserver:self
+                             name:CPViewFrameDidChangeNotification
+                           object:_observedClipView];
+
+    [defaultCenter removeObserver:self
+                          name:CPViewBoundsDidChangeNotification
+                        object:_observedClipView];
 }
 
 - (void)_windowDidResignKey:(CPNotification)aNotification
@@ -774,7 +860,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self scrollRangeToVisible:_selectionRange];
-    _stickyXLocation = _caret._rect.origin.x;
+    _stickyXLocation = MAX(0, _caret._rect.origin.x - 1);
 }
 
 - (id) _createSelectionSpanForRect:(CPRect)aRect andColor:(CPColor)aColor
@@ -977,7 +1063,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     [self setSelectedRange:setRange affinity:0 stillSelecting:YES];
 
-// fixme: only start if we are in the scrolling areas
 
 }
 - (void)_supportScrolling:(CPTimer)aTimer
