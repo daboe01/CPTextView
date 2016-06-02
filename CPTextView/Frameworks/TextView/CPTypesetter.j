@@ -195,6 +195,9 @@ var CPSystemTypesetterFactory;
         }
     }
 
+    if (i == -1)
+        return tabStops[0];
+
     return nil;
 }
 
