@@ -706,8 +706,9 @@ var _objectsInRange = function(aList, aRange)
         }
 
         // newline entered in its own line-> move down instead of re.layouting
-        if (newLength > oldLength && newLineFragment._range.length == 1 && oldLineFragment._range.length > 1 && newLineFragment._range.location === oldLineFragment._range.location && newLineFragment._isLast)
+        if (newLength > oldLength && newLineFragment._range.length == 1 && oldLineFragment._range.length > 1 && newLineFragment._range.location === oldLineFragment._range.location)
         {
+debugger
             isIdentical = YES;
             startLineForDOMRemoval--;
         }
