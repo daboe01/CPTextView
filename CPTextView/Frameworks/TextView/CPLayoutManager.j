@@ -362,11 +362,12 @@ var _objectsInRange = function(aList, aRange)
     for (var i = 0; i < l; i++)
     {
         if (newFragmentRuns[i].string !== oldFragmentRuns[i].string ||
-            !_RectEqualToRectHorizontally(newLineFragment._fragmentRect, _fragmentRect ||
+            !_RectEqualToRectHorizontally(newLineFragment._fragmentRect, _fragmentRect) || !newFragmentRuns[i].elem || !oldFragmentRuns[i].elem ||
             newFragmentRuns[i].elem.style.color !== oldFragmentRuns[i].elem.style.color ||
-            newFragmentRuns[i].elem.style.fontFamily !== oldFragmentRuns[i]. elem.style.fontFamily ||
-            newFragmentRuns[i].elem.style.fontSize !== oldFragmentRuns[i]. elem.style.fontSize))
+            newFragmentRuns[i].elem.style.fontFamily !== oldFragmentRuns[i].elem.style.fontFamily ||
+            newFragmentRuns[i].elem.style.fontSize !== oldFragmentRuns[i].elem.style.fontSize){
             return NO;
+        }
     }
 
     return YES;
@@ -708,7 +709,6 @@ var _objectsInRange = function(aList, aRange)
         // newline entered in its own line-> move down instead of re.layouting
         if (newLength > oldLength && newLineFragment._range.length == 1 && oldLineFragment._range.length > 1 && newLineFragment._range.location === oldLineFragment._range.location && newLineFragment._isLast)
         {
-debugger
             isIdentical = YES;
             startLineForDOMRemoval--;
         }
