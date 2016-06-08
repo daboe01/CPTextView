@@ -798,6 +798,7 @@ var _objectsInRange = function(aList, aRange)
     var actualRange = CPMakeRange(CPNotFound,0);
     [self invalidateLayoutForCharacterRange:invalidatedRange isSoft:NO actualCharacterRange:actualRange];
     [self invalidateDisplayForGlyphRange:actualRange];
+    [self _validateLayoutAndGlyphs];
 }
 
 - (CPRange)glyphRangeForBoundingRect:(CGRect)aRect inTextContainer:(CPTextContainer)container
