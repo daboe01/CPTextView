@@ -181,7 +181,6 @@ CPKernAttributeName = @"CPKernAttributeName";
                                            range:_editedRange
                                            changeInLength:_changeInLength
                                            invalidatedRange:_editedRange];
-        [layoutManager._textContainers makeObjectsPerformSelector:@selector(_sizeToFitTextView)]
     }
 
     _editedRange.location = CPNotFound;

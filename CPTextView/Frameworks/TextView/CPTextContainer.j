@@ -104,10 +104,7 @@ CPLineMovesUp = 4;
 {
     return _size;
 }
-- (void)_sizeToFitTextView
-{
-    [_textView sizeToFit];
-}
+
 - (void)setContainerSize:(CGSize)someSize
 {
     var oldSize = _size;

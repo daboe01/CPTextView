@@ -799,6 +799,7 @@ var _objectsInRange = function(aList, aRange)
     [self invalidateLayoutForCharacterRange:invalidatedRange isSoft:NO actualCharacterRange:actualRange];
     [self invalidateDisplayForGlyphRange:actualRange];
     [self _validateLayoutAndGlyphs];
+    [[self firstTextView] sizeToFit];
 }
 
 - (CPRange)glyphRangeForBoundingRect:(CGRect)aRect inTextContainer:(CPTextContainer)container
