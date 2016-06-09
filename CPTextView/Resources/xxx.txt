@@ -1,0 +1,807 @@
+{% include Shell/PageHeader.html 'title="Min sida"' user=user userData=userData print=print %}
+				<div id="contentblock">
+{% include Blocks/MainMenu.html %}
+{% if user %}
+					<table class="content" role="presentation">
+						<tr>
+							<td class="leftsidebar" role="navigation">
+								<div class="status">
+									<h4>Mina sidor</h4>
+									<h4>{{ userData.firstname | textcontent }} {{ userData.lastname | textcontent }}</h4>
+{% if userData.registrationDays %}									<p><a href="{% selfURL /tipshjalp/safungerarboplats/ordlista %}#dagarhosboplats">Dagar hos Boplats</a>: {{ userData.registrationDays }} </p>
+{% else %}									<p>Du <a href="{% selfURL /tipshjalp/safungerarboplats/registrera %}#Typ%20av%20medlemskap">samlar inga dagar</a> hos Boplats </p>
+{% /if %}
+									{% include Blocks/MemberPoints.html memberPoints=userData.userStatus.memberPoints %}
+{% if userData.userStatus.noAnswerCount + userData.userStatus.neglectAnswerCount > 0 %}
+											<p><a href="{% selfURL /minsida/nejsvar %}">Nej/Uteblivna svar</a>: {{ userData.userStatus.noAnswerCount + userData.userStatus.neglectAnswerCount }}</p>
+{% /if %}
+{% for restrictionDescription in userData.restrictionsDescriptions %}
+											<p>Du har spÃ¤rrats frÃ¥n att {{ restrictionDescription.type }}{% if restrictionDescription.endTime %} till och med {% include Blocks/DateString.html time=restrictionDescription.endTime format="date" %}{% /if %}.
+{% /for %}
+								</div>
+								<ul class="navigate">
+									{% include Blocks/TabItem.html item="oversikt" url="/minsida/" title="Ã–versikt" active=active %}
+									{% include Blocks/TabItem.html item="kontaktuppgifter" url="/minsida/kontaktuppgifter" title="Kontaktuppgifter" active=active %}
+									{% include Blocks/TabItem.html item="profil" url="/minsida/profil" 'title="Min profil"' active=active %}
+									{% include Blocks/TabItem.html item="ansokta" url="/minsida/ansokta" 'title="SÃ¶kta bostÃ¤der"' active=active %}
+									{% include Blocks/TabItem.html item="nejsvar" url="/minsida/nejsvar" 'title="Nej svar"' active=active %}
+									{% include Blocks/TabItem.html item="annonser" url="/minsida/annonser" 'title="Mina annonser"' active=active %}
+									{% include Blocks/TabItem.html item="bevakningar" url="/minsida/bevakningar" title="Bevakningar" active=active %}
+									{% include Blocks/TabItem.html item="meddelande" url="/minsida/meddelande" title="Meddelanden" active=active %}
+									{% include Blocks/TabItem.html item="betalning" url="/minsida/betalning" 'title="Betalning"' active=active %}
+									{% include Blocks/TabItem.html item="konto" url="/minsida/konto" 'title="Konto & lÃ¶senord"' active=active %}
+									<!-- {% include Blocks/TabItem.html item="historik" url="/minsida/historik" 'title="Historik"' active=active %} -->
+								</ul>
+							</td>
+							{% if active equalsstring "valkommen" %}
+							<td class="my info" role="main" id="maincontent">
+									<h2>VÃ¤lkommen till "Mina sidor"</h2> 
+<p>HÃ¤r hittar du allt du behÃ¶ver fÃ¶r att leta bostad, annonsera och hantera din registrering hos Boplats.</p> 
+<p>I rutan ovanfÃ¶r rubrikerna till vÃ¤nster ser du hur mÃ¥nga dagar hos Boplats du har. FÃ¶r att samla dagar hos Boplats och kunna sÃ¶ka lÃ¤genhet med fÃ¶rstahandskontrakt pÃ¥ Boplats mÃ¥ste du betala din avgift. Du gÃ¶r det under rubriken betalning till vÃ¤nster.</p> 
+<p>Innan du kan sÃ¶ka fÃ¶rstahandkontrakt mÃ¥ste du Ã¤ven fylla i dina <a href="{% selfURL /minsida/kontaktuppgifter%}">kontaktuppgifter</a> och <a href="{% selfURL /minsida/profil %}"> min profil</a> till vÃ¤nster.
+LÃ¤s mer om <a href="{% selfURL /tipshjalp/safungerarboplats/profil %}">hur du fyller i din profil hÃ¤r</a>.</p> 
+<p>Vill du ha en medsÃ¶kande? I sÃ¥ fall mÃ¥ste den registrera sig som gratismedlem eller betalande medlem. 
+LÃ¤s mer <a href="{% selfURL /tipshjalp/safungerarboplats/registrera#medsokande %}">om medsÃ¶kande hÃ¤r</a>.</p> </p> 
+								{% if openPayment %}<script>$(function() { openPaymentWindow ("{{ openPayment }}", "{% selfURL / %}"); });</script>{% /if %}
+							</td>
+							{% /if %}
+							{% if active equalsstring "oversikt" %}
+							<td class="my info" role="main" id="maincontent">
+								<h2>VÃ¤lkommen till "Mina sidor"</h2> 
+<p>HÃ¤r hittar du allt du behÃ¶ver fÃ¶r att leta bostad, annonsera och hantera din registrering hos Boplats.</p> 
+<p>I rutan ovanfÃ¶r rubrikerna till vÃ¤nster ser du hur mÃ¥nga dagar hos Boplats du har. FÃ¶r att samla dagar hos Boplats och kunna sÃ¶ka lÃ¤genhet med fÃ¶rstahandskontrakt i Boplats nya system, mÃ¥ste du betala din administrativa avgift, det gÃ¶r du under rubriken <a href="{% selfURL /minsida/betalning %}">betalning</a> till vÃ¤nster.</p> 
+<p>Innan du kan sÃ¶ka fÃ¶rstahandkontrakt mÃ¥ste du Ã¤ven fylla i dina <a href="{% selfURL /minsida/kontaktuppgifter%}">kontaktuppgifter</a> och <a href="{% selfURL /minsida/profil %}"> min profil</a> till vÃ¤nster.
+LÃ¤s mer om <a href="{% selfURL /tipshjalp/safungerarboplats/profil %}">hur du fyller i din profil hÃ¤r</a>.</p> 
+<p>Har du en medsÃ¶kande? I sÃ¥ fall mÃ¥ste den registrera sig pÃ¥ boplats. Antingen med ett gratiskonto eller ett betalande konto. 
+LÃ¤s mer <a href="{% selfURL /tipshjalp/safungerarboplats/registrera#medsokande %}">om medsÃ¶kande hÃ¤r</a>.</p> </p> 
+							</td>
+							{% /if %}
+							{% if active equalsstring "kontaktuppgifter" %}
+							<td class="myinfo" role="main" id="maincontent">
+								{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+								<form id="kontaktuppgifter" accept-charset="UTF-8" action="{% selfURL /minsida/kontaktuppgifter %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+									<h1>Kontaktuppgifter</h1>
+									<table role="presentation">
+										<tr><td colspan="2">
+											{% if userData.missingIdentification %}
+											{% include Forms/Display.html name="birthdate" label="FÃ¶delsedatum" type="text" value=userData.birthdate %}
+											{% else %}
+											{% include Forms/Display.html name="identificationnumber" label="Personnummer" value=userData.identificationnumber.identificationnumberForDisplay %}
+											{% /if %}
+											</div>
+</td></tr>
+<tr>
+	<td>
+		{% include Forms/Input.html name="firstname" label="FÃ¶rnamn" value=userData.firstname error=errors.firstname %}
+	</td>
+	<td>
+		{% include Forms/Input.html name="lastname" label="Efternamn" value=userData.lastname error=errors.lastname %}
+	</td>
+</tr>
+<tr>
+	<td>
+		{% include Forms/Input.html name="streetAddress" label="Gatuadress" value=userData.streetAddress error=errors.streetAddress %}
+	</td>
+	<td>
+		{% include Forms/Input.html name="careOfAddress" 'label="C/O adress (fÃ¶r dig som Ã¤r inneboende)"' value=userData.careOfAddress error=errors.careOfAddress %}
+	</td>
+</tr>
+<tr>
+	<td id="zipCity">
+		{% include Forms/Input.html name="zipCode" label="Postnummer" value=userData.zipCode error=errors.zipCode %}
+		{% include Forms/Input.html name="city" label="Postort" value=userData.city error=errors.city %}
+	</td>
+</tr>
+<tr>
+	<td>
+		{% include Forms/Popup.html name="country" label="Land" value=userData.country items=valuelists.countries error=errors.country noselection="" %}
+	</td>
+</tr>
+<tr>
+	<td>
+		{% include Forms/Verified.html name="mobilePhone" label="Mobilnummer" title="mobilnummer" 'definiteTitle="Ditt mobilnummer"' 'new="nytt mobilnummer"' value=userData.mobilePhone verified=userData.mobilePhoneVerified changeId="mobil" change=change changed=changed resend=resend verify=verify 'changeInstruction="Ange nytt mobilnummer och tryck spara. FÃ¶lj instruktionerna i meddelandet som skickas fÃ¶r att bekrÃ¤fta telefonnummret."' error=errors.mobilePhone 'resendText="Skicka nytt SMS"' 'verifyText="Verifiera mobilnummer"' %}
+	</td>
+	<td>
+		{% include Forms/Input.html name="phone" 'label="Alternativt telefonnummer dagtid"' value=userData.phone error=errors.phone %}
+	</td>
+</tr>
+<tr>
+	<td colspan="2">
+		{% include Forms/Verified.html name="email" label="E-postadress" title="e-postadress" 'definiteTitle="Din e-postadress"' 'new="ny e-postadress"' value=userData.email verified=userData.emailVerified changeId="epost" change=change changed=changed resend=resend 'changeInstruction="Ange ny e-postadress och tryck spara. FÃ¶lj instruktionerna i epostmeddelandet som skickas fÃ¶r att bekrÃ¤fta den."' error=errors.email 'resendText="Skicka nytt verifikationsmail"' %}
+	</td>
+</tr>
+<tr>
+	<td colspan="2" class="language">
+		<fieldset>
+			<legend class="input" for="language">Vilket sprÃ¥k vill du anvÃ¤nda pÃ¥ Boplats.se?</legend>
+			{% include Blocks/LanguageRadios.html name="languageForeignKey" 'title="Vilket sprÃ¥k fÃ¶redrar du att anvÃ¤nda pÃ¥ Boplats.se?"' selection=userData.languageForeignKey languages=valuelists.languages %}
+		</fieldset>
+	</td>
+</tr>
+<tr>
+	<td colspan="2" class="invoiceDeliveryMethod">
+		<fieldset>
+			<legend class="input" for="invoiceDeliveryMethod">Hur vill du fÃ¥ dina framtida avier?</legend>
+			{% include Forms/Radio.html name="invoiceDeliveryMethod" label="E-post" selection=userData.invoiceDeliveryMethod value="email" %}
+		</fieldset>
+	</td>
+</tr>
+<tr>
+	<td colspan="2" class="preferredMessageMethod">
+		<fieldset>
+			<legend class="input" for="preferredMessageMethod">Hur vill du fÃ¥ dina meddelanden?</legend>
+			{% include Forms/Radio.html name="preferredMessageMethod" label="E-post" selection=userData.preferredMessageMethod value="email" %}
+			{% include Forms/Radio.html name="preferredMessageMethod" 'label="SMS (endast vid visning/kontrakt)"' selection=userData.preferredMessageMethod value="sms" %}
+			{% include Forms/Radio.html name="preferredMessageMethod" 'label="Endast pÃ¥ Mina sidor - jag bevakar sjÃ¤lv"' selection=userData.preferredMessageMethod value="none" %}
+			<p class="verification">Boplats ansvarar inte fÃ¶r att pÃ¥minnelser via SMS eller e-post kommer fram. Logga in regelbundet pÃ¥ boplats.se fÃ¶r att inte missa viktig information.</p>
+                        {% if userData.email %}{% if userData.emailVerificationToken %}<p class="verification">Din epost-adress Ã¤r inte verifierad, inga meddelanden skickas via epost innan verifieringen Ã¤r gjord.</p>{% /if %}{% else %}<p class="verification">Du har inte angett nÃ¥gon epost-adress, inga meddelanden skickas via epost fÃ¶rrÃ¤n du har angett en adress och verifierat den.</p>{% /if %}
+			{% if userData.mobilePhone %}{% if userData.mobilePhoneVerificationToken %}<p class="verification">Ditt mobilnummer Ã¤r inte verifierat, inga meddelanden skickas via SMS innan verifieringen Ã¤r gjord.</p>{% /if %}{% else %}<p class="verification">Du har inte angett nÃ¥got mobilnummer, inga meddelanden skickas via SMS fÃ¶rrÃ¤n du har angett ett nummer och verifierat det.</p>{% /if %}
+                        </fieldset>
+	</td>
+</tr>
+</table>
+<button type="submit" class="notable" name="save_button">Spara</button>
+
+<div style="margin:0;padding:0;display:inline">
+	<input name="utf8" type="hidden" value="&#x2713;" />
+	<input name="authenticity_token" type="hidden" value="+KJop3vjwYVx1KE0VpQclROLup2cFZxEEcUKFkNZpew=" />
+</div>
+</form>
+<script>
+	$(function() {
+	 {% if not change %}
+	 $("form#kontaktuppgifter").find ("input#firstname").focus();
+	 {% /if %}
+	 });
+	</script>
+</td>
+{% /if %}
+{% if active equalsstring "profil" %}
+<td class="myinfo" role="main" id="maincontent">
+	{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+	<form id="profil" accept-charset="UTF-8" action="{% selfURL /minsida/profil %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+		<h1>Min profil</h1>
+		<p>FÃ¶r att sÃ¶ka bostad mÃ¥ste du fylla i din profil. Dessa uppgifter ligger till grund fÃ¶r vilka lÃ¤genheter du kan anmÃ¤la intresse pÃ¥.</p>
+		<h2><a name="folkbokforingsort"></a>FolkbokfÃ¶ringsort</h2>
+
+		<hr />
+		<table role="presentation">
+			<tr>
+				<td>{% include Forms/Popup.html name="placeOfResidence" 'label="Var Ã¤r du folkbokfÃ¶rd?"' value=userData.placeOfResidence items=valuelists.places error=errors.placeOfResidence noselection="" %}</td>
+			</tr>
+		</table>
+		<h2><a name="sysselsattning"></a>SysselsÃ¤ttning och inkomst</h2>
+		<hr />
+                		<table role="presentation">
+			<tr>
+				<td>{% include Forms/Popup.html name="occupation" 'label="Huvudsaklig sysselsÃ¤ttning"' value=userData.occupation items=valuelists.occupations error=errors.occupation %}</td>
+			</tr>
+			<tr>
+				<td>{% include Forms/Popup.html name="mainIncomeType" 'label="Huvudsaklig inkomst"' value=userData.mainIncomeType items=valuelists.mainIncomeTypes error=errors.mainIncomeType %}</td>
+				<td>{% include Forms/Input.html name="yearlyIncome" 'label="BerÃ¤knad Ã¥rsinkomst fÃ¶re skatt"' value=userData.yearlyIncome.description error=errors.yearlyIncome %}</td>
+			</tr>
+			<tr class="employee">
+				<td>{% include Forms/Input.html name="employer" 'label="Huvudsaklig arbetsgivare"' value=userData.employer error=errors.employer %}</td>
+				<td>{% include Forms/Input.html name="employerPhone" 'label="Telefonnummer till arbetsgivare"' value=userData.employerPhone error=errors.employerPhone %}</td>
+			</tr>
+			<tr class="employee">
+				<td>{% include Forms/Popup.html name="placeOfWork" 'label="I vilken kommun arbetar du?"' value=userData.placeOfWork items=valuelists.places error=errors.placeOfWork %}</td>
+			</tr>
+			<tr class="student">
+				<td>{% include Forms/Popup.html name="studyType" 'label="Typ av studier"' value=userData.studyType items=valuelists.studyTypes error=errors.studyType %}</td>
+				{% include Blocks/Schools.html userData=userData valuelists=valuelists errors=errors%}
+			</tr>
+			<tr class="student">
+				<td>{% include Forms/Date.html name="studyStartDate" 'label="Studiestart"' value=userData.studyStartDate error=errors.studyStartDate %}</td>
+				<td>{% include Forms/Date.html name="studyEndDate" 'label="Planerat studieslut"' value=userData.studyEndDate error=errors.studyEndDate %}</td>
+			</tr>
+			<tr class="student">
+				<td>{% include Forms/Popup.html name="studySpeed" 'label="Studiefart"' value=userData.studySpeed items=valuelists.studySpeeds error=errors.studySpeed %}</td>
+			</tr>
+		</table>
+<p><a href="https://nya.boplats.se/tipshjalp/safungerarboplats/profil#inkomst" target="_blank">LÃ¤s om hur du berÃ¤knar Ã¥rsinkomst</a></p>
+		<h2><a name="familjeforhallande"></a>HushÃ¥ll</h2>
+		<p>LÃ¤gg till antalet personer (bÃ¥de vuxna och barn) som kommer att bo i bostaden. Dina barn rÃ¤knas alltid som barn oavsett Ã¥lder.</p>
+		<hr />
+		<ol class="family">
+			{% include Blocks/Family.html userData=userData years=valuelists.years %}
+		</ol>
+		<button class="linkbutton addbutton" name="addperson" id="addperson" value="addperson">LÃ¤gg till en person</button>
+		{% include Forms/Checkbox.html name="nobodySmokes" 'label="Ingen i hushÃ¥llet rÃ¶ker"' value=userData.nobodySmokes error=errors.nobodySmokes %}
+		{% include Forms/Checkbox.html name="noPets" 'label="Ingen i hushÃ¥llet har husdjur"' value=userData.noPets error=errors.noPets %}
+		<h2><a name="medsokande"></a>MedsÃ¶kande</h2>
+		<p>Du kan vÃ¤lja att sÃ¶ka en lÃ¤genhet tillsammans med nÃ¥gon som ska bo i lÃ¤genheten. Fyll i personnumret pÃ¥ personen fÃ¶r att lÃ¤gga till den som medsÃ¶kande. <a href="https://nya.boplats.se/tipshjalp/safungerarboplats/registrera#medsokande" target="_blank">LÃ¤s mer om medsÃ¶kande.</a></p>
+		<hr />
+		{% include Blocks/Coapplicant.html userData=userData valuelists=valuelists errors=errors %}
+		<h2><a name="nuvarandeboende"></a>Nuvarande boende</h2>
+		<hr />
+		<table role="presentation">
+			<tr>
+				<td>{% include Forms/Popup.html name="currentHousing" 'label="Hur bor du idag?"' value=userData.currentHousing items=valuelists.housings error=errors.currentHousing %}</td>
+				<td>{% include Forms/Popup.html name="currentLandlord" 'label="Nuvarande hyresvÃ¤rd"' value=userData.currentLandlord items=valuelists.landlords error=errors.currentLandlord noselection="" %}</td>
+			</tr>
+			<tr>
+				<td>{% include Forms/Popup.html name="moveReason" 'label="VarfÃ¶r vill du flytta?"' value=userData.moveReason items=valuelists.moveReasons error=errors.moveReason %}</td>
+			</tr>
+		</table>
+		<h2><a name="referenser"></a>Referenser</h2>
+		<p>Du kan ange upp till tre referenser. Vissa hyrevÃ¤rdar kontaktar dina referenser fÃ¶r att fÃ¥ veta mer om dig. Exempel pÃ¥ bra referenser Ã¤r tidigare hyresvÃ¤rd eller din arbetsgivare.</p>
+		<hr />
+		<table class="references" role="presentation">
+			<tr>
+				<td>{% include Forms/Popup.html name="referencetype1" 'label="Typ av referens"' value=referencetype1 items=valuelists.referencetypes error=errors.referencetype1 %}</td>
+				<td>{% include Forms/Input.html name="referencename1" 'label="Namn"' value=referencename1 'instruction="Namn pÃ¥ en person eller ett fÃ¶retag"' error=errors.referencename1 %}</td>
+				<td>{% include Forms/Input.html name="referencephone1" 'label="Telefonnummer"' value=referencephone1 error=errors.referencephone1 %}</td>
+			</tr>
+			<tr>
+				<td>{% include Forms/Popup.html name="referencetype2" 'label="Typ av referens"' value=referencetype2 items=valuelists.referencetypes error=errors.referencetype2 %}</td>
+				<td>{% include Forms/Input.html name="referencename2" 'label="Namn"' value=referencename2 'instruction="Namn pÃ¥ en person eller ett fÃ¶retag"' error=errors.referencename2 %}</td>
+				<td>{% include Forms/Input.html name="referencephone2" 'label="Telefonnummer"' value=referencephone2 error=errors.referencephone2 %}</td>
+			</tr>
+			<tr>
+				<td>{% include Forms/Popup.html name="referencetype3" 'label="Typ av referens"' value=referencetype3 items=valuelists.referencetypes error=errors.referencetype3 %}</td>
+				<td>{% include Forms/Input.html name="referencename3" 'label="Namn"' value=referencename3 'instruction="Namn pÃ¥ en person eller ett fÃ¶retag"' error=errors.referencename3 %}</td>
+				<td>{% include Forms/Input.html name="referencephone3" 'label="Telefonnummer"' value=referencephone3 error=errors.referencephone3 %}</td>
+			</tr>
+		</table>
+		<h2><a name="meromdig"></a>Mer om mig</h2>
+		<hr />
+		{% include Forms/TextArea.html name="aboutme" 'label="Ã–vrig information"' value=userData.aboutme 'infotext=" "' error=errors.aboutme maxlength=300 %}
+		<h2><a name="sokerboende"></a>SÃ¶ker boende</h2>
+		<div data-prefix=""{% if searchProfileLockTimeInterval %} class="locked" title="Dessa uppgifter Ã¤r lÃ¥sta, och kan Ã¤ndras igen om {% include Blocks/AgeString.html age=searchProfileLockTimeInterval %}."{% /if %}>
+			<p>Om du bara vill bo i nÃ¥got, eller nÃ¥gra, sÃ¤rskilda omrÃ¥den, eller har en maxgrÃ¤ns fÃ¶r hur mycket hyra du vill betala, anger du det hÃ¤r. Vissa hyresvÃ¤rdar tittar pÃ¥ den hÃ¤r informationen nÃ¤r de avgÃ¶r vem som fÃ¥r lÃ¤genheten.</p>
+                        <p><h4> Spara fÃ¶rst nÃ¤r du Ã¤r nÃ¶jd med dina val. Alternativen lÃ¥ser sig fÃ¶r Ã¤ndringar i en vecka. </h4></p>
+			<hr />
+			{% if searchProfileLockTimeInterval %}<span class="infotext">(LÃ¥st - kan Ã¤ndras igen om {% include Blocks/AgeString.html age=searchProfileLockTimeInterval %})</span>{% /if %}
+			{% include Forms/Radio.html name="areaPreference" 'label="Jag har inga speciella Ã¶nskemÃ¥l om omrÃ¥de"' selection=userData.areaPreference value="no" disabled=searchProfileLockTimeInterval %}
+			{% include Forms/Radio.html name="areaPreference" 'label="Jag vill sÃ¤rskilt bo i fÃ¶ljande omrÃ¥den"' selection=userData.areaPreference value="yes" disabled=searchProfileLockTimeInterval %}
+			<p class="area">Vilka omrÃ¥den vill du frÃ¤mst bo i (max 6 omrÃ¥den)? OBS! NÃ¤r du vÃ¤ljer "GÃ¶teborg" mÃ¥ste du vÃ¤lja ett av alla underomrÃ¥den, inte sjÃ¤lva stadsdelen. Klicka pÃ¥ LÃ¤gg till fÃ¶r varje omrÃ¥de innan du sparar dina val. <a href="https://nya.boplats.se/tipshjalp/safungerarboplats/profil" target="_blank">LÃ¤s mer hÃ¤r</a>.</p>
+			<ol class="area">
+				{% include Blocks/Areas.html areas=userData.areas disabled=searchProfileLockTimeInterval %}
+			</ol>
+			{% if not searchProfileLockTimeInterval %}<table class="area" role="presentation">
+				<tr id="allareas">
+					<td>{% include Forms/Popup.html name="area" label="OmrÃ¥de" value=area items=leafAreas error=errors.areas %}</td>
+					<td style="vertical-align: bottom;"><button type="submit" class="notable insertarea" name="insertarea"{% if userData.areas.@count >= 6 %} disabled{% /if %}>LÃ¤gg till</button></td>
+				</tr>
+				<tr>
+					<td><div class="group city">{% include Forms/Popup.html name="city" label="Kommun" value=city items=cities error=errors.city %}</div></td>
+					<td class="areascell">
+						{% for city in cityAreas %}<div class="group" id="cityAreas-{{ city.primaryKey }}" style="display: none;">{% include Forms/Popup.html name=city.primaryKey label="OmrÃ¥de" value=area items=city.children onlyLeafs=true error=errors.areas %}</div>{% /for %}
+					</td>
+					<td style="vertical-align: bottom;"><button type="submit" class="notable insertarea percity" name="insertarea"{% if userData.areas.@count >= 6 %} disabled{% /if %}>LÃ¤gg till</button></td>
+				</tr>
+			</table>
+			{% if errors.missingAreas %}<p class="input error">{{ errors.missingAreas }}</p><script>summarizeError ("OmrÃ¥den", "{{ errors.missingAreas }}");</script>{% /if %}
+			{% /if %}
+			{% include Forms/Input.html name="maxRent" 'label="Absolut maxgrÃ¤ns fÃ¶r hyra"' value=userData.maxRent 'instruction="kr / mÃ¥nad"' error=errors.maxRent disabled=searchProfileLockTimeInterval %}
+		</div>
+		<div style="margin:0;padding:0;display:inline">
+			<input name="utf8" type="hidden" value="&#x2713;" />
+			<input name="authenticity_token" type="hidden" value="+KJop3vjwYVx1KE0VpQclROLup2cFZxEEcUKFkNZpew=" />
+		</div>
+		{% include Forms/Checkbox.html name="attests" 'label="Jag intygar att uppgifterna i min profil stÃ¤mmer."' value=false error=errors.attests %}
+		<button type="submit" class="notable" name="save_button">Spara</button>
+	</form>
+</td>
+{% /if %}
+{% if active equalsstring "ansokta" %}
+<td class="myinfo" role="main" id="maincontent">
+	{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+	<form id="ansokta" accept-charset="UTF-8" action="{% selfURL /minsida/ansokta %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+		<h1>SÃ¶kta bostÃ¤der</h1>
+{% for itemType in itemTypes %}
+	{% valueforkeyinto userData.applications.action itemType "applicationsList" %}
+	{% valueforkeyinto itemNames itemType "itemName" %}
+	{% if applicationsList %}
+		<h2>Att svara pÃ¥ efter visning / {{ itemName }}</h2>
+		<table class="actions">
+			{% if applicationsList.@count %}{% include Objects/ApplicationList.html applications=applicationsList confirm=confirm confirmToggle=confirmToggle valuelists=valuelists itemGroup="action" errors=errors %}{% else %}<tr><td colspan="3"><i>Du har inga lÃ¤genheter dÃ¤r du mÃ¥ste svara. efter visning.</i></td></tr>{% /if %}
+		</table>
+	{% /if %}
+{% /for %}
+{% for itemType in itemTypes %}
+	{% valueforkeyinto userData.applications.current itemType "applicationsList" %}
+	{% valueforkeyinto itemNames itemType "itemName" %}
+	{% if applicationsList %}
+		<h2>Aktuella intresseanmÃ¤lningar / {{ itemName }}</h2>
+		<p>BostÃ¤der som du har anmÃ¤lt intresse fÃ¶r dÃ¤r uthyrningsprocessen fortfarande pÃ¥gÃ¥r. InvÃ¤nta hyresvÃ¤rdens behandling av ansÃ¶kningarna.</p>
+		<table class="applications">
+			{% if applicationsList.@count %}{% include Objects/ApplicationList.html applications=applicationsList confirm=confirm confirmToggle=confirmToggle valuelists=valuelists itemGroup="current" errors=errors showStatus=true %}{% else %}<tr><td colspan="3"><i>Du har inga intresseanmÃ¤lningar</i></td></tr>{% /if %}
+		</table>
+	{% /if %}
+{% /for %}
+{% for itemType in itemTypes %}
+	{% valueforkeyinto userData.applications.past itemType "applicationsList" %}
+	{% valueforkeyinto itemNames itemType "itemName" %}
+	{% if applicationsList %}
+		<h2>Gamla intresseanmÃ¤lningar / {{ itemName }}</h2>
+		<p>BostÃ¤der som du har anmÃ¤lt intresse fÃ¶r som har gÃ¥tt till nÃ¥gon annan, eller dÃ¤r uthyrningsprocessen har avbrutits.</p>
+		<table class="history">
+			{% if applicationsList.@count %}{% include Objects/ApplicationList.html applications=applicationsList confirm=confirm confirmToggle=confirmToggle valuelists=valuelists itemGroup="past" errors=errors showStatus=true %}{% /if %}
+		</table>
+	{% /if %}
+{% /for %}
+	</form>
+</td>
+{% /if %}
+{% if active equalsstring "nejsvar" %}
+<td class="myinfo" role="main" id="maincontent">
+	{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+	<form id="ansokta" accept-charset="UTF-8" action="{% selfURL /minsida/ansokta %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+		<h1>Mina nej-svar under {% include Blocks/IntervalString.html interval=noanswerInterval %}</h1>
+{% for itemType in itemTypes %}
+	{% valueforkeyinto userData.applications.noanswer itemType "applications" %}
+	{% valueforkeyinto itemNames itemType "itemName" %}
+	{% if applications %}
+		<h2>Att svara pÃ¥ efter visning / {{ itemName }}</h2>
+		<p>HÃ¤r ser du alla lÃ¤genheter dÃ¤r du har svarat nej, eller dÃ¤r du inte svarade.</p><p><a href="{% selfURL /tipshjalp/sokahyresratt/nejsvar %}"> LÃ¤s mer om hur mÃ¥nga gÃ¥nger man fÃ¥r svara nej.</a></p>
+		<table class="noanswer">
+			{% if applications.@count %}{% include Objects/ApplicationList.html applications=applications confirm=confirm confirmToggle=confirmToggle valuelists=valuelists itemGroup="noanswer" errors=errors %}{% else %}<tr><td colspan="3"><i>Du har inga nej-svar.</i></td></tr>{% /if %}
+		</table>
+	{% /if %}
+{% /for %}
+	</form>
+</td>
+{% /if %}
+{% if active equalsstring "annonser" %}
+<td class="myinfo" role="main" id="maincontent">
+	{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+	{% if create %}
+	<form id="annonser" accept-charset="UTF-8" action="{% selfURL /minsida/annonser/ %}{{ create }}{% if brokerItem.primaryKey %}/{{ brokerItem.primaryKey }}{% /if %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+		{% patterninclude Objects/Create/%@.html create itemType=create brokerItem=brokerItem valuelists=valuelists canSubmit=canSubmit editsDisabled=editsDisabled canCancel=canCancel canDelete=canDelete canChange=canChange canLease=canLease cities=cities cityAreas=cityAreas leafAreas=leafAreas areaCity=areaCity offered1AreaCity=offered1AreaCity offered2AreaCity=offered2AreaCity criteria=criteria confirmCancelBrokerItem=confirmCancelBrokerItem confirmDeleteBrokerItem=confirmDeleteBrokerItem confirmSubmitBrokerItem=confirmSubmitBrokerItem errors=errors %}
+	</form>
+	{% else %}{% if applications %}
+	{% patterninclude Objects/BrokerItemApplications/%@.html brokerItemType brokerItem=brokerItem applications=applications application=application %}
+	{% else %}
+	<form id="annonser" accept-charset="UTF-8" action="{% selfURL /minsida/annonser %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+		<div class="create">
+			<button type="submit" class="notable" name="showcreatebrokeritembuttons" id="showcreatebrokeritembuttons">Skapa ny annons</button>
+			<button type="submit" class="modalshield{% if show notequalsstring createbrokeritembuttons %} hidden{% /if %}" name="hidecreatebrokeritembuttons"></button>
+			<div class="popover{% if show notequalsstring "createbrokeritembuttons" %} hidden{% /if %}">
+				{% include Objects/Create.html createOptions=createOptions %}
+			</div>
+		</div>
+		<script>
+			$("form#annonser button#showcreatebrokeritembuttons").click (function (event) {
+																			event.preventDefault();
+																			$("form#annonser button.modalshield").show ("fast");
+																			$("form#annonser div.popover").slideDown ("fast");
+																		});
+			$("form#annonser button.modalshield").click (function (event) {
+															event.preventDefault();
+															$("form#annonser button.modalshield").hide ("fast");
+															$("form#annonser div.popover").slideUp ("fast");
+														});
+			$("form#annonser .popover a").click (function (event) {
+													$("form#annonser button.modalshield").hide();
+													$("form#annonser div.popover").hide();
+												});
+		</script>
+		<h1>Egna annonser</h1>
+		<h2>Ã„nnu inte publicerade</h2>
+		<p>Annonser sparade som utkast</p>
+		<table class="offers">
+			{% include Objects/OffersList.html items=offers.draft %}
+		</table>
+		<h2>Publicerade annonser</h2>
+		<p>Annonser som Ã¤r Ã¶ppna fÃ¶r ansÃ¶kningar</p>
+		<table class="offers">
+			{% include Objects/OffersList.html items=offers.current %}
+		</table>
+		<h2>Gamla annonser</h2>
+		<p>Annonser som Ã¤r avslutade</p>
+		<table class="offers">
+			{% include Objects/OffersList.html items=offers.past %}
+		</table>
+	</form>
+	<script>
+		$("button[data-item-url]").click (function (event) {
+											 event.preventDefault();
+											 document.location.href = $(this).data ("item-url");
+										 })
+	</script>
+	{% /if %}{% /if %}
+</td>
+{% /if %}
+{% if active equalsstring "bevakningar" %}
+							<td class="myinfo" role="main" id="maincontent">
+								{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+								<form id="bevakningar" accept-charset="UTF-8" action="{% selfURL /minsida/bevakningar %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+									<h1>Bevakningar</h1>
+									<table class="bevakningar">
+										{% include Blocks/UserSearches.html searches=userData.userStatus.bofMemberSearches %}
+									</table>
+									<button type="submit" class="linkbutton addbutton" name="create_search_button">Skapa ny bevakning</button><p>En bevakning Ã¤r en automatisk sÃ¶kning enligt kriterier som du sjÃ¤lv anger. Du fÃ¥r ett meddelande dÃ¥ en eller flera lÃ¤genheter matchar din bevakning. Under <a href="{% selfURL /minsida/kontaktuppgifter%}">kontaktuppgifter</a> kan du vÃ¤lja om du vill ha dina meddelanden som epost eller bara pÃ¥ mina sidor.</p>
+									
+									<div style="margin:0;padding:0;display:inline">
+										<input name="utf8" type="hidden" value="&#x2713;" />
+										<input name="authenticity_token" type="hidden" value="+KJop3vjwYVx1KE0VpQclROLup2cFZxEEcUKFkNZpew=" />
+									</div>
+								</form>
+								<script>
+									$(function() {
+{% if not change %}
+										$("form#kontaktuppgifter").find ("input#firstname").focus();
+{% /if %}
+									});
+								</script>
+							</td>
+{% /if %}
+{% if active equalsstring "meddelande" %}
+							<td class="myinfo" role="main" id="maincontent">
+								{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+								<form id="meddelande" accept-charset="UTF-8" action="{% selfURL /minsida/meddelande %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+									<h1>Meddelanden</h1>
+									<h2>Aktuella meddelanden</h2>
+									<p>HÃ¤r ser du alla meddelanden som du nÃ¥gonsin har fÃ¥tt. Klicka fÃ¶r att lÃ¤sa hela meddelandet. RÃ¶tt kryss betyder olÃ¤st, grÃ¶n bock att det Ã¤r lÃ¤st.</p>
+									<hr />
+									<table class="meddelande">
+										{% include Blocks/UserMessages.html messages=userData.messages %}
+									</table>
+								</form>
+							</td>
+{% /if %}
+{% if active equalsstring "betalning" %}
+							<td class="myinfo" role="main" id="maincontent">
+								{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+								<form id="betalning" accept-charset="UTF-8" action="{% selfURL /minsida/betalning %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+									<h1>Betalning</h1>
+									<table class="betalning">
+										{% include Blocks/MemberBills.html bills=userData.payments %}
+									</table>
+<p>Om du betalar med avi via bank, tÃ¤nk pÃ¥ att det kan ta upp till fem arbetsdagar innan betalningen registrerats hos oss pÃ¥ Boplats. Betalar du med kort, kan du sÃ¶ka lÃ¤genheter direkt.</p>
+<p><a href="{% selfURL /tipshjalp/safungerarboplats/betala %}">LÃ¤s mer om hur du gÃ¶r fÃ¶r att betala hÃ¤r</a></p>
+								</form>
+							</td>
+{% /if %}
+{% if active equalsstring "konto" %}
+							<td class="myinfo" role="main" id="maincontent">
+								{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+								<form id="password" accept-charset="UTF-8" action="{% selfURL /minsida/konto %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+									<h1>Konto &amp; lÃ¶senord</h1>
+									<p>HÃ¤r kan du Ã¤ndra ditt lÃ¶senord samt avsluta ditt konto</p>
+									<h2>LÃ¶senord</h2>
+									<div>{% include Forms/Input.html name="currentpassword" 'label="Nuvarande lÃ¶senord"' value="" error=errors.currentpassword type="password" %}</div>
+									<div>{% include Forms/Input.html name="password1" 'label="Nytt lÃ¶senord"' value="" error=errors.password type="password" %}<img src="{% selfURL /static/safety-level0.png %}" class="passwordsafety" data-level="0" /><img src="{% selfURL /static/safety-level1.png %}" class="passwordsafety" data-level="1" /><img src="{% selfURL /static/safety-level2.png %}" class="passwordsafety" data-level="2" /><img src="{% selfURL /static/safety-level3.png %}" class="passwordsafety" data-level="3" /><img src="{% selfURL /static/safety-level4.png %}" class="passwordsafety" data-level="4" /><img src="{% selfURL /static/safety-level5.png %}" class="passwordsafety" data-level="5" /></div>
+									<div>{% include Forms/Input.html name="password2" 'label="Nytt lÃ¶senord igen"' value="" error=errors.password type="password" %}</div>
+
+									<button type="submit" class="notable" name="change_password_button">Spara Ã¤ndringar</button>
+									
+									<div style="margin:0;padding:0;display:inline">
+										<input name="utf8" type="hidden" value="&#x2713;" />
+										<input name="authenticity_token" type="hidden" value="+KJop3vjwYVx1KE0VpQclROLup2cFZxEEcUKFkNZpew=" />
+									</div>
+								</form>
+								<form id="pin" accept-charset="UTF-8" action="{% selfURL /minsida/konto %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+									<hr />
+                                                                        <h2>Sifferkod fÃ¶r telefonsupport</h2>
+									<p>Om du behÃ¶ver ringa till Boplats fÃ¶r support sÃ¥ ska du uppge denna sifferkod som identifikation.</p>
+									{% include Forms/Input.html name="PIN" label="Sifferkod" value=userData.pin 'infotext="(fyra siffror)"' error=errors.pin %}
+
+									<button type="submit" class="notable" name="change_pin_button">Skapa sifferkod</button>
+									
+									<div style="margin:0;padding:0;display:inline">
+										<input name="utf8" type="hidden" value="&#x2713;" />
+										<input name="authenticity_token" type="hidden" value="+KJop3vjwYVx1KE0VpQclROLup2cFZxEEcUKFkNZpew=" />
+									</div>
+								</form>
+{% if userData.userStatus.isNonpayingMember %}
+								<form id="membership" accept-charset="UTF-8" action="{% selfURL /minsida/konto %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+									<h2>Typ av medlemsskap</h2>
+									<p>Du Ã¤r fÃ¶r nÃ¤rvarande gratismedlem</p>
+									<p>Du kan enbart skapa bevakningar och hyra ut privatrum, men du samlar inte kÃ¶tid och kan inte sÃ¶ka lÃ¤genheter. Du kan nÃ¤r som helst uppgradera till betalande genom att skapa en avi och betala den.</p>
+									<hr />
+
+									<button type="submit" class="notable" name="upgrade_account_button">Skapa avi fÃ¶r medlemsavgift</button>
+									
+									<div style="margin:0;padding:0;display:inline">
+										<input name="utf8" type="hidden" value="&#x2713;" />
+										<input name="authenticity_token" type="hidden" value="+KJop3vjwYVx1KE0VpQclROLup2cFZxEEcUKFkNZpew=" />
+									</div>
+								</form>
+{% /if %}
+								<form id="deleteaccount" accept-charset="UTF-8" action="{% selfURL /minsida/konto %}#deleteaccount" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+									<a name="deleteaccount" />
+									<div class="modalshield{% if not confirmDeleteAccount %} hidden{% /if %}"></div>
+									<div class="popover{% if not confirmDeleteAccount %} hidden{% /if %}">
+										<a href="{% selfURL /minsida/konto %}" id="closebutton"><img alt="StÃ¤ng" src="{% selfURL /static/close.png %}"></a>
+										<div>
+											{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+											<h3>Du kommer nu att avsluta ditt konto</h3>
+											<p>NÃ¤r du gjort det, kommer du inte lÃ¤ngre kunna logga in pÃ¥ Boplats.</p>
+											{% include Forms/Input.html name="deletepassword" label="LÃ¶senord" type="password" error=errors.deletepassword %}
+											<button type="submit" class="notable" name="confirm_delete_account_button">Avsluta mitt konto</button>
+										</div>
+									</div>
+                                                                         <hr />
+                                                                        <h2>Avsluta ditt konto</h2>
+									<p>NÃ¤r du avslutar ditt konto kan du inte lÃ¤ngre logga in. All information om dig och ditt konto raderas, och du fÃ¶rlorar dina samlade dagar hos Boplats. Du kan aldrig fÃ¥ tillbaka de dagar du samlat som bostadssÃ¶kande om du skapar ett nytt konto. Du fÃ¥r inte tillbaka avgiften om du avslutar ditt konto.</p>
+								
+
+									<button type="submit" class="notable" name="delete_account_button">Avsluta mitt konto</button>
+									
+									<div style="margin:0;padding:0;display:inline">
+										<input name="utf8" type="hidden" value="&#x2713;" />
+										<input name="authenticity_token" type="hidden" value="+KJop3vjwYVx1KE0VpQclROLup2cFZxEEcUKFkNZpew=" />
+									</div>
+								</form>
+							</td>
+{% /if %}
+{% if active equalsstring "historik" %}
+<td class="myinfo" role="main" id="maincontent">
+	{% include Blocks/Information.html error=errors.page notice=errors.notice %}
+	<form id="historik" accept-charset="UTF-8" action="{% selfURL /minsida/historik %}" method="post" autocapitalize="off" autocorrect="off" autocomplete="off">
+		<h1>Historik</h1>
+		<h2>Senaste hÃ¤ndelser</h2>
+		<hr />
+		<table class="historik">
+			{% include Blocks/UserHistory.html history=userData.history %}
+		</table>
+	</form>
+</td>
+{% /if %}
+							<td class="margin"></td>
+						</tr>
+					</table>
+{% else %}
+					<div class="pageblock topmargin">Du mÃ¥ste vara <a href="{% selfURL /login %}" id="login">inloggad</a> fÃ¶r att se denna sidan.</div>
+				</div>
+{% /if %}
+{% if message %}{% include Blocks/MessagePopover.html message=message closeURL=pageURL %}{% /if %}
+{% if payment %}{% include Blocks/PaymentPopover.html member=userData payment=payment closeURL=pageURL %}{% /if %}
+<form method="POST" id="refreshForm"></form>
+<script>
+	$(function() {
+	 $("div.city select").change (function (event) {
+									  var areasId = $(this).attr ("id") + "Areas-" + $(":selected", $(this)).attr ("value");
+									  $("td.areascell div.group", $(this).closest ("tr")).each (function() {
+																									if ($(this).attr ("id") == areasId) {
+																										$(this).show();
+																									} else {
+																										$(this).hide();
+																										$("select option", $(this)).attr ("selected", false);
+																										$("input:checkbox", $(this)).attr ("checked", false);
+																										$("label.checked", $(this)).removeClass ("checked");
+																										$("select", $(this)).trigger ("updateState");
+																									}
+																								});
+								  });
+	 $("select#occupation").change (updateOccupation);
+	 updateOccupation (null);
+	 $("select#studyType").change (updateStudyType);
+	 updateStudyType (null);
+	 $("tr#allareas, tr#offered1Allareas, tr#offered2Allareas").hide();
+	 $("div.group#" + "areaCityAreas-" + $(":selected", $("select#areaCity")).attr ("value")).show();
+	 $("div.group#" + "offered1AreaCityAreas-" + $(":selected", $("select#offered1AreaCity")).attr ("value")).show();
+	 $("div.group#" + "offered2AreaCityAreas-" + $(":selected", $("select#offered2AreaCity")).attr ("value")).show();
+	 $("select#area, select#offered1Area, select#offered2Area").css ("display: none;");
+	 $("ol.family").on ("click",
+						"button.removebutton",
+						function (event) {
+							event.preventDefault();
+							$(this).closest ("li").remove();
+						});
+	 $("button#addperson").click (function (event) {
+									  var personNumber = 2;
+
+									  event.preventDefault();
+									  $("button#addperson").attr ("disabled", true);
+									  $("ol.family input[name=person]").each (function() {
+																				  var value = $(this).attr ("value");
+																				  if (personNumber <= value) {
+																					  personNumber = value * 1 + 1;
+																				  }
+																			  });
+									  $.ajax ({
+										  type: "GET",
+										  url: $(this).closest ("form").attr ("action") + "/familj/" + personNumber,
+										  }).done (function (html) {
+													item = $(html);
+
+														$("ol.family").append (item);
+													(item);
+														$("button#addperson").attr ("disabled", false);
+													});
+								  });
+	 $("ol.area").on ("click",
+					  "button.removebutton",
+					  function (event) {
+						  event.preventDefault();
+						  $(this).closest ("li").remove();
+						  $("button.insertarea").attr ("disabled", null);
+					  });
+	 $("button.insertarea").click (function (event) {
+									var areaNumber = 1;
+									var areaCount = 0;
+									var row = $(this).closest ("tr");
+									var block = row.closest ("table").parent();
+									var citySelect = $("div.city select", row);
+									var cityPrefix = block.data ("prefix").length == 0 ? "" : block.data ("prefix") + "-";
+									var areaSelect;
+
+									event.preventDefault();
+									$("ol.area input.areanumber").each (function() {
+																			var value = $(this).attr ("value");
+																			if (areaNumber <= value) {
+																				areaNumber = value * 1 + 1;
+																			}
+																			areaCount += 1;
+																		});
+									if (areaCount < 6) {
+										if ($(this).hasClass ("percity")) {
+											areaSelect = $("select#" + cityPrefix + citySelect.val());
+											if (areaSelect.length == 0) {
+												area = citySelect.val();
+											} else {
+												area = areaSelect.val();
+											}
+										} else {
+											area = $("select", row).val();
+										}
+										if ($("input[value=" + area + "]", block).length == 0) {
+											$.ajax ({
+													type: "GET",
+													url: $(this).closest ("form").attr ("action") + "/omrade/" + block.data ("prefix") + "/" + areaNumber + "/" + area,
+													}).done (function (html) {
+																 var item = $(html);
+
+																 $("ol.area", block).append (item);
+																 styleInputs (item);
+																 if ($("ol.area input.areanumber", block).length >= 6) {
+																	 $("button.insertarea", row).attr ("disabled", "disabled");
+																 }
+															 });
+											}
+										}
+									});
+	 if ($("input#areaPreference-yes, input#areaPreference-no").length > 0) {
+		 $("input#areaPreference-yes, input#areaPreference-no").change (showHideAreas);
+		 showHideAreas (null);
+	 }
+	 $("textarea[data-maxlength]").keypress (function (event) {
+												 var max = $(this).data ("maxlength");
+												 var len = $(this).val().length;
+
+												 if ((event.which < 0x20) || event.metaKey) {
+													 return;
+												 }
+												 if (len >= max) {
+													 event.preventDefault();
+												 }
+										});
+	 $("textarea[data-maxlength]").bind ("keyup", handleLimitedInput);
+	 $("textarea[data-maxlength]").bind ("paste", handleLimitedInput);
+	 $("textarea[data-maxlength]").bind ("input", handleLimitedInput);
+	});
+
+handleLimitedInput (event) {
+	max = $(this).data ("maxlength");
+	len = $(this).val().length;
+	char = max - len;
+
+	(len > max) {
+			$(this).val ($(this).val().substring (0, max));
+		= $(this).val().length;
+		= max - len;
+		}
+		$("span.infotext", $(this).closest ("div.input")).text (char + " tecken kvar");
+	}
+
+showHideAreas (event) {
+	($("input#areaPreference-yes:checked").val()) {
+			$("ol.area, table.area, p.area").slideDown (event == null ? null : "fast");
+		} else {
+			$("ol.area, table.area, p.area").slideUp (event == null ? null : "fast");
+		}
+	}
+
+updateOccupation (event) {
+	($("select#occupation").val() == "arbete") {
+			$("tr.employee").slideDown (event == null ? null: "fast");
+		} else {
+			$("tr.employee").slideUp (event == null ? null: "fast");
+		}
+	($("select#occupation").val() == "studerar") {
+			$("tr.student").slideDown (event == null ? null: "fast");
+		} else {
+			$("tr.student").slideUp (event == null ? null: "fast");
+		}
+	}
+
+updateStudyType (event) {
+		$("tr.student td.school").each (function() {
+										($(this).attr ("id") == $("select#studyType").val()) {
+												$(this).show();
+											} else {
+												$(this).hide();
+											}
+										});
+	}
+
+	$(function() {
+		$("button.cardpayment").click (function (event) {
+										  var paymentWindow = openPaymentWindow ($(this).val(), "{% selfURL / %}");
+
+										  paymentWindow.openingWindow = window;
+										  event.preventDefault();
+									  });
+	   $("<button />")
+			.attr ("name", "printbutton")
+			.addClass ("cardpayment")
+			.text ("Skriv ut")
+			.click (function (event) {
+					();
+					})
+			.insertAfter ($("a#closebutton"));
+		$("button.applicationresponse[value=yes]").click (function (event) {
+															 var key = $(this).data ("key");
+
+															 event.preventDefault();
+															 $("div.answeryes").each (function() {
+																						  if ($(this).data ("key") == key) {
+																							  $(this).show ("fast",
+																											function() {
+																												$("a#closebutton", $(this)).focus();
+																											});
+																						  }
+																					  });
+														 });
+		$("button.applicationresponse[value=no]").click (function (event) {
+															var key = $(this).data ("key");
+
+															event.preventDefault();
+															$("div.answerno").each (function() {
+																						if ($(this).data ("key") == key) {
+																							$(this).show ("fast",
+																										  function() {
+																											  $("a#closebutton", $(this)).focus();
+																										  });
+																						}
+																					});
+														 });
+		$("div.answeryes a, div.answerno a").click (function (event) {
+													.preventDefault();
+														$("div.modalshield, div.popover").hide ("fast");
+													});
+		$("div.answeryes button[name=cancel], div.answerno button[name=cancel]").click (function (event) {
+																						.preventDefault();
+																							$("div.modalshield, div.popover").hide ("fast");
+																						});
+		$("button.toggleanswer[value=yes]").click (function (event) {
+													  var key = $(this).data ("key");
+
+													  event.preventDefault();
+													  $("div.toggleyes").each (function() {
+																				($(this).data ("key") == key) {
+																						$(this).show ("fast",
+																									 function() {
+																										 $("a#closebutton", $(this)).focus();
+																									 });
+																					}
+																				});
+												  });
+		$("button.toggleanswer[value=no]").click (function (event) {
+													 var key = $(this).data ("key");
+
+													 event.preventDefault();
+													 $("div.toggleno").each (function() {
+																				 if ($(this).data ("key") == key) {
+																					 $(this).show ("fast",
+																								() {
+																										$("a#closebutton", $(this)).focus();
+																									});
+																				 }
+																			 });
+												 });
+		$("div.toggleyes a, div.toggleno a").click (function (event) {
+													.preventDefault();
+														$("div.modalshield, div.popover").hide ("fast");
+													});
+		$("div.toggleyes button[name=cancel], div.toggleno button[name=cancel]").click (function (event) {
+																						.preventDefault();
+																							$("div.modalshield, div.popover").hide ("fast");
+																						});
+	});
+</script>
+{% include Shell/PageFooter.html %}

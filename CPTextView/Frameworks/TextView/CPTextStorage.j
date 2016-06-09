@@ -175,11 +175,13 @@ CPKernAttributeName = @"CPKernAttributeName";
 
     for (var i = 0; i < c; i++)
     {
-        [[_layoutManagers objectAtIndex:i] textStorage:self
+        var layoutManager = [_layoutManagers objectAtIndex:i]
+        [layoutManager textStorage:self
                                            edited:_editedMask
                                            range:_editedRange
                                            changeInLength:_changeInLength
                                            invalidatedRange:_editedRange];
+        [layoutManager._textContainers makeObjectsPerformSelector:@selector(_sizeToFitTextView)]
     }
 
     _editedRange.location = CPNotFound;

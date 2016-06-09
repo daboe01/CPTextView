@@ -9,6 +9,19 @@
 @import <TextView/RTFProducer.j>
 @import <TextView/RTFParser.j>
 
+@implementation CPString(FileLoading)
+
+- (id)initWithContentsOfURL:(CPURL)aURL
+{	var data = [[CPURLConnection sendSynchronousRequest:[CPURLRequest requestWithURL:aURL] returningResponse:nil error:nil] rawString];
+	return data;
+}
+
+- (id)initWithContentsOfFile:(CPString)aPath
+{	return [self initWithContentsOfURL:[CPURL URLWithString:aPath]];
+}
+@end
+
+
 @implementation AppController : CPObject
 {
     CPTextView  _textView;
@@ -132,8 +145,18 @@
 [_textView insertText:"aaaa\n"];
 [_textView insertText:"aaaa\n"];
 
-//[_textView setTextColor:[CPColor redColor]];
+var string= [[CPString alloc] initWithContentsOfFile:"/Resources/xxx.txt"]
+//[_textView setString: string]
+var storage = [_textView textStorage];
+var outputLength = [_textView._layoutManager numberOfCharacters]-1;
+var outputRange = CPMakeRange(0,outputLength);
+    [storage beginEditing];
+    [storage replaceCharactersInRange:outputRange withAttributedString:[[CPAttributedString alloc] initWithString:string]];
+    [[_textView textContainer] setWidthTracksTextView:YES];
 
+    [storage endEditing];
+
+//[_textView setTextColor:[CPColor redColor]];
     [theWindow orderFront:self];
     [CPMenu setMenuBarVisible:YES];
 }
