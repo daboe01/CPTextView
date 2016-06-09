@@ -156,7 +156,7 @@ var outputRange = CPMakeRange(0,outputLength);
 
     [storage endEditing];
 
-//[_textView setTextColor:[CPColor redColor]];
+[_textView setTextColor:[CPColor redColor]];
     [theWindow orderFront:self];
     [CPMenu setMenuBarVisible:YES];
 }
