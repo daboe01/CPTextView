@@ -367,12 +367,8 @@ var _objectsInRange = function(aList, aRange)
         if (!_RectEqualToRectHorizontally(newLineFragment._fragmentRect, _fragmentRect))
             return NO;
 
-        if(newFragmentRuns[i].elem && oldFragmentRuns[i].elem && 
-            (newFragmentRuns[i].elem.style.color !== oldFragmentRuns[i].elem.style.color ||
-            newFragmentRuns[i].elem.style.fontFamily !== oldFragmentRuns[i].elem.style.fontFamily ||
-            newFragmentRuns[i].elem.style.fontSize !== oldFragmentRuns[i].elem.style.fontSize)){
+        if (newFragmentRuns[i].color !== oldFragmentRuns[i].color || newFragmentRuns[i].font !== oldFragmentRuns[i].font)
             return NO;
-        }
     }
 
     return YES;
