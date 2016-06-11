@@ -2079,7 +2079,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 + (CPArray)_paragraphBoundaryRegex
 {
-    return /^.[\n\r]/m;
+    return /^[^\n\r][\n\r][^\n\r]/m;
 }
 + (CPArray)_whitespaceRegex
 {
@@ -2147,13 +2147,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             break;
         case CPSelectByParagraph:
             regex = [[self class] _paragraphBoundaryRegex];
+
+            // triple click right in last line of a paragraph-> select this paragraph completely
+            if (loc > 0 && _isNewlineCharacter([string characterAtIndex:loc]))
+                loc--;
+
             break;
         default:
             return proposedRange;
     }
 
-    if (loc > 0 && _isNewlineCharacter([string characterAtIndex:loc]))
-        loc--;
 
     var granularRange = [self _characterRangeForIndex:loc inRange:proposedRange asDefinedByRegex:regex skip:YES];
 
