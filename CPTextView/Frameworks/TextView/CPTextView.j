@@ -2077,23 +2077,26 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     return /^.[^-\.,+#'"!§$%&/\(<\[\]>\)=?`´*\s{}\|¶]/m;
 }
+
 + (CPArray)_paragraphBoundaryRegex
 {
-    return /^[^\n\r][\n\r][^\n\r]/m;
+    return /^.[^\n\r]/m;
 }
+
 + (CPArray)_whitespaceRegex
 {
+    // do not include \n here or we will get cross paragraph selections
     return /^.[ \t]+/m;
 }
 
-- (CPRange)_characterRangeForIndex:(unsigned)index inRange:(CPRange) aRange asDefinedByRegex:(JSObject)regex skip:(BOOL)flag
+- (CPRange)_characterRangeForIndex:(unsigned)index inRange:(CPRange) aRange asDefinedByRegex:(JSObject)regex
 {
     var wordRange = CPMakeRange(index, 0),
         numberOfCharacters = [_layoutManager numberOfCharacters],
         string = [_textStorage string];
 
     // do we start on a boundary character?
-    if (flag && _regexMatchesStringAtIndex(regex, string, index))
+    if (_regexMatchesStringAtIndex(regex, string, index))
     {
         // -> extend to the left
         for (var searchIndex = index - 1; searchIndex > 0 && _regexMatchesStringAtIndex(regex, string, searchIndex); searchIndex--)
@@ -2107,17 +2110,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             searchIndex++;
         }
         return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), searchIndex));
-    }
-    // -> extend to the left
-    for (var searchIndex = index - 1; searchIndex >= 0 && !_regexMatchesStringAtIndex (regex, string, searchIndex); searchIndex--)
-    {
-        wordRange.location = searchIndex;
-    }
-    // -> extend to the right
-    index++;
-    while (index < numberOfCharacters && !_regexMatchesStringAtIndex (regex, string, index))
-    {
-        index++;
     }
     return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters), index));
 }
@@ -2158,7 +2150,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 
 
-    var granularRange = [self _characterRangeForIndex:loc inRange:proposedRange asDefinedByRegex:regex skip:YES];
+    var granularRange = [self _characterRangeForIndex:loc inRange:proposedRange asDefinedByRegex:regex];
 
     if (proposedRange.length == 0 && _isNewlineCharacter([string characterAtIndex:proposedRange.location]))
         return _MakeRangeFromAbs(_isNewlineCharacter([string characterAtIndex:loc])? proposedRange.location : granularRange.location, proposedRange.location + 1);
@@ -2166,8 +2158,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (proposedRange.length)
         granularRange = CPUnionRange(granularRange, [self _characterRangeForIndex:CPMaxRange(proposedRange)
                                                                           inRange:proposedRange
-                                                                 asDefinedByRegex:regex
-                                                                             skip:YES]);
+                                                                 asDefinedByRegex:regex]);
 
     switch (granularity)
     {
