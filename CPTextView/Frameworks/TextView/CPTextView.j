@@ -2075,7 +2075,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 + (CPArray)_wordBoundaryRegex
 {
-    return /^.[^-\.,+#'"!§$%&/\(<\[\]>\)=?`´*\s{}\|¶]/m;
+    return /(^[0-9][\.,])|(^.[^-\.,+#'"!§$%&/\(<\[\]>\)=?`´*\s{}\|¶])/m;
 }
 
 + (CPArray)_paragraphBoundaryRegex
