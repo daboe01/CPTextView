@@ -80,24 +80,27 @@ e.g. using zaach/jison on github
         var range = [fontName rangeOfString:@"-"];
 
         if (range.location != CPNotFound)
-	{
-	    var fontFamily = [fontName substringToIndex: range.location];
+		{
+	    	var fontFamily = [fontName substringToIndex: range.location],
+				traits = 0,
+				weight = 0;
 
-	    font = [[CPFontManager sharedFontManager] fontWithFamily: fontFamily
-						    traits: traits
-						    weight: weight
-						    size: fontSize];
-	}
+			// The method fontWithFamily:... is not present in Cappuccino??? Will cause an error.
+	    	//font = [[CPFontManager sharedFontManager] fontWithFamily: fontFamily
+			//			    traits: traits
+			//			    weight: weight
+			//			    size: fontSize];
+			font = [CPFont _fontWithName:fontFamily size:fontSize bold:bold italic:italic];
+		}
       
         if (font == nil)
-	{
-	    console.log(@"RTFParser", 
+		{
+	    	console.log(@"RTFParser", 
 		         @"Could not find font %@ size %f traits %d weight %d", 
 		         fontName, fontSize, traits, weight);
-
 	  /* Last resort, default font.  :-(  */
-	    font = [CPFont systemFontOfSize: fontSize];
-	}
+	    	font = [CPFont systemFontOfSize: fontSize];
+		}
     }
     return font;
 }
