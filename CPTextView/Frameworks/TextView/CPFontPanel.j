@@ -32,8 +32,14 @@
 
 @import <AppKit/CPFontManager.j>
 @import <AppKit/CPPanel.j>
+@import <AppKit/CPColorWell.j>
+@import <AppKit/CPColorPanel.j>
+@import <AppKit/CPBrowser.j>
+
 @import "CPLayoutManager.j"
 @import "CPFontManagerAdditions.j"
+@import "CPFontDescriptor.j"
+@import "CPText.j"
 
 @class CPTextStorage
 @class CPLayoutManager

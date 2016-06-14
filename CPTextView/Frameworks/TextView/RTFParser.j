@@ -80,24 +80,27 @@ e.g. using zaach/jison on github
         var range = [fontName rangeOfString:@"-"];
 
         if (range.location != CPNotFound)
-	{
-	    var fontFamily = [fontName substringToIndex: range.location];
+		{
+	    	var fontFamily = [fontName substringToIndex: range.location],
+				traits = 0,
+				weight = 0;
 
-	    font = [[CPFontManager sharedFontManager] fontWithFamily: fontFamily
-						    traits: traits
-						    weight: weight
-						    size: fontSize];
-	}
+			// The method fontWithFamily:... is not present in Cappuccino??? Will cause an error.
+	    	//font = [[CPFontManager sharedFontManager] fontWithFamily: fontFamily
+			//			    traits: traits
+			//			    weight: weight
+			//			    size: fontSize];
+			font = [CPFont _fontWithName:fontFamily size:fontSize bold:bold italic:italic];
+		}
       
         if (font == nil)
-	{
-	    console.log(@"RTFParser", 
+		{
+	    	console.log(@"RTFParser", 
 		         @"Could not find font %@ size %f traits %d weight %d", 
 		         fontName, fontSize, traits, weight);
-
 	  /* Last resort, default font.  :-(  */
-	    font = [CPFont systemFontOfSize: fontSize];
-	}
+	    	font = [CPFont systemFontOfSize: fontSize];
+		}
     }
     return font;
 }
@@ -259,7 +262,7 @@ var kRgsymRtf = {
 @implementation _CPRTFParser : CPObject
 {
     CPString _codePage;
-    CPSize _paper;
+    CGSize _paper;
     CPString _rtf;
     unsigned _curState;
     CPArray _states;
@@ -659,7 +662,9 @@ var kRgsymRtf = {
 
                         if (hex.length == 4)
                         {
-                            var temp = parseInt(hex, 16);
+                            var temp = parseInt(hex, 16),
+								hexTable = null;
+								
                             if (hexTable && hexTable[hex.toUpperCase()] !== undefined)
                             {
                                 temp = parseInt(hexTable[hex.toUpperCase()], 16);
