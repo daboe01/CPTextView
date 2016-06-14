@@ -259,7 +259,7 @@ var kRgsymRtf = {
 @implementation _CPRTFParser : CPObject
 {
     CPString _codePage;
-    CPSize _paper;
+    CGSize _paper;
     CPString _rtf;
     unsigned _curState;
     CPArray _states;
@@ -659,7 +659,9 @@ var kRgsymRtf = {
 
                         if (hex.length == 4)
                         {
-                            var temp = parseInt(hex, 16);
+                            var temp = parseInt(hex, 16),
+								hexTable = null;
+								
                             if (hexTable && hexTable[hex.toUpperCase()] !== undefined)
                             {
                                 temp = parseInt(hexTable[hex.toUpperCase()], 16);

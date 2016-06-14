@@ -66,7 +66,10 @@ CPHeavierFontAction     = 5;
 CPLighterFontAction     = 6;
 CPRemoveTraitFontAction = 7;
 
-@implementation CPFontManager(FontPanel)
+@implementation CPFontManager(FontPanel) {
+	CPInteger  	_fontAction;
+	CPInteger 	_currentFontTrait;
+}
 
 
 /*!
