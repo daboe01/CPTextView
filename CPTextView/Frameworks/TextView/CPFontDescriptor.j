@@ -21,6 +21,9 @@
  */
 
 @import <Foundation/CPObject.j>
+@import <Foundation/CPDictionary.j>
+@import <Foundation/CPNumber.j>
+
 /*
     Font descriptor dictionary keys
 */

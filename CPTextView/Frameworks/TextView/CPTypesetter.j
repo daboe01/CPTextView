@@ -26,7 +26,10 @@
 
 @import <Foundation/CPObject.j>
 @import "CPParagraphStyle.j"
-@import "CPTextStorage.j"
+@import "CPText.j"
+
+@class CPTextStorage
+@class CPLayoutManager
 
 @global _isNewlineCharacter
 

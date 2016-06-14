@@ -26,9 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-@import "CPTextStorage.j"
 @import "CPTextContainer.j"
 @import "CPTypesetter.j"
+@import "CPText.j"
+
+@class CPTextStorage
 
 @global _MakeRangeFromAbs
 
