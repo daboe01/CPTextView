@@ -360,7 +360,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (self)
     {
+//#if PLATFORM(DOM)
         self._DOMElement.style.cursor = "text";
+//#endif
         _textContainerInset = CGSizeMake(2,0);
         _textContainerOrigin = CGPointMake(_bounds.origin.x, _bounds.origin.y);
         [aContainer setTextView:self];
@@ -900,7 +902,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     {
         for (var i = 0; i < _selectionSpans.length; i++)
         {
-            _DOMElement.removeChild(_selectionSpans[i]);
+
+//#if PLATFORM(DOM)
+            self._DOMElement.removeChild(_selectionSpans[i]);
+//#endif
         }
     }
     _selectionSpans = [];
@@ -922,7 +927,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             rects[i].origin.y += _textContainerOrigin.y;
             var newSpan = [self _createSelectionSpanForRect:rects[i] andColor:effectiveSelectionColor];
             _selectionSpans.push(newSpan);
-            _DOMElement.appendChild(newSpan);
+//#if PLATFORM(DOM)
+            self._DOMElement.appendChild(newSpan);
+//#endif
         }
 
     }
@@ -2304,7 +2311,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             style.backgroundColor = "black";
             _caretDOM.style.width = "1px";
             _textView = aView;
+//#if PLATFORM(DOM)
             _textView._DOMElement.appendChild(_caretDOM);
+//#endif
         }
     }
 
@@ -2552,6 +2561,7 @@ var _CPCopyPlaceholder = '-';
 
     [self hideInputElement];
 
+//#if PLATFORM(DOM)
     // only append the _CPNativeInputField if it is not already there
     var children = currentFirstResponder._DOMElement.childNodes,
         l = children.length;
@@ -2569,6 +2579,7 @@ var _CPCopyPlaceholder = '-';
 
     currentFirstResponder._DOMElement.appendChild(_CPNativeInputField);
     _CPNativeInputField.focus();
+//#endif
 }
 
 + (void)focusForClipboardOfTextView:(CPTextView)textview
