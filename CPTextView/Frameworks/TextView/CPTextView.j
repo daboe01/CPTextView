@@ -990,23 +990,47 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self _setSelectedRange:range affinity:affinity stillSelecting:selecting overwriteTypingAttributes:YES];
 }
 
+//#if PLATFORM(DOM)
+
+- (CGPoint)_cumulativeOffset
+{
+    var top = 0,
+        left = 0,
+        element = self._DOMElement;
+
+    do
+    {
+        top += element.offsetTop  || 0;
+        left += element.offsetLeft || 0;
+        element = element.offsetParent;
+    }
+    while(element);
+
+    return CGPointMake(left, top);
+}
+//#endif
+
 // interface to the _CPNativeInputManager
 - (void)_activateNativeInputElement:(DOMElemet)aNativeField
 {
 //#if PLATFORM(DOM)
-    var point = [_caret _cumulativeOffset];
-    [_caret setVisibility:NO];  // hide our caret because now the system caret takes over
 
     var attributes=[[self typingAttributes] copy];
     [attributes setObject:[CPColor colorWithRed:1 green:1 blue:1 alpha:0] forKey:CPForegroundColorAttributeName]; // make it invisible
     var placeholderString = [[CPAttributedString alloc] initWithString:aNativeField.innerHTML attributes:attributes];
     [self insertText:placeholderString];  // FIXME: this hack to provide the visual space for the inputmanager should at least bypass the undomanager
 
-    aNativeField.style.left =(point.x)+"px";
-    aNativeField.style.top = (point.y)+"px";
+    var caretOrigin = [_layoutManager boundingRectForGlyphRange:CPMakeRange(MAX(0, _selectionRange.location - 1), 1) inTextContainer:_textContainer].origin;
+    caretOrigin.y += [_layoutManager _characterOffsetAtLocation:MAX(0, _selectionRange.location - 1)];
+    caretOrigin.x += 2; // two pixel offset to the LHS character
+    var cumulativeOffset = [self _cumulativeOffset];
+
+    aNativeField.style.left =(caretOrigin.x + cumulativeOffset.x)+"px";
+    aNativeField.style.top = (caretOrigin.y + cumulativeOffset.y)+"px";
     aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
     aNativeField.style.color = [[_typingAttributes objectForKey:CPForegroundColorAttributeName] cssString];
 //#endif
+    [_caret setVisibility:NO];  // hide our caret because now the system caret takes over
 
 }
 
@@ -2360,22 +2384,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [_caretTimer invalidate];
         _caretTimer = nil;
     }
-}
-- (CGPoint)_cumulativeOffset
-{
-    var top = 0,
-        left = 0,
-        element = _caretDOM;
-
-    do
-    {
-        top += element.offsetTop  || 0;
-        left += element.offsetLeft || 0;
-        element = element.offsetParent;
-    }
-    while(element);
-
-    return CGPointMake(left, top);
 }
 
 @end

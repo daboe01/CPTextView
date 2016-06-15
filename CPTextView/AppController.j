@@ -145,6 +145,7 @@
 [_textView insertText:"aaaa\n"];
 [_textView insertText:"aaaa\n"];
 
+/*
 var string= [[CPString alloc] initWithContentsOfFile:"/Resources/xxx.txt"]
 //[_textView setString: string]
 var storage = [_textView textStorage];
@@ -157,6 +158,7 @@ var outputRange = CPMakeRange(0,outputLength);
     [storage endEditing];
 
 [_textView setTextColor:[CPColor redColor]];
+*/
     [theWindow orderFront:self];
     [CPMenu setMenuBarVisible:YES];
 }
