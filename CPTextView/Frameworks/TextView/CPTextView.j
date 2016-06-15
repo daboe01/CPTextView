@@ -993,22 +993,21 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 // interface to the _CPNativeInputManager
 - (void)_activateNativeInputElement:(DOMElemet)aNativeField
 {
+//#if PLATFORM(DOM)
+    var point = [_caret _cumulativeOffset];
+    [_caret setVisibility:NO];  // hide our caret because now the system caret takes over
+
     var attributes=[[self typingAttributes] copy];
     [attributes setObject:[CPColor colorWithRed:1 green:1 blue:1 alpha:0] forKey:CPForegroundColorAttributeName]; // make it invisible
     var placeholderString = [[CPAttributedString alloc] initWithString:aNativeField.innerHTML attributes:attributes];
     [self insertText:placeholderString];  // FIXME: this hack to provide the visual space for the inputmanager should at least bypass the undomanager
 
-    var caretOrigin = [_layoutManager boundingRectForGlyphRange:CPMakeRange(MAX(0, _selectionRange.location - 1), 1) inTextContainer:_textContainer].origin;
-    caretOrigin.y += [_layoutManager _characterOffsetAtLocation:MAX(0, _selectionRange.location - 1)];
-    caretOrigin.x += 2; // two pixel offset to the LHS character
-
-//#ifdef(DOM)...
-    aNativeField.style.left = caretOrigin.x+"px";
-    aNativeField.style.top = caretOrigin.y+"px";
+    aNativeField.style.left =(point.x)+"px";
+    aNativeField.style.top = (point.y)+"px";
     aNativeField.style.font = [[_typingAttributes objectForKey:CPFontAttributeName] cssString];
     aNativeField.style.color = [[_typingAttributes objectForKey:CPForegroundColorAttributeName] cssString];
+//#endif
 
-    [_caret setVisibility:NO];  // hide our caret because now the system caret takes over
 }
 
 - (CPArray)selectedRanges
@@ -2362,6 +2361,22 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _caretTimer = nil;
     }
 }
+- (CGPoint)_cumulativeOffset
+{
+    var top = 0,
+        left = 0,
+        element = _caretDOM;
+
+    do
+    {
+        top += element.offsetTop  || 0;
+        left += element.offsetLeft || 0;
+        element = element.offsetParent;
+    }
+    while(element);
+
+    return CGPointMake(left, top);
+}
 
 @end
 
@@ -2428,6 +2443,7 @@ var _CPCopyPlaceholder = '-';
     _CPNativeInputField.style.margin = "0px";
     _CPNativeInputField.style.whiteSpace = "pre";
     _CPNativeInputField.style.outline = "0px solid transparent";
+    document.body.appendChild(_CPNativeInputField);
 
     _CPNativeInputField.addEventListener("keyup", function(e)
     {
@@ -2455,7 +2471,8 @@ var _CPCopyPlaceholder = '-';
             return;
         }
 
-        if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyPressedCalled == NO && _CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && _CPNativeInputField.innerHTML.length < 3 && _CPNativeInputFieldLastValue !== _CPNativeInputField.innerHTML) // chrome-trigger: keypressed is omitted for deadkeys and cursor keys
+        // webkit-browsers: keypressed is omitted for deadkeys and cursor keys
+        if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyPressedCalled == NO && (_CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && _CPNativeInputField.innerHTML.length < 3 && _CPNativeInputFieldLastValue !== _CPNativeInputField.innerHTML))
         {
             _CPNativeInputFieldActive = YES;
             [currentFirstResponder _activateNativeInputElement:_CPNativeInputField];
@@ -2467,12 +2484,13 @@ var _CPCopyPlaceholder = '-';
             _CPNativeInputField.innerHTML = '';
         }
 
+        _CPNativeInputFieldLastValue = _CPNativeInputField.innerHTML;
+
         return false; // prevent the default behaviour
     }, true);
 
     _CPNativeInputField.addEventListener("keydown", function(e)
     {
-        _CPNativeInputFieldLastValue = _CPNativeInputField.innerHTML;
         _CPNativeInputFieldKeyUpCalled = NO;
         _CPNativeInputFieldKeyPressedCalled = NO;
         var currentFirstResponder = [[CPApp keyWindow] firstResponder];
@@ -2562,23 +2580,9 @@ var _CPCopyPlaceholder = '-';
     [self hideInputElement];
 
 //#if PLATFORM(DOM)
-    // only append the _CPNativeInputField if it is not already there
-    var children = currentFirstResponder._DOMElement.childNodes,
-        l = children.length;
+    if(document.activeElement !== _CPNativeInputField)
+        _CPNativeInputField.focus();
 
-    for (var i = 0; i < l; i++)
-    {
-        if (children[i] === _CPNativeInputField)   // we are (almost) done
-        {
-            if (document.activeElement !== _CPNativeInputField) // focus the _CPNativeInputField if necessary
-                _CPNativeInputField.focus();
-
-            return;
-        }
-    }
-
-    currentFirstResponder._DOMElement.appendChild(_CPNativeInputField);
-    _CPNativeInputField.focus();
 //#endif
 }
 
