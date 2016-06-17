@@ -1041,10 +1041,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)keyDown:(CPEvent)event
 {
-    [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager
-
-    if ([_CPNativeInputManager isNativeInputFieldActive])
-       return;
+    [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager (at least on chrome+FF)
 
     if ([event charactersIgnoringModifiers].charCodeAt(0) != 229) // filter out 229 because this would be inserted in chrome on each deadkey
         [self interpretKeyEvents:[event]];
@@ -2414,6 +2411,7 @@ var _CPCopyPlaceholder = '-';
 }
 + (void)cancelCurrentNativeInputSession
 {
+    // backspace in safari tends to insert <br>s->eliminate these
     if (_CPNativeInputField.innerHTML.length > 2)
         _CPNativeInputField.innerHTML = '';
 
@@ -2435,7 +2433,10 @@ var _CPCopyPlaceholder = '-';
 
     [currentFirstResponder setSelectedRange:placeholderRange];
     [currentFirstResponder insertText:aStr];
+    _CPNativeInputField.innerHTML = _CPNativeInputFieldLastValue = '';
+
     [self hideInputElement];
+
     [currentFirstResponder updateInsertionPointStateAndRestartTimer:YES];
 }
 
@@ -2451,7 +2452,6 @@ var _CPCopyPlaceholder = '-';
     _CPNativeInputField.style.margin = "0px";
     _CPNativeInputField.style.whiteSpace = "pre";
     _CPNativeInputField.style.outline = "0px solid transparent";
-    _CPNativeInputField.oncontextmenu = _CPNativeInputField.onmousedown = _CPNativeInputField.onselectstart = _oncontextmenuhandler;
 
     document.body.appendChild(_CPNativeInputField);
 
@@ -2481,7 +2481,7 @@ var _CPCopyPlaceholder = '-';
             return;
         }
 
-        // webkit-browsers: keypressed is omitted for deadkeys and cursor keys
+        // webkit-browsers: keypressed is omitted for deadkeys (and unfortunately also for cursor keys)
         if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyPressedCalled == NO && (_CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && _CPNativeInputField.innerHTML.length < 3 && _CPNativeInputFieldLastValue !== _CPNativeInputField.innerHTML))
         {
             _CPNativeInputFieldActive = YES;
