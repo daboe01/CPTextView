@@ -2083,27 +2083,25 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (CPRange)_characterRangeForIndex:(unsigned)index inRange:(CPRange) aRange asDefinedByRegex:(JSObject)regex
 {
+    return [self _characterRangeForIndex:index inRange:aRange asDefinedByLRegex:regex andRRegex:regex]
+}
+
+- (CPRange)_characterRangeForIndex:(unsigned)index inRange:(CPRange) aRange asDefinedByLRegex:(JSObject)lregex andRRegex:(JSObject)rregex
+{
     var wordRange = CPMakeRange(index, 0),
         numberOfCharacters = [_layoutManager numberOfCharacters],
         string = [_textStorage string];
 
-    // do we start on a boundary character?
-    if (_regexMatchesStringAtIndex(regex, string, index))
-    {
-        // -> extend to the left
-        for (var searchIndex = index - 1; searchIndex >= 0 && _regexMatchesStringAtIndex(regex, string, searchIndex); searchIndex--)
-        {
-            wordRange.location = searchIndex;
-        }
-        // -> extend to the right
-        searchIndex = index + 1;
-        while (searchIndex < numberOfCharacters && _regexMatchesStringAtIndex(regex, string, searchIndex))
-        {
-            searchIndex++;
-        }
-        return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters - 1), searchIndex));
-    }
-    return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters), index));
+    // extend to the left
+    for (var searchIndex = index - 1; searchIndex >= 0 && _regexMatchesStringAtIndex(lregex, string, searchIndex); searchIndex--)
+        wordRange.location = searchIndex;
+
+    // extend to the right
+    searchIndex = index + 1;
+    while (searchIndex < numberOfCharacters && _regexMatchesStringAtIndex(rregex, string, searchIndex))
+        searchIndex++;
+
+    return _MakeRangeFromAbs(wordRange.location, MIN(MAX(0, numberOfCharacters), searchIndex));
 }
 
 - (CPRange)selectionRangeForProposedRange:(CPRange)proposedRange granularity:(CPSelectionGranularity)granularity
@@ -2120,17 +2118,19 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         proposedRange.length = textStorageLength - proposedRange.location;
 
     var string = [_textStorage string],
-        regex,
+        lregex,
+        rregex,
         loc = proposedRange.location;
 
 
     switch (granularity)
     {
         case CPSelectByWord:
-            regex = _isWhitespaceCharacter([string characterAtIndex:loc])? [[self class] _whitespaceRegex] : [[self class] _wordBoundaryRegex];
+            lregex = _isWhitespaceCharacter([string characterAtIndex:loc])? [[self class] _whitespaceRegex] : [[self class] _wordBoundaryRegex];
+            rregex = _isWhitespaceCharacter([string characterAtIndex:CPMaxRange(proposedRange)])? [[self class] _whitespaceRegex] : [[self class] _wordBoundaryRegex];
             break;
         case CPSelectByParagraph:
-            regex = [[self class] _paragraphBoundaryRegex];
+            lregex = rregex = [[self class] _paragraphBoundaryRegex];
 
             // triple click right in last line of a paragraph-> select this paragraph completely
             if (loc > 0 && _isNewlineCharacter([string characterAtIndex:loc]) &&
@@ -2143,7 +2143,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 
 
-    var granularRange = [self _characterRangeForIndex:loc inRange:proposedRange asDefinedByRegex:regex];
+    var granularRange = [self _characterRangeForIndex:loc
+                                              inRange:proposedRange
+                                    asDefinedByLRegex:lregex
+                                            andRRegex:rregex];
 
     if (proposedRange.length == 0 && _isNewlineCharacter([string characterAtIndex:proposedRange.location]))
         return _MakeRangeFromAbs(_isNewlineCharacter([string characterAtIndex:loc])? proposedRange.location : granularRange.location, proposedRange.location + 1);
@@ -2151,7 +2154,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (proposedRange.length)
         granularRange = CPUnionRange(granularRange, [self _characterRangeForIndex:CPMaxRange(proposedRange)
                                                                           inRange:proposedRange
-                                                                 asDefinedByRegex:regex]);
+                                                                asDefinedByLRegex:lregex
+                                                                        andRRegex:rregex]);
 
     switch (granularity)
     {
