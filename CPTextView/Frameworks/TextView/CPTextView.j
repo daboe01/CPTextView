@@ -1067,15 +1067,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (_startTrackingLocation === CPNotFound)
         _startTrackingLocation = [_layoutManager numberOfCharacters];
-
-    if (fraction[0] > 0.5)
+    else if (fraction[0] > 0.5)
         _startTrackingLocation++;
 
-    var granularities = [-1, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
+    var granularities = [CPNotFound, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
     [self setSelectionGranularity:granularities[[event clickCount]]];
 
-    var setRange = [self selectionRangeForProposedRange:CPMakeRange(_startTrackingLocation, 0) granularity:[self selectionGranularity]];
-    _startTrackingLocation = CPMaxRange(setRange)
+    var setRange = CPMakeRange(_startTrackingLocation, 0);
 
     if ([event modifierFlags] & CPShiftKeyMask)
         setRange = _MakeRangeFromAbs(_startTrackingLocation < _MidRange(_selectionRange)?
