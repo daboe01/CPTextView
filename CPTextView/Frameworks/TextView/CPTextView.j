@@ -1105,8 +1105,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
     if (index == CPNotFound)
         index = _scrollingDownward ? CPMaxRange(oldRange) : oldRange.location;
-
-    if (fraction[0] > 0.5)
+    else if (fraction[0] > 0.5)
         index++;
 
     if (index > oldRange.location)
@@ -1115,14 +1114,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (index < CPMaxRange(oldRange))
         _scrollingDownward = NO;
 
-    if (index < _startTrackingLocation)
-        [self setSelectedRange:CPMakeRange(index, _startTrackingLocation - index)
-              affinity:0
-              stillSelecting:YES];
-    else
-        [self setSelectedRange:CPMakeRange(_startTrackingLocation, index - _startTrackingLocation)
-              affinity:0
-              stillSelecting:YES];
+    [self setSelectedRange:_MakeRangeFromAbs(index, _startTrackingLocation)
+                  affinity:0
+            stillSelecting:YES];
 
     [self scrollRangeToVisible:CPMakeRange(index, 0)];
 }
