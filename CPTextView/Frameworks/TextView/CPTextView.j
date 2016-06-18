@@ -56,11 +56,6 @@ _characterTripletFromStringAtIndex=function(string, index)
     var tripletRange = _MakeRangeFromAbs(MAX(0, index - 1), MIN(string.length, index + 2)),
         ret = [string substringWithRange:tripletRange];
 
-    if (tripletRange.length < 3 && index == 0)
-    {
-        ret = " " + ret;
-    }
-
     return ret;
 }
 _regexMatchesStringAtIndex=function(regex, string, index)
@@ -1079,7 +1074,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var granularities = [-1, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
     [self setSelectionGranularity:granularities[[event clickCount]]];
 
-    var setRange = CPMakeRange(_startTrackingLocation, 0);
+    var setRange = [self selectionRangeForProposedRange:CPMakeRange(_startTrackingLocation, 0) granularity:[self selectionGranularity]];
+    _startTrackingLocation = CPMaxRange(setRange)
 
     if ([event modifierFlags] & CPShiftKeyMask)
         setRange = _MakeRangeFromAbs(_startTrackingLocation < _MidRange(_selectionRange)?
@@ -1089,27 +1085,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         _scrollingTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(_supportScrolling:) userInfo:nil repeats:YES];
 
     [self setSelectedRange:setRange affinity:0 stillSelecting:YES];
-
-
 }
 - (void)_supportScrolling:(CPTimer)aTimer
 {
     [self mouseDragged:[CPApp currentEvent]];
-}
-
-- (void)_clearRange:(var)range
-{
-    var rects = [_layoutManager rectArrayForCharacterRange:nil withinSelectedCharacterRange:range
-                                 inTextContainer:_textContainer
-                                 rectCount:nil],
-        l = rects.length;
-
-    for (var i = 0; i < l ; i++)
-    {
-        rects[i].origin.x += _textContainerOrigin.x;
-        rects[i].origin.y += _textContainerOrigin.y;
-        [self setNeedsDisplayInRect:rects[i]];
-    }
 }
 
 - (void)mouseDragged:(CPEvent)event
@@ -1133,16 +1112,10 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         index++;
 
     if (index > oldRange.location)
-    {
-        [self _clearRange:_MakeRangeFromAbs(oldRange.location,index)];
         _scrollingDownward = YES;
-    }
 
     if (index < CPMaxRange(oldRange))
-    {
-        [self _clearRange:_MakeRangeFromAbs(index, CPMaxRange(oldRange))];
         _scrollingDownward = NO;
-    }
 
     if (index < _startTrackingLocation)
         [self setSelectedRange:CPMakeRange(index, _startTrackingLocation - index)
@@ -1279,7 +1252,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 }
 - (unsigned)_calculateMoveSelectionFromRange:(CPRange)aRange intoDirection:(integer)move granularity:(CPSelectionGranularity)granularity
 {
-    var inWord = ![self _isCharacterAtIndex:(move > 0 ? CPMaxRange(aRange) : aRange.location) + move granularity:granularity],
+    var inWord = [self _isCharacterAtIndex:(move > 0 ? CPMaxRange(aRange) : aRange.location) + move granularity:granularity],
         aSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(aRange) : aRange.location) + move, 0) granularity:granularity],
         bSel = [self selectionRangeForProposedRange:CPMakeRange((move > 0 ? CPMaxRange(aSel) : aSel.location) + move, 0) granularity:granularity];
     return move > 0 ? CPMaxRange(inWord? aSel:bSel) : (inWord? aSel:bSel).location;
@@ -2126,7 +2099,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if (_regexMatchesStringAtIndex(regex, string, index))
     {
         // -> extend to the left
-        for (var searchIndex = index - 1; searchIndex > 0 && _regexMatchesStringAtIndex(regex, string, searchIndex); searchIndex--)
+        for (var searchIndex = index - 1; searchIndex >= 0 && _regexMatchesStringAtIndex(regex, string, searchIndex); searchIndex--)
         {
             wordRange.location = searchIndex;
         }
