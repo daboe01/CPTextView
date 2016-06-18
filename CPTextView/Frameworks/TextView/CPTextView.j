@@ -2355,6 +2355,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 var _CPNativeInputField,
     _CPNativeInputFieldLastValue,
+    _CPNativeInputFieldKeyDownCalled,
     _CPNativeInputFieldKeyUpCalled,
     _CPNativeInputFieldKeyPressedCalled,
     _CPNativeInputFieldActive,
@@ -2469,6 +2470,10 @@ var _CPCopyPlaceholder = '-';
 
     _CPNativeInputField.addEventListener("keydown", function(e)
     {
+        if (CPBrowserIsEngine(CPGeckoBrowserEngine) && _CPNativeInputFieldKeyDownCalled)
+            return true;
+
+        _CPNativeInputFieldKeyDownCalled = YES;
         _CPNativeInputFieldKeyUpCalled = NO;
         _CPNativeInputFieldKeyPressedCalled = NO;
         var currentFirstResponder = [[CPApp keyWindow] firstResponder];
@@ -2479,6 +2484,8 @@ var _CPCopyPlaceholder = '-';
         // FF-trigger: here the best way to detect a dead key is the missing keyup event
         if (CPBrowserIsEngine(CPGeckoBrowserEngine))
             setTimeout(function(){
+                _CPNativeInputFieldKeyDownCalled = NO;
+
                 if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyUpCalled == NO && _CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && _CPNativeInputField.innerHTML.length < 3 && !e.repeat)
                 {
                     _CPNativeInputFieldActive = YES;
