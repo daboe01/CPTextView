@@ -2142,7 +2142,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
             return proposedRange;
     }
 
-
     var granularRange = [self _characterRangeForIndex:loc
                                               inRange:proposedRange
                                     asDefinedByLRegex:lregex
@@ -2380,9 +2379,7 @@ var _CPCopyPlaceholder = '-';
 }
 + (void)cancelCurrentNativeInputSession
 {
-    // backspace in safari tends to insert <br>s->eliminate these
-    if (_CPNativeInputField.innerHTML.length > 2)
-        _CPNativeInputField.innerHTML = '';
+    _CPNativeInputField.innerHTML = '';
 
     [self _endInputSessionWithString:_CPNativeInputField.innerHTML];
 }
