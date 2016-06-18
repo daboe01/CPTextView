@@ -2156,13 +2156,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
                                                                 asDefinedByLRegex:lregex
                                                                         andRRegex:rregex]);
 
-    switch (granularity)
-    {
-        case CPSelectByParagraph:
-            if (_isNewlineCharacter([string characterAtIndex:CPMaxRange(granularRange)]))
-                granularRange.length++;
-    }
-
     return granularRange;
 }
 
