@@ -39,6 +39,8 @@
 @class _CPCaret;
 @class _CPNativeInputManager;
 
+var CPRichStringPboardType="CPRichStringPboardType";
+
 _MakeRangeFromAbs = function(a1, a2)
 {
     return (a1 < a2) ? CPMakeRange(a1, a2 - a1) : CPMakeRange(a2, a1 - a2);
@@ -120,25 +122,22 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     if ([self isRichText] && [self respondsToSelector:@selector(textStorage)])
     {
         var stringForPasting = [[self textStorage] attributedSubstringFromRange:CPMakeRangeCopy(selectedRange)];
+        var richData =  [_CPRTFProducer produceRTF:stringForPasting documentAttributes:@{}];
 
-        if (stringForPasting._rangeEntries.length > 1)
-        {
-            var richData =  [_CPRTFProducer produceRTF:stringForPasting documentAttributes:@{}];
-       //   [pasteboard declareTypes:[CPStringPboardType, CPRichStringPboardType] owner:nil];
-       //   crude hack to make rich pasting possible in chrome and firefox. simply put rtf on the plain pasteboard
-            [pasteboard setString:richData forType:CPStringPboardType];
-        }
+        [pasteboard declareTypes:[CPStringPboardType, CPRichStringPboardType] owner:nil];
+        [pasteboard setString:stringForPasting._string forType:CPStringPboardType];
+        [pasteboard setString:richData forType:CPRichStringPboardType];
     }
 }
 
 - (id)_stringForPasting
 {
     var pasteboard = [CPPasteboard generalPasteboard],
-      //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
+        dataForPasting = [pasteboard stringForType:CPRichStringPboardType],
         stringForPasting = [pasteboard stringForType:CPStringPboardType];
 
-    if ([stringForPasting hasPrefix:"{\\rtf1\\ansi"])
-        stringForPasting = [[_CPRTFParser new] parseRTF:stringForPasting];
+    if (dataForPasting || [stringForPasting hasPrefix:"{\\rtf1\\ansi"])
+        stringForPasting = [[_CPRTFParser new] parseRTF:dataForPasting ? dataForPasting : stringForPasting];
 
     if (![self isRichText] && [stringForPasting isKindOfClass:[CPAttributedString class]])
         stringForPasting = stringForPasting._string;
@@ -2508,11 +2507,16 @@ var _CPCopyPlaceholder = '-';
         _CPNativeInputField.onpaste = function(e)
         {
             var pasteboard = [CPPasteboard generalPasteboard];
-            [pasteboard declareTypes:[CPStringPboardType] owner:nil];
 
-            var data = e.clipboardData.getData('text/plain');
+            var data = e.clipboardData.getData('text/plain'),
+                cappString = [pasteboard stringForType:CPStringPboardType];
+            // capp string is invalid -> overwrite with system clipboard
 
-            [pasteboard setString:data forType:CPStringPboardType];
+            if (cappString !== data)
+            {
+                [pasteboard declareTypes:[CPStringPboardType] owner:nil];
+                [pasteboard setString:data forType:CPStringPboardType];
+            }
  
             var currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
@@ -2528,8 +2532,9 @@ var _CPCopyPlaceholder = '-';
                 currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
             [currentFirstResponder copy:self];
+
             var stringForPasting = [pasteboard stringForType:CPStringPboardType];
-            e.clipboardData.setData('text/rtf', stringForPasting); // does not seem to work
+
             e.clipboardData.setData('text/plain', stringForPasting);
             return false;
 
@@ -2546,11 +2551,10 @@ var _CPCopyPlaceholder = '-';
             }, 20);
 
             [currentFirstResponder copy:self];  // this is necessary because cut will only execute in the future
-        //  dataForPasting = [pasteboard dataForType:CPRichStringPboardType],
+
             var stringForPasting = [pasteboard stringForType:CPStringPboardType];
 
             e.clipboardData.setData('text/plain', stringForPasting);
-         // e.clipboardData.setData('application/rtf', stringForPasting); // does not seem to work
             return false;
         }
     }
