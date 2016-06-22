@@ -39,7 +39,7 @@
 @class _CPCaret;
 @class _CPNativeInputManager;
 
-var CPRichStringPboardType="CPRichStringPboardType";
+var CPRTFPboardType="CPRTFPboardType";
 
 _MakeRangeFromAbs = function(a1, a2)
 {
@@ -124,16 +124,16 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         var stringForPasting = [[self textStorage] attributedSubstringFromRange:CPMakeRangeCopy(selectedRange)];
         var richData =  [_CPRTFProducer produceRTF:stringForPasting documentAttributes:@{}];
 
-        [pasteboard declareTypes:[CPStringPboardType, CPRichStringPboardType] owner:nil];
+        [pasteboard declareTypes:[CPStringPboardType, CPRTFPboardType] owner:nil];
         [pasteboard setString:stringForPasting._string forType:CPStringPboardType];
-        [pasteboard setString:richData forType:CPRichStringPboardType];
+        [pasteboard setString:richData forType:CPRTFPboardType];
     }
 }
 
 - (id)_stringForPasting
 {
     var pasteboard = [CPPasteboard generalPasteboard],
-        dataForPasting = [pasteboard stringForType:CPRichStringPboardType],
+        dataForPasting = [pasteboard stringForType:CPRTFPboardType],
         stringForPasting = [pasteboard stringForType:CPStringPboardType];
 
     if (dataForPasting || [stringForPasting hasPrefix:"{\\rtf1\\ansi"])
