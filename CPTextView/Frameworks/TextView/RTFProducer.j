@@ -254,16 +254,17 @@ function _points2twips(a) { return (a)*20.0; }
 - (int)numberForColor: (CPColor)color
 {
     var cn,
-        num = [colorDict objectForKey: color];
+        num = [colorDict objectForKey:color];
 
-    if (num == nil)
+    if (num === nil)
     {
-        cn = [colorDict count] + 1;
+        cn = [colorDict count];
 	    
-        [colorDict setObject: [CPNumber numberWithInt: cn]
-		 forKey: color];
-    }
-    var cn = [num intValue];
+        [colorDict setObject: [CPNumber numberWithInt:cn + 1]
+		              forKey: color];
+
+    } else
+      cn = [num intValue];
 
     return cn + 1;
 }
