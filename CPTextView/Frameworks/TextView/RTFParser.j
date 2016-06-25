@@ -502,8 +502,8 @@ var kRgsymRtf = {
                 _colorArray.push([CPColor blackColor]); // placeholder
             break;
             case "cf":  // change foreground color
-                 var fontIndex = parseInt(param) - 1;
-                 if (_currentRun && fontIndex >= 0)
+                var fontIndex = parseInt(param) - 1;
+                if (_currentRun && fontIndex >= 0)
                      _currentRun.fgColour = _colorArray[fontIndex];
             break;
             case "f":  // change font

@@ -95,7 +95,7 @@ function _points2twips(a) { return (a)*20.0; }
 
         fontEnum = [keyArray objectEnumerator];
         while ((currFont = [fontEnum nextObject]) !== nil)
-	{
+	    {
 	    var fontFamily;
 	    var detail;
 
@@ -133,23 +133,24 @@ function _points2twips(a) { return (a)*20.0; }
             next,
             i;
 
-        while ((next = [keyEnum nextObject]) != nil)
-	{
-	    var cn = [colorDict objectForKey: next];
-	    [list insertObject: next atIndex: [cn intValue]-1];
-	}
+        while ((next = [keyEnum nextObject]) !== nil)
+        {
+	        var cn = [colorDict objectForKey:next];
+	        [list insertObject:[CPColor colorWithCSSString:next] atIndex:[cn intValue]-1];
+	    }
 
         result = [CPString stringWithString: @"{\\colortbl;"];
         for (i = 0; i < count; i++)
-	{
-	    var color = [[list objectAtIndex: i] 
-			       colorUsingColorSpaceName: CPCalibratedRGBColorSpace];
-	    result += [CPString stringWithFormat:
+        {
+	        var color = [[list objectAtIndex:i] 
+                               colorUsingColorSpaceName:CPCalibratedRGBColorSpace];
+
+            result += [CPString stringWithFormat:
 					    @"\\red%d\\green%d\\blue%d;",
-					 ([color redComponent]*255),
-					 ([color greenComponent]*255),
-					 ([color blueComponent]*255)];
-	}
+					    ([color redComponent]*255),
+					    ([color greenComponent]*255),
+					    ([color blueComponent]*255)];
+        }
 
         result += @"}\n";
         return result;
@@ -251,22 +252,15 @@ function _points2twips(a) { return (a)*20.0; }
     return fCount;
 }
 
-- (int)numberForColor: (CPColor)color
+- (int)numberForColor:(CPColor)color
 {
-    var cn,
-        num = [colorDict objectForKey:color];
+    var num = [colorDict objectForKey:[color cssString]];
 
-    if (num === nil)
-    {
-        cn = [colorDict count];
-	    
-        [colorDict setObject: [CPNumber numberWithInt:cn + 1]
-		              forKey: color];
+    if (!num)
+        [colorDict setObject:num = [CPNumber numberWithInt:[colorDict count] + 1]
+		              forKey:[color cssString]];
 
-    } else
-      cn = [num intValue];
-
-    return cn + 1;
+    return [num intValue];
 }
 
 - (CPString) paragraphStyle: (CPParagraphStyle) paraStyle
