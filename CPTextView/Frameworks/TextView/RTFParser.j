@@ -499,6 +499,7 @@ var kRgsymRtf = {
                     red = [oldColor redComponent];
                 _colorArray.pop();
                 _colorArray.push([CPColor colorWithRed: red green:green blue:parseInt(param) / 255 alpha:1.0]);
+                _colorArray.push([CPColor blackColor]); // placeholder
             break;
             case "cf":  // change foreground color
                  var fontIndex = parseInt(param) - 1;
