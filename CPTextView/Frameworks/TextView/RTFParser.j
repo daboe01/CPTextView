@@ -305,7 +305,7 @@ var kRgsymRtf = {
                 return sym[4];
 
         case 1:
-            console.log("skipped : " + sym[4]);
+            // console.log("skipped : " + sym[4]);
         return '';
         default:
             if (sym && sym[4])
