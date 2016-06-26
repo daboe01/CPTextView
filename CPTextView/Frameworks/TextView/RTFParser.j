@@ -379,8 +379,12 @@ var kRgsymRtf = {
         newOffset = CPMaxRange(_currentRun._range);
         var dict = [_currentRun dictionary];
         [_result setAttributes:dict range:_currentRun._range];  // flush previous run
+        _currentRun.fgColour = [CPColor blackColor];
+
     }
-    _currentRun = [_RTFAttribute new];
+    else
+        _currentRun = [_RTFAttribute new];
+
     _currentRun._range = CPMakeRange(newOffset, 0);  // open a new one
 }
 - (CPString)_applyPropChange:sym parameter:param

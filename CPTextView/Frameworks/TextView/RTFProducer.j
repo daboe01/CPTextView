@@ -265,7 +265,7 @@ function _points2twips(a) { return (a)*20.0; }
 
 - (CPString) paragraphStyle: (CPParagraphStyle) paraStyle
 {
-    var headerString = [CPString stringWithString:@"\\pard\\plain"],
+    var headerString = [CPString stringWithString:@"\\pard"],
         twips;
 
     if (paraStyle == nil)
@@ -356,8 +356,8 @@ function _points2twips(a) { return (a)*20.0; }
 }
 
 - (CPString) runStringForString: (CPString) substring
-		     attributes: (CPDictionary) attributes
-		 paragraphStart: (BOOL) first
+		     attributes:(CPDictionary) attributes
+		 paragraphStart:(BOOL)first
 {
     var result = "",
         headerString = "",
@@ -432,8 +432,8 @@ function _points2twips(a) { return (a)*20.0; }
 	    if (first)
 	        currentFont = font;
 	}
-        else if ([currAttrib isEqualToString: CPForegroundColorAttributeName])
-        {
+    else if ([currAttrib isEqualToString: CPForegroundColorAttributeName])
+    {
 	    var color = [attributes objectForKey: CPForegroundColorAttributeName];
 	    if (![color isEqual: fgColor])
 	    {
@@ -441,8 +441,8 @@ function _points2twips(a) { return (a)*20.0; }
 	        trailerString += @"\\cf0";
 	    }
 	}
-        else if ([currAttrib isEqualToString: CPBackgroundColorAttributeName])
-        {
+    else if ([currAttrib isEqualToString: CPBackgroundColorAttributeName])
+    {
 	  var color = [attributes objectForKey: CPBackgroundColorAttributeName];
 	  if (![color isEqual: bgColor])
 	    {

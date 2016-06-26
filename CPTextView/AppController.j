@@ -171,7 +171,7 @@ var outputRange = CPMakeRange(0,outputLength);
 
 - (void) makeRTF:sender
 {
-   [_textView2 setString: [_CPRTFProducer produceRTF:[_textView textStorage] documentAttributes: @{}] ];
+   [_textView2 setString: [_CPRTFProducer produceRTF: [[_textView textStorage] attributedSubstringFromRange:CPMakeRangeCopy([_textView selectedRange])] documentAttributes: @{}] ];
 return
 
    var tc = [_CPRTFParser new];
