@@ -1037,7 +1037,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     [[_window platformWindow] _propagateCurrentDOMEvent:YES];  // necessary for the _CPNativeInputManager (at least on chrome+FF)
 
-    if ([event charactersIgnoringModifiers].charCodeAt(0) != 229) // filter out 229 because this would be inserted in chrome on each deadkey
+    if (! [_CPNativeInputManager isNativeInputFieldActive] && [event charactersIgnoringModifiers].charCodeAt(0) != 229) // filter out 229 because this would be inserted in chrome on each deadkey
         [self interpretKeyEvents:[event]];
 
     [_caret setPermanentlyVisible:YES];
