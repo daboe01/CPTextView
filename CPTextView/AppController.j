@@ -71,6 +71,20 @@
     [[textView window] makeFirstResponder:textView];
 
 }
+- (void) openWindow:(id)sender
+{
+    var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMake(0, 0, 200, 150) styleMask:CPClosableWindowMask|CPTitledWindowMask],
+        contentView = [theWindow contentView];
+    var textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];
+    [textView setBackgroundColor:[CPColor whiteColor]];
+    var scrollView = [[CPScrollView alloc] initWithFrame:CGRectMake(0, 0, 200, 150)];
+
+    [scrollView setDocumentView:textView]; 
+    [contentView addSubview:scrollView];
+    [theWindow makeKeyAndOrderFront:self];
+
+}
+
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
    // CPLogRegister(CPLogConsole);
@@ -84,6 +98,13 @@
     [mybutton setTarget:self]
     [mybutton setAction:@selector(openSheet:)]
     [contentView addSubview:mybutton]
+
+    mybutton=[[CPButton alloc] initWithFrame:CGRectMake(80, 0, 80, 25)];
+    [mybutton setTitle:"Open window"]
+    [mybutton setTarget:self]
+    [mybutton setAction:@selector(openWindow:)]
+    [contentView addSubview:mybutton]
+
 
     _textView = [[CPTextView alloc] initWithFrame:CGRectMake(0, 0,500,500)];
     _textView2 = [[CPTextView alloc] initWithFrame:CGRectMake(0, 50,500,500)];
