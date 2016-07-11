@@ -67,6 +67,23 @@ _regexMatchesStringAtIndex=function(regex, string, index)
     return regex.exec(triplet)  !== null;
 }
 
+_walkTheDOM = function(node, func) {
+    func(node);
+    node = node.firstChild;
+    while (node) {
+        walkTheDOM(node, func);
+        node = node.nextSibling;
+    }
+}
+_getStyle = function(className) {
+    var classes = document.styleSheets[0].rules || document.styleSheets[0].cssRules;
+    for (var x = 0; x < classes.length; x++) {
+        if (classes[x].selectorText == className) {
+            return classes[x].cssText ? classes[x].cssText : classes[x].style.cssText;
+        }
+    }
+}
+
 
 @implementation CPColor(CPTextViewExtensions)
 
@@ -2508,29 +2525,30 @@ var _CPCopyPlaceholder = '-';
         return false;
     }, true); // capture mode
 
-    if (CPBrowserIsEngine(CPGeckoBrowserEngine))
+    _CPNativeInputField.onpaste = function(e)
     {
-        _CPNativeInputField.onpaste = function(e)
-        {
-            var pasteboard = [CPPasteboard generalPasteboard];
+        var pasteboard = [CPPasteboard generalPasteboard];
 
-            var data = e.clipboardData.getData('text/plain'),
-                cappString = [pasteboard stringForType:CPStringPboardType];
+        var data = e.clipboardData.getData('text/plain'),
+            cappString = [pasteboard stringForType:CPStringPboardType];
             // capp string is invalid -> overwrite with system clipboard
 
-            if (cappString !== data)
-            {
-                [pasteboard declareTypes:[CPStringPboardType] owner:nil];
-                [pasteboard setString:data forType:CPStringPboardType];
-            }
- 
-            var currentFirstResponder = [[CPApp keyWindow] firstResponder];
-
-            setTimeout(function(){   // prevent dom-flickering
-                [currentFirstResponder paste:self];
-            }, 20);
-            return false;
+        if (cappString !== data)
+        {
+            [pasteboard declareTypes:[CPStringPboardType] owner:nil];
+            [pasteboard setString:data forType:CPStringPboardType];
         }
+ 
+        var currentFirstResponder = [[CPApp keyWindow] firstResponder];
+
+        setTimeout(function(){   // prevent dom-flickering
+                [currentFirstResponder paste:self];
+        }, 20);
+e.preventDefault()
+        return false;
+    }
+    if (CPBrowserIsEngine(CPGeckoBrowserEngine))
+    {
         _CPNativeInputField.oncopy = function(e)
         {
             var pasteboard = [CPPasteboard generalPasteboard],
