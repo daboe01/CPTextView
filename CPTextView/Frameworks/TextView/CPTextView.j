@@ -124,8 +124,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)copy:(id)sender
 {
-    [_CPNativeInputManager setLastCopyWasNative:[sender isKindOfClass:[_CPNativeInputManager class]]];
-
     var selectedRange = [self selectedRange];
 
     if (selectedRange.length < 1)
@@ -552,9 +550,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)paste:(id)sender
 {
-    var e = [CPApp currentEvent]._DOMEvent;
-    if (e && e.currentTarget == document) // this is somehow necessary to prevent double pasting
-        return;
+    if (![sender isKindOfClass:_CPNativeInputManager] && [[CPApp currentEvent] type] != CPAppKitDefined)
+        return
 
     var stringForPasting = [self _stringForPasting];
 
@@ -2376,21 +2373,11 @@ var _CPNativeInputField,
     _CPNativeInputFieldKeyDownCalled,
     _CPNativeInputFieldKeyUpCalled,
     _CPNativeInputFieldKeyPressedCalled,
-    _CPNativeInputFieldActive,
-    _CPNativeInputFieldLastCopyWasNative = 1;
+    _CPNativeInputFieldActive;
 
 var _CPCopyPlaceholder = '-';
 
 @implementation _CPNativeInputManager : CPObject
-
-+ (BOOL)lastCopyWasNative
-{
-    return _CPNativeInputFieldLastCopyWasNative;
-}
-+ (void)setLastCopyWasNative:(BOOL)flag
-{
-    _CPNativeInputFieldLastCopyWasNative = flag;
-}
 
 + (BOOL)isNativeInputFieldActive
 {
@@ -2525,7 +2512,7 @@ var _CPCopyPlaceholder = '-';
         return false;
     }, true); // capture mode
 
-    _CPNativeInputField.onpaste = function(e)
+    _CPNativeInputField.addEventListener("paste", function(e)
     {
         var pasteboard = [CPPasteboard generalPasteboard];
 
@@ -2546,7 +2533,8 @@ var _CPCopyPlaceholder = '-';
         }, 20);
 e.preventDefault()
         return false;
-    }
+    }, true); // capture mode
+
     if (CPBrowserIsEngine(CPGeckoBrowserEngine))
     {
         _CPNativeInputField.oncopy = function(e)
