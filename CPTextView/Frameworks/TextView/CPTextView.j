@@ -2512,13 +2512,18 @@ var _CPCopyPlaceholder = '-';
         return false;
     }, true); // capture mode
 
-    _CPNativeInputField.addEventListener("paste", function(e)
+    _CPNativeInputField.onpaste = function(e)
     {
         e.preventDefault();
-        var pasteboard = [CPPasteboard generalPasteboard];
 
+        var pasteboard = [CPPasteboard generalPasteboard],
+            nativeClipboard = (e.originalEvent || e).clipboardData,
+            richtext = nativeClipboard.getData('text/html');
 
-        var richtext = (e.originalEvent || e).clipboardData.getData('text/html');
+// this is unfortunately chrome only at the moment
+// safari seems possible (see http://codebits.glennjones.net/editing/getclipboarddata.htm)
+// the pasteboard type "NeXT smart paste pasteboard type" looks promising.
+// however, i did not get it working in place.
 
         if (richtext)
         {
@@ -2543,7 +2548,7 @@ var _CPCopyPlaceholder = '-';
                     }
                 }
             });
-            _CPNativeInputField.innerHTML = _CPCopyPlaceholder;
+
             [pasteboard declareTypes:[CPRTFPboardType] owner:nil];
             [pasteboard setString:[_CPRTFProducer produceRTF:rtfdata documentAttributes:@{}] forType:CPRTFPboardType];
 
@@ -2568,7 +2573,7 @@ var _CPCopyPlaceholder = '-';
         }, 20);
 
         return false;
-    }, true); // capture mode
+    };
 
     if (CPBrowserIsEngine(CPGeckoBrowserEngine))
     {
