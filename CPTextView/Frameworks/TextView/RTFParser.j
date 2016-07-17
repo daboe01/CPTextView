@@ -230,7 +230,7 @@ var kRgsymRtf = {
         "ftnsep"                             : [ "ftnsep",   0,        false,     kRTFParserType_dest,    "destSkip"],
         "ftnsepc"                            : [ "ftnsepc",  0,        false,     kRTFParserType_dest,    "destSkip"],
         "fprq"                               : [ "fprq",     0,        false,     kRTFParserType_dest,    "destSkip"],
-        "fcharset"                           : [ "fcharset", 0,        false,     kRTFParserType_dest,    "destSkip"],
+//        "fcharset"                           : [ "fcharset", 0,        false,     kRTFParserType_dest,    "destSkip"],
         "rquote"                             : [ "rquote",   0,        false,     kRTFParserType_char,    "'"],
 //      "s"                                  : [ "s",        0,        false,     kRTFParserType_dest,    "destSkip"],
         "header"                             : [ "header",   0,        false,     kRTFParserType_dest,    "destSkip"],
@@ -389,7 +389,7 @@ var kRgsymRtf = {
 }
 - (CPString)_applyPropChange:sym parameter:param
 {
-    console.log("prop : " + sym[0] + " / param : " + param+ ' ');
+    //console.log("prop : " + sym[0] + " / param : " + param+ ' ');
 
     switch (sym[0])
     {
@@ -506,11 +506,13 @@ var kRgsymRtf = {
                 _colorArray.push([CPColor blackColor]); // placeholder
             break;
             case "cf":  // change foreground color
+                [self _flushCurrentRun];
                 var fontIndex = parseInt(param) - 1;
                 if (_currentRun && fontIndex >= 0)
                      _currentRun.fgColour = _colorArray[fontIndex];
             break;
             case "f":  // change font
+                 [self _flushCurrentRun];
                  var fontIndex = parseInt(param);
                  if (_currentRun && fontIndex >= 0 && fontIndex < _fontArray.length)
                      _currentRun.fontName = _fontArray[fontIndex];

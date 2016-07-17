@@ -79,16 +79,17 @@ _CPwalkTheDOM = function(node, func)
     }
 }
 
-//fixme:<!> someone should check that it is always in the second styleSheet
 _CPgetStyle = function(className)
 {
-    var classes = document.styleSheets[1].rules || document.styleSheets[1].cssRules;
-    for (var x = 0; x < classes.length; x++)
+    for (var i = 0; i < document.styleSheets.length; i++)
     {
-        if (classes[x].selectorText == className)
-        {
-            return classes[x].cssText ? classes[x].cssText : classes[x].style.cssText;
-        }
+		var classes = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
+
+		for (var x = 0; x < classes.length; x++)
+		{
+			if (classes[x].selectorText == className)
+				return classes[x].cssText ? classes[x].cssText : classes[x].style.cssText;
+		}
     }
 }
 
@@ -2528,7 +2529,9 @@ var _CPCopyPlaceholder = '-';
             richtext,
             pasteboard = [CPPasteboard generalPasteboard];
 
-// this is unfortunately chrome only at the moment
+// this is the chrome path:
+// we have to construct an CPAttributedString whilst walking the dom and looking at the CSS attributes
+// does not currently work in safari
 // safari seems possible (see http://codebits.glennjones.net/editing/getclipboarddata.htm)
 // the pasteboard type "NeXT smart paste pasteboard type" looks promising.
 // however, i did not get it working in place.
@@ -2570,11 +2573,14 @@ var _CPCopyPlaceholder = '-';
             [pasteboard declareTypes:[CPRTFPboardType] owner:nil];
             [pasteboard setString:richtext forType:CPRTFPboardType];
 
-            // fixme: prevent dom-flickering (settimeout does not work here)
-            [[[CPApp keyWindow] firstResponder] paste:self];
+            // prevent dom-flickering (settimeout does not work here)
+			var currentFirstResponder = [[CPApp keyWindow] firstResponder];
+	
+			setTimeout(function(){   // prevent dom-flickering (only FF)
+				[currentFirstResponder paste:self];
+			}, 20);
 
             return false;
-
         }
 
         var data = e.clipboardData.getData('text/plain'),
@@ -2588,7 +2594,7 @@ var _CPCopyPlaceholder = '-';
  
         var currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
-        setTimeout(function(){   // prevent dom-flickering (only FF)
+        setTimeout(function(){   // prevent dom-flickering (only needed for FF)
             [currentFirstResponder paste:self];
         }, 20);
 
