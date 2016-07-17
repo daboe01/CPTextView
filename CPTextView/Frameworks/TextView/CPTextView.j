@@ -67,16 +67,16 @@ _regexMatchesStringAtIndex=function(regex, string, index)
     return regex.exec(triplet)  !== null;
 }
 
-_walkTheDOM = function(node, func) {
+_CPwalkTheDOM = function(node, func) {
     func(node);
     node = node.firstChild;
     while (node) {
-        walkTheDOM(node, func);
+        _CPwalkTheDOM(node, func);
         node = node.nextSibling;
     }
 }
-_getStyle = function(className) {
-    var classes = document.styleSheets[0].rules || document.styleSheets[0].cssRules;
+_CPgetStyle = function(className) {
+    var classes = document.styleSheets[1].rules || document.styleSheets[1].cssRules;
     for (var x = 0; x < classes.length; x++) {
         if (classes[x].selectorText == className) {
             return classes[x].cssText ? classes[x].cssText : classes[x].style.cssText;
@@ -2514,13 +2514,48 @@ var _CPCopyPlaceholder = '-';
 
     _CPNativeInputField.addEventListener("paste", function(e)
     {
+        e.preventDefault();
         var pasteboard = [CPPasteboard generalPasteboard];
 
-        var data = e.clipboardData.getData('text/plain'),
-            cappString = [pasteboard stringForType:CPStringPboardType];
-            // capp string is invalid -> overwrite with system clipboard
 
-        if (cappString !== data)
+        var richtext = (e.originalEvent || e).clipboardData.getData('text/html');
+
+        if (richtext)
+        {
+            var rtfdata = [CPAttributedString new];
+            _CPNativeInputField.innerHTML = richtext;
+            _CPwalkTheDOM(_CPNativeInputField, function(node)
+            {
+                if (node.nodeType === 3 && node.parentElement)
+                {
+                    var text = node.data;
+                    var style = _CPgetStyle('span.'+node.parentElement.className);
+
+                    if (style)
+                    {
+                        // extract color
+                        var rgbmatch = style.match(new RegExp(/rgb\((\d+)[, ]+(\d+)[, ]+(\d+)\)/));
+                        if (text && rgbmatch)
+                        {
+                            [rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text
+                                                                                            attributes:@{CPForegroundColorAttributeName: [CPColor colorWithRed:rgbmatch[1]/255.0 green:rgbmatch[2]/255.0 blue:rgbmatch[3]/255.0 alpha:1]}]];
+                        }
+                    }
+                }
+            });
+            _CPNativeInputField.innerHTML = _CPCopyPlaceholder;
+            [pasteboard declareTypes:[CPRTFPboardType] owner:nil];
+            [pasteboard setString:[_CPRTFProducer produceRTF:rtfdata documentAttributes:@{}] forType:CPRTFPboardType];
+
+            [[[CPApp keyWindow] firstResponder] paste:self];
+
+            return false;
+        }
+
+        var data = e.clipboardData.getData('text/plain'),
+        cappString = [pasteboard stringForType:CPStringPboardType];
+
+        if (cappString != data)
         {
             [pasteboard declareTypes:[CPStringPboardType] owner:nil];
             [pasteboard setString:data forType:CPStringPboardType];
@@ -2528,10 +2563,10 @@ var _CPCopyPlaceholder = '-';
  
         var currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
-        setTimeout(function(){   // prevent dom-flickering
-                [currentFirstResponder paste:self];
+        setTimeout(function(){   // prevent dom-flickering (only FF)
+            [currentFirstResponder paste:self];
         }, 20);
-e.preventDefault()
+
         return false;
     }, true); // capture mode
 
