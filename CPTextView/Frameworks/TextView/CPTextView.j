@@ -68,19 +68,25 @@ _regexMatchesStringAtIndex=function(regex, string, index)
 }
 
 // these two functions are to support chrome rich native paste
-_CPwalkTheDOM = function(node, func) {
+_CPwalkTheDOM = function(node, func)
+{
     func(node);
     node = node.firstChild;
-    while (node) {
+    while (node)
+    {
         _CPwalkTheDOM(node, func);
         node = node.nextSibling;
     }
 }
-//fixme:<!> how can we be sure that it is always the second styleSheet?
-_CPgetStyle = function(className) {
+
+//fixme:<!> someone should check that it is always in the second styleSheet
+_CPgetStyle = function(className)
+{
     var classes = document.styleSheets[1].rules || document.styleSheets[1].cssRules;
-    for (var x = 0; x < classes.length; x++) {
-        if (classes[x].selectorText == className) {
+    for (var x = 0; x < classes.length; x++)
+    {
+        if (classes[x].selectorText == className)
+        {
             return classes[x].cssText ? classes[x].cssText : classes[x].style.cssText;
         }
     }
