@@ -2523,53 +2523,67 @@ var _CPCopyPlaceholder = '-';
 
     _CPNativeInputField.onpaste = function(e)
     {
-        e.preventDefault();
-
         var nativeClipboard = (e.originalEvent || e).clipboardData,
             richtext,
-            pasteboard = [CPPasteboard generalPasteboard];
+            pasteboard = [CPPasteboard generalPasteboard],
+            rtfdata = [CPAttributedString new],
+			_CPDOMParsefunction = function(node)
+			{
+debugger
+				if (node.nodeType === 3 && node.parentElement)
+				{
+					var text = node.data;
+					var style = _CPgetStyle('span.'+node.parentElement.className);
+	
+					if (style)
+					{
+						// extract color from DOM
+						var rgbmatch = style.match(new RegExp(/rgb\((\d+)[, ]+(\d+)[, ]+(\d+)\)/));
+						if (text && rgbmatch)
+						{
+							[rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text
+																							attributes:@{CPForegroundColorAttributeName:[CPColor colorWithRed:rgbmatch[1]/255.0 green:rgbmatch[2]/255.0 blue:rgbmatch[3]/255.0 alpha:1]}]];
+						}
+					}
+				}
+			};
 
-// this is the chrome path:
-// we have to construct an CPAttributedString whilst walking the dom and looking at the CSS attributes
-// does not currently work in safari
-// safari seems possible (see http://codebits.glennjones.net/editing/getclipboarddata.htm)
-// the pasteboard type "NeXT smart paste pasteboard type" looks promising.
-// however, i did not get it working in place.
+        // this is the safari path
+        // safari puts a lot of cryptic types on the pasteboard (16 or so)
+        // no type actually works, though.
+        // for this reason, we have to let the paste execute and collect data from the DOM afterwards
+        if (0&& nativeClipboard.types.length > 10)
+        {
+            setTimeout(function()
+            {
+                _CPwalkTheDOM(_CPNativeInputField, _CPDOMParsefunction);
+                [pasteboard declareTypes:[CPRTFPboardType] owner:nil];
+                [pasteboard setString:[_CPRTFProducer produceRTF:rtfdata documentAttributes:@{}] forType:CPRTFPboardType];
 
+                [[[CPApp keyWindow] firstResponder] paste:self];
+                _CPNativeInputField.innerHTML = _CPCopyPlaceholder;
+            }, 100);
+            return false;
+        }
+        // this is the chrome path:
+        // we have to construct an CPAttributedString whilst walking the dom and looking at the CSS attributes
         if (richtext = nativeClipboard.getData('text/html'))
         {
-            var rtfdata = [CPAttributedString new];
+            e.preventDefault();
             _CPNativeInputField.innerHTML = richtext;
-            _CPwalkTheDOM(_CPNativeInputField, function(node)
-            {
-                if (node.nodeType === 3 && node.parentElement)
-                {
-                    var text = node.data;
-                    var style = _CPgetStyle('span.'+node.parentElement.className);
-
-                    if (style)
-                    {
-                        // extract color from DOM
-                        var rgbmatch = style.match(new RegExp(/rgb\((\d+)[, ]+(\d+)[, ]+(\d+)\)/));
-                        if (text && rgbmatch)
-                        {
-                            [rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text
-                                                                                            attributes:@{CPForegroundColorAttributeName: [CPColor colorWithRed:rgbmatch[1]/255.0 green:rgbmatch[2]/255.0 blue:rgbmatch[3]/255.0 alpha:1]}]];
-                        }
-                    }
-                }
-            });
+            _CPwalkTheDOM(_CPNativeInputField, _CPDOMParsefunction);
 
             [pasteboard declareTypes:[CPRTFPboardType] owner:nil];
             [pasteboard setString:[_CPRTFProducer produceRTF:rtfdata documentAttributes:@{}] forType:CPRTFPboardType];
 
             [[[CPApp keyWindow] firstResponder] paste:self];
-
+            _CPNativeInputField.innerHTML = _CPCopyPlaceholder;
             return false;
         }
         // this is the FF codepath (can use RTF directly)
-        else if (richtext = nativeClipboard.getData('text/rtf'))
+        if (richtext = nativeClipboard.getData('text/rtf'))
         {
+            e.preventDefault();
             [pasteboard declareTypes:[CPRTFPboardType] owner:nil];
             [pasteboard setString:richtext forType:CPRTFPboardType];
 
