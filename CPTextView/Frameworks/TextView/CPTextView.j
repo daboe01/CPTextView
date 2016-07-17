@@ -2516,16 +2516,16 @@ var _CPCopyPlaceholder = '-';
     {
         e.preventDefault();
 
-        var pasteboard = [CPPasteboard generalPasteboard],
-            nativeClipboard = (e.originalEvent || e).clipboardData,
-            richtext = nativeClipboard.getData('text/html');
+        var nativeClipboard = (e.originalEvent || e).clipboardData,
+            richtext,
+            pasteboard = [CPPasteboard generalPasteboard];
 
 // this is unfortunately chrome only at the moment
 // safari seems possible (see http://codebits.glennjones.net/editing/getclipboarddata.htm)
 // the pasteboard type "NeXT smart paste pasteboard type" looks promising.
 // however, i did not get it working in place.
 
-        if (richtext)
+        if (richtext = nativeClipboard.getData('text/html'))
         {
             var rtfdata = [CPAttributedString new];
             _CPNativeInputField.innerHTML = richtext;
@@ -2538,7 +2538,7 @@ var _CPCopyPlaceholder = '-';
 
                     if (style)
                     {
-                        // extract color
+                        // extract color from DOM
                         var rgbmatch = style.match(new RegExp(/rgb\((\d+)[, ]+(\d+)[, ]+(\d+)\)/));
                         if (text && rgbmatch)
                         {
@@ -2555,6 +2555,18 @@ var _CPCopyPlaceholder = '-';
             [[[CPApp keyWindow] firstResponder] paste:self];
 
             return false;
+        }
+        // this is the FF codepath (can use RTF directly)
+        else if (richtext = nativeClipboard.getData('text/rtf'))
+        {
+            [pasteboard declareTypes:[CPRTFPboardType] owner:nil];
+            [pasteboard setString:richtext forType:CPRTFPboardType];
+
+            // fixme: prevent dom-flickering (settimeout does not work here)
+            [[[CPApp keyWindow] firstResponder] paste:self];
+
+            return false;
+
         }
 
         var data = e.clipboardData.getData('text/plain'),
