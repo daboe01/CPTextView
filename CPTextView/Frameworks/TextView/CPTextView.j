@@ -2529,7 +2529,6 @@ var _CPCopyPlaceholder = '-';
             rtfdata = [CPAttributedString new],
 			_CPDOMParsefunction = function(node)
 			{
-debugger
 				if (node.nodeType === 3 && node.parentElement)
 				{
 					var text = node.data;
@@ -2544,16 +2543,19 @@ debugger
 							[rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text
 																							attributes:@{CPForegroundColorAttributeName:[CPColor colorWithRed:rgbmatch[1]/255.0 green:rgbmatch[2]/255.0 blue:rgbmatch[3]/255.0 alpha:1]}]];
 						}
+                        else
+							[rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text]];
 					}
 				}
 			};
 
-        // this is the safari path
+        // this is the rich safari path
         // safari puts a lot of cryptic types on the pasteboard (16 or so)
         // no type actually works, though.
         // for this reason, we have to let the paste execute and collect data from the DOM afterwards
         if (0&& nativeClipboard.types.length > 10)
         {
+_CPNativeInputField.innerHTML="testing";
             setTimeout(function()
             {
                 _CPwalkTheDOM(_CPNativeInputField, _CPDOMParsefunction);
@@ -2561,11 +2563,11 @@ debugger
                 [pasteboard setString:[_CPRTFProducer produceRTF:rtfdata documentAttributes:@{}] forType:CPRTFPboardType];
 
                 [[[CPApp keyWindow] firstResponder] paste:self];
-                _CPNativeInputField.innerHTML = _CPCopyPlaceholder;
+                //_CPNativeInputField.innerHTML = _CPCopyPlaceholder;
             }, 100);
-            return false;
+            return true; // let the paste execute
         }
-        // this is the chrome path:
+        // this is the rich chrome path:
         // we have to construct an CPAttributedString whilst walking the dom and looking at the CSS attributes
         if (richtext = nativeClipboard.getData('text/html'))
         {
@@ -2580,7 +2582,7 @@ debugger
             _CPNativeInputField.innerHTML = _CPCopyPlaceholder;
             return false;
         }
-        // this is the FF codepath (can use RTF directly)
+        // this is the rich FF codepath (can use RTF directly)
         if (richtext = nativeClipboard.getData('text/rtf'))
         {
             e.preventDefault();
@@ -2597,6 +2599,7 @@ debugger
             return false;
         }
 
+        // plain is the same in all browsers...
         var data = e.clipboardData.getData('text/plain'),
         cappString = [pasteboard stringForType:CPStringPboardType];
 
