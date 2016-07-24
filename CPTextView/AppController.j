@@ -8,7 +8,6 @@
 @import <TextView/CPTextView.j>
 @import <TextView/RTFProducer.j>
 @import <TextView/RTFParser.j>
-@import "XMLColorizer.j"
 
 @implementation CPString(FileLoading)
 
@@ -147,7 +146,6 @@
 
     item = [mainMenu insertItemWithTitle:@"Font" action:@selector(orderFrontFontPanel:) keyEquivalent:nil atIndex:1];    
     item = [mainMenu insertItemWithTitle:@"RTFRoundtrip" action:@selector(makeRTF:) keyEquivalent:nil atIndex:1];    
-    item = [mainMenu insertItemWithTitle:@"XMLcolorizer" action:@selector(colorizeXML:) keyEquivalent:nil atIndex:1];    
 
     var centeredParagraph=[CPParagraphStyle new];
     [centeredParagraph setAlignment: CPCenterTextAlignment];
@@ -195,19 +193,6 @@ var outputRange = CPMakeRange(0,outputLength);
 - (void) makeRTF:sender
 {
    [_textView2 setString: [_CPRTFProducer produceRTF: [[_textView textStorage] attributedSubstringFromRange:CPMakeRangeCopy([_textView selectedRange])] documentAttributes: @{}] ];
-return
-
-   var tc = [_CPRTFParser new];
-   var mystr=[tc parseRTF:[_textView2 stringValue]];
-   [_textView selectAll: self];
-   [_textView insertText: mystr];
-
-}
-- (void) colorizeXML:sender
-{
-   var colorizer = [XMLColorizer new]
-   [colorizer setStringToParse:[_textView2 stringValue] ]
-   [_textView insertText: [colorizer coloredAttributedString] ];
 return
 
    var tc = [_CPRTFParser new];
