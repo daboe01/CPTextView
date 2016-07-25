@@ -2521,7 +2521,7 @@ var _CPCopyPlaceholder = '-';
         return false;
     }, true); // capture mode
 
-    _CPNativeInputField.onpaste = function(e)
+    _CPNativeInputField.addEventListener('paste',  function(e)
     {
         var nativeClipboard = (e.originalEvent || e).clipboardData,
             richtext,
@@ -2553,19 +2553,31 @@ var _CPCopyPlaceholder = '-';
         // safari puts a lot of cryptic types on the pasteboard (16 or so)
         // no type actually works, though.
         // for this reason, we have to let the paste execute and collect data from the DOM afterwards
-        if (0&& nativeClipboard.types.length > 10)
+        if (nativeClipboard.types.length > 10)
         {
-_CPNativeInputField.innerHTML="testing";
-            setTimeout(function()
+// http://stackoverflow.com/questions/2176861/javascript-get-clipboard-data-on-paste-event-cross-browser/6804718#6804718
+            function waitForPastedData(elem)
             {
-                _CPwalkTheDOM(_CPNativeInputField, _CPDOMParsefunction);
-                [pasteboard declareTypes:[CPRTFPboardType] owner:nil];
-                [pasteboard setString:[_CPRTFProducer produceRTF:rtfdata documentAttributes:@{}] forType:CPRTFPboardType];
+                if (elem.childNodes && elem.childNodes.length > 0)
+                {
+                    _CPwalkTheDOM(elem, _CPDOMParsefunction);
+                    [pasteboard declareTypes:[CPRTFPboardType] owner:nil];
+                    [pasteboard setString:[_CPRTFProducer produceRTF:rtfdata documentAttributes:@{}] forType:CPRTFPboardType];
 
-                [[[CPApp keyWindow] firstResponder] paste:self];
-                //_CPNativeInputField.innerHTML = _CPCopyPlaceholder;
-            }, 100);
-            return true; // let the paste execute
+                    [[[CPApp keyWindow] firstResponder] paste:self];
+                    elem.innerHTML = _CPCopyPlaceholder;
+                }
+                else
+                {
+                    setTimeout(function()
+                    {
+                        waitForPastedData(elem)
+                    }, 20);
+                }
+            }
+
+            waitForPastedData(_CPNativeInputField);
+            return true;
         }
         // this is the rich chrome path:
         // we have to construct an CPAttributedString whilst walking the dom and looking at the CSS attributes
@@ -2616,7 +2628,7 @@ _CPNativeInputField.innerHTML="testing";
         }, 20);
 
         return false;
-    };
+    });
 
     if (CPBrowserIsEngine(CPGeckoBrowserEngine))
     {
@@ -2636,7 +2648,6 @@ _CPNativeInputField.innerHTML="testing";
         }
         _CPNativeInputField.oncut = function(e)
         {
-
             var pasteboard = [CPPasteboard generalPasteboard],
                 string,
                 currentFirstResponder = [[CPApp keyWindow] firstResponder];
@@ -2696,5 +2707,7 @@ _CPNativeInputField.innerHTML="testing";
 {
     _CPNativeInputField.style.top="-10000px";
     _CPNativeInputField.style.left="-10000px";
+  //_CPNativeInputField.style.top="000px";
+  //_CPNativeInputField.style.left="00px";
 }
 @end
