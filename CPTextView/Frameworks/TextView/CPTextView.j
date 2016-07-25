@@ -2521,7 +2521,7 @@ var _CPCopyPlaceholder = '-';
         return false;
     }, true); // capture mode
 
-    _CPNativeInputField.addEventListener('paste',  function(e)
+    _CPNativeInputField.onpaste = function(e)
     {
         var nativeClipboard = (e.originalEvent || e).clipboardData,
             richtext,
@@ -2549,7 +2549,7 @@ var _CPCopyPlaceholder = '-';
 				}
 			};
 
-        // this is the rich safari path
+        // this is the native rich safari path
         // safari puts a lot of cryptic types on the pasteboard (16 or so)
         // no type actually works, though.
         // for this reason, we have to let the paste execute and collect data from the DOM afterwards
@@ -2628,7 +2628,7 @@ var _CPCopyPlaceholder = '-';
         }, 20);
 
         return false;
-    });
+    }
 
     if (CPBrowserIsEngine(CPGeckoBrowserEngine))
     {
@@ -2707,7 +2707,7 @@ var _CPCopyPlaceholder = '-';
 {
     _CPNativeInputField.style.top="-10000px";
     _CPNativeInputField.style.left="-10000px";
-  //_CPNativeInputField.style.top="000px";
-  //_CPNativeInputField.style.left="00px";
+  _CPNativeInputField.style.top="000px";
+  _CPNativeInputField.style.left="00px";
 }
 @end
