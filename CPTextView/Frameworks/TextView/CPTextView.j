@@ -83,13 +83,13 @@ _CPgetStyle = function(className)
 {
     for (var i = 0; i < document.styleSheets.length; i++)
     {
-		var classes = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
+        var classes = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
 
-		for (var x = 0; x < classes.length; x++)
-		{
-			if (classes[x].selectorText == className)
-				return classes[x].cssText ? classes[x].cssText : classes[x].style.cssText;
-		}
+        for (var x = 0; x < classes.length; x++)
+        {
+            if (classes[x].selectorText == className)
+                return classes[x].cssText ? classes[x].cssText : classes[x].style.cssText;
+        }
     }
 }
 
@@ -2527,27 +2527,27 @@ var _CPCopyPlaceholder = '-';
             richtext,
             pasteboard = [CPPasteboard generalPasteboard],
             rtfdata = [CPAttributedString new],
-			_CPDOMParsefunction = function(node)
-			{
-				if (node.nodeType === 3 && node.parentElement)
-				{
-					var text = node.data;
-					var style = _CPgetStyle('span.'+node.parentElement.className);
-	
-					if (style)
-					{
-						// extract color from DOM
-						var rgbmatch = style.match(new RegExp(/rgb\((\d+)[, ]+(\d+)[, ]+(\d+)\)/));
-						if (text && rgbmatch)
-						{
-							[rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text
-																							attributes:@{CPForegroundColorAttributeName:[CPColor colorWithRed:rgbmatch[1]/255.0 green:rgbmatch[2]/255.0 blue:rgbmatch[3]/255.0 alpha:1]}]];
-						}
+            _CPDOMParsefunction = function(node)
+            {
+                if (node.nodeType === 3 && node.parentElement)
+                {
+                    var text = node.data;
+                    var style = _CPgetStyle('span.'+node.parentElement.className);
+    
+                    if (style)
+                    {
+                        // extract color from DOM
+                        var rgbmatch = style.match(new RegExp(/rgb\((\d+)[, ]+(\d+)[, ]+(\d+)\)/));
+                        if (text && rgbmatch)
+                        {
+                            [rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text
+                                                                                            attributes:@{CPForegroundColorAttributeName:[CPColor colorWithRed:rgbmatch[1]/255.0 green:rgbmatch[2]/255.0 blue:rgbmatch[3]/255.0 alpha:1]}]];
+                        }
                         else
-							[rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text]];
-					}
-				}
-			};
+                            [rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text]];
+                    }
+                }
+            };
 
         // this is the native rich safari path
         // safari puts a lot of cryptic types on the pasteboard (16 or so)
@@ -2606,11 +2606,11 @@ var _CPCopyPlaceholder = '-';
             [pasteboard setString:richtext forType:CPRTFPboardType];
 
             // prevent dom-flickering (settimeout does not work here)
-			var currentFirstResponder = [[CPApp keyWindow] firstResponder];
-	
-			setTimeout(function(){   // prevent dom-flickering (only FF)
-				[currentFirstResponder paste:self];
-			}, 20);
+            var currentFirstResponder = [[CPApp keyWindow] firstResponder];
+    
+            setTimeout(function(){   // prevent dom-flickering (only FF)
+                [currentFirstResponder paste:self];
+            }, 20);
 
             return false;
         }
@@ -2711,7 +2711,8 @@ var _CPCopyPlaceholder = '-';
 {
     _CPNativeInputField.style.top="-10000px";
     _CPNativeInputField.style.left="-10000px";
-  _CPNativeInputField.style.top="000px";
-  _CPNativeInputField.style.left="00px";
+
+    _CPNativeInputField.style.top="000px";
+    _CPNativeInputField.style.left="00px";
 }
 @end
