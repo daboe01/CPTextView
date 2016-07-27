@@ -2553,9 +2553,12 @@ var _CPCopyPlaceholder = '-';
         // safari puts a lot of cryptic types on the pasteboard (16 or so)
         // no type actually works, though.
         // for this reason, we have to let the paste execute and collect data from the DOM afterwards
-        if (nativeClipboard.types.length > 10)
+        // i did not get this working so far, the event is not forwarded.
+        // for this reason, the code path is disabled at the moment
+
+        if (NO && nativeClipboard.types.length > 10)
         {
-// http://stackoverflow.com/questions/2176861/javascript-get-clipboard-data-on-paste-event-cross-browser/6804718#6804718
+            // http://stackoverflow.com/questions/2176861/javascript-get-clipboard-data-on-paste-event-cross-browser/6804718#6804718
             function waitForPastedData(elem)
             {
                 if (elem.childNodes && elem.childNodes.length > 0)
@@ -2577,6 +2580,7 @@ var _CPCopyPlaceholder = '-';
             }
 
             waitForPastedData(_CPNativeInputField);
+
             return true;
         }
         // this is the rich chrome path:
