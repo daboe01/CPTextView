@@ -519,6 +519,7 @@ var kRgsymRtf = {
 
             break;
             case "fs":  // change font size
+                 [self _flushCurrentRun];
                  _currentRun.fontSize = parseInt(param) / 2;
             break;
             case "tx":  // tabstop
