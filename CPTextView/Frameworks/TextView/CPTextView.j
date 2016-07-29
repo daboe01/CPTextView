@@ -2711,8 +2711,5 @@ var _CPCopyPlaceholder = '-';
 {
     _CPNativeInputField.style.top="-10000px";
     _CPNativeInputField.style.left="-10000px";
-
-    _CPNativeInputField.style.top="000px";
-    _CPNativeInputField.style.left="00px";
 }
 @end
