@@ -79,21 +79,6 @@ _CPwalkTheDOM = function(node, func)
     }
 }
 
-_CPgetStyle = function(className)
-{
-    for (var i = 0; i < document.styleSheets.length; i++)
-    {
-        var classes = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
-
-        for (var x = 0; x < classes.length; x++)
-        {
-            if (classes[x].selectorText == className)
-                return classes[x].cssText ? classes[x].cssText : classes[x].style.cssText;
-        }
-    }
-}
-
-
 @implementation CPColor(CPTextViewExtensions)
 
 + (CPColor)selectedTextBackgroundColor
@@ -2530,23 +2515,31 @@ var _CPCopyPlaceholder = '-';
             rtfdata = [CPAttributedString new],
             _CPDOMParsefunction = function(node)
             {
-                if (node.nodeType === 3 && node.parentElement)
+                if (node.nodeType === 1 && node.nodeName === 'SPAN')
                 {
-                    var text = node.data;
-                    var style = _CPgetStyle('span.'+node.parentElement.className);
-    
-                    if (style)
-                    {
-                        // extract color from DOM
-                        var rgbmatch = style.match(new RegExp(/rgb\((\d+)[, ]+(\d+)[, ]+(\d+)\)/));
-                        if (text && rgbmatch)
-                        {
-                            [rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text
-                                                                                            attributes:@{CPForegroundColorAttributeName:[CPColor colorWithRed:rgbmatch[1]/255.0 green:rgbmatch[2]/255.0 blue:rgbmatch[3]/255.0 alpha:1]}]];
-                        }
-                        else
-                            [rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text]];
-                    }
+                    var text = node.innerText,
+                        style = window.getComputedStyle(node),
+                        styleAttributes = @{};
+
+                    // extract color from the DOM
+                    var rgbmatch = style.getPropertyValue('color').match(new RegExp(/rgb\((\d+)[, ]+(\d+)[, ]+(\d+)\)/));
+
+                    if (rgbmatch)
+                        [styleAttributes setObject:[CPColor colorWithRed:rgbmatch[1]/255.0 green:rgbmatch[2]/255.0 blue:rgbmatch[3]/255.0 alpha:1]
+                                            forKey:CPForegroundColorAttributeName];
+
+                    // extract font from the DOM
+                    var fontname = style.getPropertyValue('font-family'),
+                        fontsize = style.getPropertyValue('font-size'),
+                        isBold = style.getPropertyValue('font-weight').indexOf('bold') >= 0,
+                        isItalic = style.getPropertyValue('font-style').indexOf('italic') >= 0;
+
+                    if (fontname && fontsize)
+                        [styleAttributes setObject:isBold? [CPFont boldFontWithName:fontname size:fontsize italic:isItalic] :
+                                                           [CPFont fontWithName:fontname size:fontsize italic:isItalic]
+                                            forKey:CPFontAttributeName];
+
+                    [rtfdata appendAttributedString: [[CPAttributedString alloc] initWithString:text attributes:styleAttributes]];
                 }
             };
 
@@ -2584,7 +2577,7 @@ var _CPCopyPlaceholder = '-';
 
             return true;
         }
-        // this is the rich chrome path:
+        // this is the native rich chrome path:
         // we have to construct an CPAttributedString whilst walking the dom and looking at the CSS attributes
         if (richtext = nativeClipboard.getData('text/html'))
         {
