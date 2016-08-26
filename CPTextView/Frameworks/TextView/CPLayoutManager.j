@@ -120,6 +120,11 @@ var _objectWithLocationInRange = function(aList, aLocation)
 
 var _objectsInRange = function(aList, aRange)
 {
+    var firstIndex = [aList _indexOfObject:aRange.location sortedByFunction:_sortRange context:nil],
+        lastIndex = [aList _indexOfObject:CPMaxRange(aRange) sortedByFunction:_sortRange context:nil];
+
+    return aList.slice(firstIndex > 0 ? firstIndex - 1 : 0, lastIndex === CPNotFound ? aList.length : lastIndex + 1);
+
     var list = [],
         c = aList.length,
         location = aRange.location;
