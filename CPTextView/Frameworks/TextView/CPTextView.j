@@ -1834,7 +1834,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 
     [undoManager endUndoGrouping];
-
     [_layoutManager _validateLayoutAndGlyphs];
     [self sizeToFit];
     [self setNeedsDisplay:YES];
