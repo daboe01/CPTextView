@@ -998,6 +998,13 @@ var _objectsInRange = function(aList, aRange)
     // FIXME
 }
 
+- (void)_appendNewLineFragmentInTextContainer:(CPTextContainer)aTextContainer forGlyphRange:(CPRange)glyphRange
+{
+   var lineFragment = [[_lineFragmentFactory alloc] initWithRange:glyphRange textContainer:aTextContainer textStorage:_textStorage];
+
+    _lineFragments.push(lineFragment);
+}
+
 - (void)setTextContainer:(CPTextContainer)aTextContainer forGlyphRange:(CPRange)glyphRange
 {
     var fragments = _objectsInRange(_lineFragments, glyphRange),
