@@ -48,43 +48,54 @@ var _measuringContext,
     _isCanvasSizingInvalid,
     _didTestCanvasSizingValid,
     _sharedSimpleTypesetter,
-    _sizingCache;
+    _sizingCache = [];
 
 function _widthOfStringForFont(aString, aFont)
 {
     var peek,
         cssString = [aFont cssString];
 
-    if (!_measuringContext)
-        _measuringContext = CGBitmapGraphicsContextCreate();
+    if (_didTestCanvasSizingValid === undefined) {
+        if (CPFeatureIsCompatible(CPHTMLCanvasFeature))
+        {
+            var teststring = "0123456879abcdefghiklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.-()";
 
-    if (!_didTestCanvasSizingValid && CPFeatureIsCompatible(CPHTMLCanvasFeature))
-    {
-        var teststring = "0123456879abcdefghiklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.-()";
-        _didTestCanvasSizingValid = YES;
-        _measuringContext.font = cssString;
-        _isCanvasSizingInvalid = ABS([teststring sizeWithFont:aFont].width -_measuringContext.measureText(teststring).width) > 2;
+            if (!_measuringContext)
+                _measuringContext = CGBitmapGraphicsContextCreate();
+
+            _didTestCanvasSizingValid = YES;
+            _measuringContext.font = cssString;
+            _isCanvasSizingInvalid = ABS([teststring sizeWithFont:aFont].width -_measuringContext.measureText(teststring).width) > 2;
+        } else {
+            _didTestCanvasSizingValid = NO;
+        }
     }
 
-    if (!_sizingCache)
-        _sizingCache = [];
+    var sizeCacheForFont = _sizingCache[cssString];
 
-    if (_sizingCache[cssString] !== undefined && _sizingCache[cssString].hasOwnProperty(aString))
-        return _sizingCache[cssString][aString];
+    if (sizeCacheForFont !== undefined)
+    {
+        var sizeWidth = sizeCacheForFont[aString];
 
-    if (_sizingCache[cssString] === undefined)
-        _sizingCache[cssString] = [];
+        if (sizeWidth !== undefined)
+            return sizeWidth;
+    }
+    else
+        sizeCacheForFont = _sizingCache[cssString] = [];
 
-    if (!CPFeatureIsCompatible(CPHTMLCanvasFeature) || _isCanvasSizingInvalid)  // measuring with canvas is _much_ faster on chrome
-        return _sizingCache[cssString][aString] = [aString sizeWithFont:aFont];
+    if (!_didTestCanvasSizingValid || _isCanvasSizingInvalid)  // measuring with canvas is _much_ faster on chrome
+        return sizeCacheForFont[aString] = [aString sizeWithFont:aFont].width;
 
     if (_measuringContextFont !== aFont)
     {
+        if (!_measuringContext)
+            _measuringContext = CGBitmapGraphicsContextCreate();
+
         _measuringContextFont = aFont;
         _measuringContext.font = cssString;
     }
 
-    return _sizingCache[cssString][aString] = _measuringContext.measureText(aString);
+    return sizeCacheForFont[aString] = _measuringContext.measureText(aString).width;
 }
 
 var CPSystemTypesetterFactory;
@@ -148,7 +159,6 @@ var CPSystemTypesetterFactory;
 
     CPRange             _attributesRange;
     CPDictionary        _currentAttributes;
-    CPFont              _currentFont;
     CPParagraphStyle    _currentParagraph;
 
     float               _lineHeight;
@@ -213,8 +223,9 @@ var CPSystemTypesetterFactory;
 {
     var myX = 0,
         rect = CGRectMake(lineOrigin.x, lineOrigin.y, _lineWidth, _lineHeight),
-        containerSize=aContainer._size;
+        containerSize = aContainer._size;
 
+//    [_layoutManager setTextContainer:_currentTextContainer forGlyphRange:lineRange];  // creates a new lineFragment
     [_layoutManager _appendNewLineFragmentInTextContainer:_currentTextContainer forGlyphRange:lineRange]
 
     var fragment = [_layoutManager._lineFragments lastObject];
@@ -262,11 +273,14 @@ var CPSystemTypesetterFactory;
         maxNumberOfLineFragments:(unsigned)maxNumLines
         nextGlyphIndex:(UIntegerReference)nextGlyph
 {
+    var textContainers = [_layoutManager textContainers],
+        textContainersCount = [textContainers count];
+
     _layoutManager = layoutManager;
     _textStorage = [_layoutManager textStorage];
-    _indexOfCurrentContainer = MAX(0, [[_layoutManager textContainers]
+    _indexOfCurrentContainer = MAX(0, [textContainers
                                    indexOfObject:[_layoutManager textContainerForGlyphAtIndex:glyphIndex effectiveRange:nil withoutAdditionalLayout:YES]
-                                   inRange:CPMakeRange(0, [[_layoutManager textContainers] count])]);
+                                   inRange:CPMakeRange(0, textContainersCount)]);
     _currentTextContainer = [[_layoutManager textContainers] objectAtIndex:_indexOfCurrentContainer];
     _attributesRange = CPMakeRange(0, 0);
     _lineHeight = 0;
@@ -274,6 +288,8 @@ var CPSystemTypesetterFactory;
     _lineWidth = 0;
 
     var containerSize = [_currentTextContainer containerSize],
+        containerSizeWidth = containerSize.width,
+        containerSizeHeight = containerSize.height,
         lineRange = CPMakeRange(glyphIndex, 0),
         wrapRange = CPMakeRange(0, 0),
         wrapWidth = 0,
@@ -291,7 +307,12 @@ var CPSystemTypesetterFactory;
         prevRangeWidth = 0,
         measuringRange = CPMakeRange(glyphIndex, 0),
         currentAnchor = 0,
-        previousFont;
+        currentFont,
+        currentFontLineHeight,
+        previousFont,
+        currentParagraphMinimumLineHeight,
+        currentParagraphMaximumLineHeight,
+        currentParagraphLineSpacing;
 
     if (glyphIndex > 0)
         lineOrigin = CGPointCreateCopy([_layoutManager lineFragmentRectForGlyphAtIndex:glyphIndex effectiveRange:nil].origin);
@@ -312,36 +333,44 @@ var CPSystemTypesetterFactory;
         if (!CPLocationInRange(glyphIndex, _attributesRange))
         {
             _currentAttributes = [_textStorage attributesAtIndex:glyphIndex effectiveRange:_attributesRange];
-            _currentFont = [_currentAttributes objectForKey:CPFontAttributeName];
+            currentFont = [_currentAttributes objectForKey:CPFontAttributeName];
             _currentParagraph = [_currentAttributes objectForKey:CPParagraphStyleAttributeName] || [CPParagraphStyle defaultParagraphStyle];
+            currentParagraphMinimumLineHeight = [_currentParagraph minimumLineHeight];
+            currentParagraphMaximumLineHeight = [_currentParagraph maximumLineHeight];
+            currentParagraphLineSpacing = [_currentParagraph lineSpacing];
 
-            if (!_currentFont)
-                _currentFont = [_textStorage font] || [CPFont systemFontOfSize:12.0];
+            if (!currentFont)
+                currentFont = [_textStorage font] || [CPFont systemFontOfSize:12.0];
 
-            ascent = [_currentFont ascender]
-            descent = [_currentFont descender]
+            ascent = [currentFont ascender]
+            descent = [currentFont descender]
             leading = (ascent - descent) * 0.2; // FAKE<!>
-        }
 
-        if (previousFont !== _currentFont)
-        {
-            measuringRange = CPMakeRange(glyphIndex, 0);
-            currentAnchor = prevRangeWidth;
-            previousFont = _currentFont;
+            if (previousFont !== currentFont)
+            {
+                measuringRange = CPMakeRange(glyphIndex, 0);
+                currentAnchor = prevRangeWidth;
+                previousFont = currentFont;
+            }
+
+            currentFontLineHeight = ascent - descent + leading;
+
+            if (currentFontLineHeight > _lineHeight)
+                _lineHeight = currentFontLineHeight;
+
+            if (ascent > _lineBase)
+                _lineBase = ascent;
         }
 
         lineRange.length++;
         measuringRange.length++;
 
-        _lineHeight = MAX(_lineHeight, ascent - descent + leading);
-        _lineBase = MAX(_lineBase, ascent);
+        var currentCharCode = theString.charCodeAt(glyphIndex),  // use pure javascript methods for performance reasons
+            rangeWidth = _widthOfStringForFont(theString.substr(measuringRange.location, measuringRange.length), currentFont) + currentAnchor;
 
-        var currentChar = theString[glyphIndex],  // use pure javascript methods for performance reasons
-            rangeWidth = _widthOfStringForFont(theString.substr(measuringRange.location, measuringRange.length), _currentFont).width + currentAnchor;
-
-        switch (currentChar)    // faster than sending actionForControlCharacterAtIndex: called for each char.
+        switch (currentCharCode)    // faster than sending actionForControlCharacterAtIndex: called for each char.
         {
-            case '\t':
+            case 9: // '\t'
             {
                 var nextTab = [self textTabForWidth:rangeWidth + lineOrigin.x writingDirection:0];
 
@@ -352,26 +381,25 @@ var CPSystemTypesetterFactory;
                 else
                     rangeWidth += 28;   //FIXME
             }  // fallthrough intentional
-            case  ' ':
+            case 32: // ' '
                 wrapRange = CPMakeRangeCopy(lineRange);
                 wrapRange._height = _lineHeight;
                 wrapRange._base = _lineBase;
                 wrapWidth = rangeWidth;
                 break;
+            case 10:
+            case 13:
+                isNewline = YES;
+                break;
             default:
-                if (_isNewlineCharacter(currentChar))
-                {
-                    isNewline = YES;
-                }
         }
 
-        var advancement = CPMakeSize(rangeWidth - prevRangeWidth, ascent);
-        advancement.descent=descent;
+        var advancement = {width: rangeWidth - prevRangeWidth, height: ascent, descent: descent};
         advancements.push(advancement);
 
         prevRangeWidth = _lineWidth = rangeWidth;
 
-        if (lineOrigin.x + rangeWidth > containerSize.width)
+        if (lineOrigin.x + rangeWidth > containerSizeWidth)
         {
             if (wrapWidth)
             {
@@ -399,22 +427,24 @@ var CPSystemTypesetterFactory;
 
             if (isNewline)
             {
-                if ([_currentParagraph minimumLineHeight])
-                    _lineHeight = MAX(_lineHeight, [_currentParagraph minimumLineHeight]);
+                if (currentParagraphMinimumLineHeight && currentParagraphMinimumLineHeight > _lineHeight)
+                    _lineHeight = currentParagraphMinimumLineHeight;
 
-                if ([_currentParagraph maximumLineHeight])
-                    _lineHeight = MIN(_lineHeight, [_currentParagraph maximumLineHeight]);
+                if (currentParagraphMaximumLineHeight && currentParagraphMaximumLineHeight < _lineHeight)
+                    _lineHeight = currentParagraphMaximumLineHeight;
 
                 lineOrigin.y += _lineHeight;
 
-                if ([_currentParagraph lineSpacing])
-                    lineOrigin.y += [_currentParagraph lineSpacing];
+                if (currentParagraphLineSpacing)
+                    lineOrigin.y += currentParagraphLineSpacing;
 
-                if (lineOrigin.y > [_currentTextContainer containerSize].height)
+                if (lineOrigin.y > containerSizeHeight && _indexOfCurrentContainer < textContainersCount - 1)
                 {
                     _indexOfCurrentContainer++;
-                    _indexOfCurrentContainer = MAX(_indexOfCurrentContainer, [[_layoutManager textContainers] count] - 1);
-                    _currentTextContainer = [[_layoutManager textContainers] objectAtIndex:_indexOfCurrentContainer];
+                    _currentTextContainer = [textContainers objectAtIndex:_indexOfCurrentContainer];
+                    containerSize = [_currentTextContainer containerSize];
+                    containerSizeWidth = containerSize.width;
+                    containerSizeHeight = containerSize.height;
                 }
 
                 lineOrigin.x = 0;
@@ -427,8 +457,8 @@ var CPSystemTypesetterFactory;
             advancements    = [];
             currentAnchor   = 0;
             prevRangeWidth  = 0;
-            _lineHeight     = 0;
-            _lineBase       = 0;
+            _lineHeight     = currentFontLineHeight;
+            _lineBase       = ascent;
             lineRange       = CPMakeRange(glyphIndex + 1, 0);
             measuringRange  = CPMakeRange(glyphIndex + 1, 0);
             wrapRange       = CPMakeRange(0, 0);
@@ -443,7 +473,7 @@ var CPSystemTypesetterFactory;
         [self _flushRange:lineRange lineOrigin:lineOrigin currentContainer:_currentTextContainer advancements:advancements lineCount:numLines sameLine:NO];
     }
 
-    var rect = CGRectMake(0, lineOrigin.y, containerSize.width, [_layoutManager._lineFragments lastObject]._usedRect.size.height - descent);
+    var rect = CGRectMake(0, lineOrigin.y, containerSizeWidth, [_layoutManager._lineFragments lastObject]._usedRect.size.height - descent);
     [_layoutManager setExtraLineFragmentRect:rect usedRect:rect textContainer:_currentTextContainer];
 }
 
