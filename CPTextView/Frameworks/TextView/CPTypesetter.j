@@ -77,7 +77,7 @@ function _widthOfStringForFont(aString, aFont)
     {
         var sizeWidth = sizeCacheForFont[aString];
 
-        if (sizeWidth !== undefined)
+        if (sizeWidth !== undefined && sizeCacheForFont.hasOwnProperty(aString))
             return sizeWidth;
     }
     else
