@@ -273,7 +273,7 @@ var CPSystemTypesetterFactory;
         maxNumberOfLineFragments:(unsigned)maxNumLines
         nextGlyphIndex:(UIntegerReference)nextGlyph
 {
-    var textContainers = [_layoutManager textContainers],
+    var textContainers = [layoutManager textContainers],
         textContainersCount = [textContainers count];
 
     _layoutManager = layoutManager;
@@ -281,7 +281,7 @@ var CPSystemTypesetterFactory;
     _indexOfCurrentContainer = MAX(0, [textContainers
                                    indexOfObject:[_layoutManager textContainerForGlyphAtIndex:glyphIndex effectiveRange:nil withoutAdditionalLayout:YES]
                                    inRange:CPMakeRange(0, textContainersCount)]);
-    _currentTextContainer = [[_layoutManager textContainers] objectAtIndex:_indexOfCurrentContainer];
+    _currentTextContainer = textContainers[_indexOfCurrentContainer];
     _attributesRange = CPMakeRange(0, 0);
     _lineHeight = 0;
     _lineBase = 0;
@@ -353,13 +353,6 @@ var CPSystemTypesetterFactory;
                 previousFont = currentFont;
             }
 
-            currentFontLineHeight = ascent - descent + leading;
-
-            if (currentFontLineHeight > _lineHeight)
-                _lineHeight = currentFontLineHeight;
-
-            if (ascent > _lineBase)
-                _lineBase = ascent;
         }
 
         lineRange.length++;
@@ -414,6 +407,14 @@ var CPSystemTypesetterFactory;
             glyphIndex = CPMaxRange(lineRange) - 1;  // start the line starts directly at current character
         }
 
+        currentFontLineHeight = ascent - descent + leading;
+
+        if (currentFontLineHeight > _lineHeight)
+            _lineHeight = currentFontLineHeight;
+
+        if (ascent > _lineBase)
+            _lineBase = ascent;
+
         if (isNewline || isTabStop)
         {
             if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainer:_currentTextContainer advancements:advancements lineCount:numLines sameLine:!isNewline])
@@ -457,8 +458,8 @@ var CPSystemTypesetterFactory;
             advancements    = [];
             currentAnchor   = 0;
             prevRangeWidth  = 0;
-            _lineHeight     = currentFontLineHeight;
-            _lineBase       = ascent;
+            _lineHeight     = 0;
+            _lineBase       = 0;
             lineRange       = CPMakeRange(glyphIndex + 1, 0);
             measuringRange  = CPMakeRange(glyphIndex + 1, 0);
             wrapRange       = CPMakeRange(0, 0);
