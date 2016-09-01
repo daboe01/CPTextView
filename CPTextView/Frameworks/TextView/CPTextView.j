@@ -2696,7 +2696,7 @@ var _CPCopyPlaceholder = '-';
         range.select();
     } else if (window.getSelection)
     {
-        var selection = window.getSelection();        
+        var selection = window.getSelection();
         var range = document.createRange();
         range.selectNodeContents(_CPNativeInputField);
         selection.removeAllRanges();
