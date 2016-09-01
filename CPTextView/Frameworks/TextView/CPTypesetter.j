@@ -346,6 +346,14 @@ var CPSystemTypesetterFactory;
             descent = [currentFont descender]
             leading = (ascent - descent) * 0.2; // FAKE<!>
 
+            currentFontLineHeight = ascent - descent + leading;
+
+            if (currentFontLineHeight > _lineHeight)
+                _lineHeight = currentFontLineHeight;
+
+            if (ascent > _lineBase)
+                _lineBase = ascent;
+
             if (previousFont !== currentFont)
             {
                 measuringRange = CPMakeRange(glyphIndex, 0);
@@ -407,14 +415,6 @@ var CPSystemTypesetterFactory;
             glyphIndex = CPMaxRange(lineRange) - 1;  // start the line starts directly at current character
         }
 
-        currentFontLineHeight = ascent - descent + leading;
-
-        if (currentFontLineHeight > _lineHeight)
-            _lineHeight = currentFontLineHeight;
-
-        if (ascent > _lineBase)
-            _lineBase = ascent;
-
         if (isNewline || isTabStop)
         {
             if ([self _flushRange:lineRange lineOrigin:lineOrigin currentContainer:_currentTextContainer advancements:advancements lineCount:numLines sameLine:!isNewline])
@@ -458,8 +458,8 @@ var CPSystemTypesetterFactory;
             advancements    = [];
             currentAnchor   = 0;
             prevRangeWidth  = 0;
-            _lineHeight     = 0;
-            _lineBase       = 0;
+            _lineHeight     = currentFontLineHeight;
+            _lineBase       = ascent;
             lineRange       = CPMakeRange(glyphIndex + 1, 0);
             measuringRange  = CPMakeRange(glyphIndex + 1, 0);
             wrapRange       = CPMakeRange(0, 0);
