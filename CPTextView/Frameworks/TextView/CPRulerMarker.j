@@ -4,18 +4,20 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 // Original - David Young <daver@geeks.org>
-#import <AppKit/NSRulerMarker.h>
-#import <AppKit/NSRulerView.h>
-#import <AppKit/CPImage.h>
-#import <AppKit/NSWindow.h>
-#import <AppKit/NSScrollView.h>
+@import "CPRulerView.j"
+@import <AppKit/CPImage.j>
+@import <AppKit/CPWindow.j>
+@import <AppKit/CPScrollView.j>
+
+var CPHorizontalRuler = 1,
+    CPVerticalRuler = 2;
 
 @implementation CPRulerMarker : CPObject
 {
     CPRulerView _ruler @accessors(property = ruler);
     float       _markerLocation @accessors(property = markerLocation);
     CPImage     _image @accessors(property = image);
-    CPPoint     _imageOrigin;
+    CGPoint     _imageOrigin;
     id          _representedObject  @accessors(property = representedObject);
     BOOL        _isRemovable @accessors(property = isRemovable);
     BOOL        _isMovable @accessors(property = isMovable);
@@ -37,7 +39,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     _isMovable = YES;
     _isRemovable = YES;
     _isPinned = YES;
-    
+
     return self;
 }
 
@@ -49,7 +51,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 - (float)thicknessRequiredInRuler
 {
     var thickness = 0;
-    
+
     if ([_ruler orientation] == CPVerticalRuler) {
         thickness += [[self image] size].width;
         thickness += _imageOrigin.x;
@@ -58,17 +60,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         thickness += [[self image] size].height;
         thickness += _imageOrigin.y;
     }
-    
+
     return thickness;
 }
 
 - (CGRect)imageRectInRuler
 {
     var rect = CGRectCreateCopy([_ruler bounds]),
-        location = CGMakePoint(_markerLocation, _markerLocation);
+        location = CGPointMake(_markerLocation, _markerLocation);
 
     if ([_ruler clientView])
-        location = [_ruler convertPoint:location fromView:[_ruler clientView]];        
+        location = [_ruler convertPoint:location fromView:[_ruler clientView]];
     else
         location = [_ruler convertPoint:location fromView:[[_ruler enclosingScrollView] documentView]];
 
@@ -98,7 +100,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     if ([_ruler isFlipped])
         location.y += [_image size].height;
 
-    [[self image] compositeToPoint:location operation:NSCompositeSourceOver];
+    // Fixme: Do something about the next line
+    //[[self image] compositeToPoint:location operation:NSCompositeSourceOver];
 }
 
 - (float)_markerLocationFromLocation:(CGPoint)point
@@ -118,24 +121,24 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 {
     var point = [_ruler convertPoint:[event locationInWindow] fromView:nil];
     _isPinned = YES;
-    
+
     if ([[_ruler clientView] respondsToSelector:@selector(rulerView:shouldAddMarker:)])
         if ([[_ruler clientView] rulerView:_ruler shouldAddMarker:self] == NO)
             return NO;
-    
+
     var respondToShouldAddMarker = [[_ruler clientView] respondsToSelector:@selector(rulerView:shouldAddMarker:)];
     _isDragging = YES;
     do
     {
         point = [_ruler convertPoint:[event locationInWindow] fromView:nil];
         _isPinned = NO;
-        if (CPPointInRect(point, [_ruler bounds]))
+        if (CGRectContainsPoint([_ruler bounds], point)) {
             if (respondToShouldAddMarker)
                 _isPinned = [[_ruler clientView] rulerView:_ruler shouldAddMarker:self];
             else
                 _isPinned = YES;
         }
-        
+
         _markerLocation = [self _markerLocationFromLocation:point];
 
         if ([[_ruler clientView] respondsToSelector:@selector(rulerView:willAddMarker:atLocation:)])
@@ -147,43 +150,43 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         [self drawRect:[_ruler bounds]];
         [_ruler unlockFocus];
         [[_ruler window] flushWindow];
-        
-        event = [[_ruler window] nextEventMatchingMask:NSLeftMouseUpMask|NSLeftMouseDraggedMask];
+
+        event = [[_ruler window] nextEventMatchingMask:CPLeftMouseUpMask|CPLeftMouseDraggedMask];
     }
-    while ([event type] != NSLeftMouseUp);
+    while ([event type] != CPLeftMouseUp);
 
     _isDragging = NO;
-    
+
     // check for adding...
     if (_isPinned)
     {
         [_ruler addMarker:self];
-        
+
         if ([[_ruler clientView] respondsToSelector:@selector(rulerView:didAddMarker:)])
             [[_ruler clientView] rulerView:_ruler didAddMarker:self];
-        
+
         return YES;
     }
     _isPinned = YES;
-    
+
     return NO;
 }
 
 - (BOOL)_trackMoveMarker:(CPEvent)event
 {
-    CGPoint point = [_ruler convertPoint:[event locationInWindow] fromView:nil];
+    var point = [_ruler convertPoint:[event locationInWindow] fromView:nil];
     _isPinned = YES;
     if ([[_ruler clientView] respondsToSelector:@selector(rulerView:shouldMoveMarker:)])
         if ([[_ruler clientView] rulerView:_ruler shouldMoveMarker:self] == NO)
             return NO;
-    
-    BOOL respondToShouldRemoveMarker = [[_ruler clientView] respondsToSelector:@selector(rulerView:shouldRemoveMarker:)];
+
+    var respondToShouldRemoveMarker = [[_ruler clientView] respondsToSelector:@selector(rulerView:shouldRemoveMarker:)];
     _isDragging = YES;
     do {
         if ([self isMovable]) {
             point = [_ruler convertPoint:[event locationInWindow] fromView:nil];
             _isPinned = YES;
-            if (NSMouseInRect(point, [_ruler bounds], [_ruler isFlipped]) == NO) {
+            if (1 /* Fixme: Function not in Cappuccino.... CPMouseInRect(point, [_ruler bounds], [_ruler isFlipped]) == NO */) {
                 if (respondToShouldRemoveMarker) {
                     _isPinned =  [[_ruler clientView] rulerView:_ruler shouldRemoveMarker:self] == NO;
                 } else {
@@ -196,17 +199,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             }
             [_ruler setNeedsDisplay:YES];
         }
-        event = [[_ruler window] nextEventMatchingMask:NSLeftMouseUpMask|NSLeftMouseDraggedMask];
-    } while ([event type] != NSLeftMouseUp);
+        event = [[_ruler window] nextEventMatchingMask:CPLeftMouseUpMask|CPLeftMouseDraggedMask];
+    } while ([event type] != CPLeftMouseUp);
     _isDragging = NO;
-    
+
     // check for removing...
-    BOOL removed = NO;
+    var removed = NO;
     if (_isPinned == NO) {
         [[self retain] autorelease]; // Be sure we survive the removal until we're done
         [_ruler removeMarker:self];
         removed = YES;
-        
+
         if ([[_ruler clientView] respondsToSelector:@selector(rulerView:didRemoveMarker:)])
             [[_ruler clientView] rulerView:_ruler didRemoveMarker:self];
     }
@@ -217,7 +220,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             [[_ruler clientView] rulerView:_ruler didMoveMarker:self];
         }
     }
-    
+
     return YES;
 }
 

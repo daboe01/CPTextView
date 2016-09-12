@@ -30,16 +30,21 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 // Original - David Young <daver@geeks.org>
-@import <AppKit/CPRulerMarker.j>
+@import "CPRulerMarker.j"
 @import <AppKit/CPScrollView.j>
 @import <AppKit/CPBezierPath.j>
 @import <AppKit/CPColor.j>
 @import <AppKit/CPStringDrawing.j>
-@import <AppKit/CPParagraphStyle.j>
-@import <AppKit/CPText.j>
+@import "CPParagraphStyle.j"
+@import "CPText.j"
 @import <AppKit/CPFont.j>
-@import <AppKit/CPAttributedString.j>
+@import <Foundation/CPAttributedString.j>
 @import <AppKit/CPImage.j>
+
+@global CPHorizontalRuler;
+@global CPVerticalRuler;
+
+@typedef CPRulerOrientation;
 
 var DEFAULT_RULE_THICKNESS      = 16.0,
     DEFAULT_MARKER_THICKNESS    = 15.0,
@@ -63,38 +68,38 @@ var _measurementUnits;
 }
 + (_CPMeasurementUnit)inchesMeasurementUnit
 {
-    return [self measurementUnitWithName:@"Inches" 
-                            abbreviation:@"in" 
-                           pointsPerUnit:72.0 
-                             stepUpCycle:[ [NSNumber numberWithFloat:2.0] ]
-                           stepDownCycle:[ [NSNumber numberWithFloat:0.5], [NSNumber numberWithFloat:0.25], [NSNumber numberWithFloat:0.125] ] ];
+    return [self measurementUnitWithName:@"Inches"
+                            abbreviation:@"in"
+                           pointsPerUnit:72.0
+                             stepUpCycle:[ [CPNumber numberWithFloat:2.0] ]
+                           stepDownCycle:[ [CPNumber numberWithFloat:0.5], [CPNumber numberWithFloat:0.25], [CPNumber numberWithFloat:0.125] ] ];
 }
 
 + (_CPMeasurementUnit)centimetersMeasurementUnit
 {
-    return [self measurementUnitWithName:@"Centimeters" 
-                            abbreviation:@"cm" 
-                           pointsPerUnit:28.35 
-                             stepUpCycle:[ [NSNumber numberWithFloat:2.0] ]
-                           stepDownCycle:[ [NSNumber numberWithFloat:0.5], [NSNumber numberWithFloat:0.2] ] ];
+    return [self measurementUnitWithName:@"Centimeters"
+                            abbreviation:@"cm"
+                           pointsPerUnit:28.35
+                             stepUpCycle:[ [CPNumber numberWithFloat:2.0] ]
+                           stepDownCycle:[ [CPNumber numberWithFloat:0.5], [CPNumber numberWithFloat:0.2] ] ];
 }
 
 + (_CPMeasurementUnit)pointsMeasurementUnit
 {
-    return [self measurementUnitWithName:@"Points" 
-                            abbreviation:@"pt" 
-                           pointsPerUnit:1.0 
-                             stepUpCycle:[ [NSNumber numberWithFloat:10.0] ]
-                           stepDownCycle:[ [NSNumber numberWithFloat:0.5] ] ];
+    return [self measurementUnitWithName:@"Points"
+                            abbreviation:@"pt"
+                           pointsPerUnit:1.0
+                             stepUpCycle:[ [CPNumber numberWithFloat:10.0] ]
+                           stepDownCycle:[ [CPNumber numberWithFloat:0.5] ] ];
 }
 
 + (_CPMeasurementUnit)picasMeasurementUnit
 {
-    return [self measurementUnitWithName:@"Picas" 
-                            abbreviation:@"pc" 
-                           pointsPerUnit:12.0 
-                             stepUpCycle:[NSArray arrayWithObject:[NSNumber numberWithFloat:10.0]]
-                           stepDownCycle:[NSArray arrayWithObject:[NSNumber numberWithFloat:0.5]]];
+    return [self measurementUnitWithName:@"Picas"
+                            abbreviation:@"pc"
+                           pointsPerUnit:12.0
+                             stepUpCycle:[CPArray arrayWithObject:[CPNumber numberWithFloat:10.0]]
+                           stepDownCycle:[CPArray arrayWithObject:[CPNumber numberWithFloat:0.5]]];
 }
 
 + (CPArray)allMeasurementUnits
@@ -104,12 +109,12 @@ var _measurementUnits;
 
 + (_CPMeasurementUnit)measurementUnitNamed:(CPString)name
 {
-    int i, count =  [_measurementUnits count];
-    
+    var i, count =  [_measurementUnits count];
+
     for (i = 0; i < count; ++i)
         if ([[[_measurementUnits objectAtIndex:i] name] isEqualToString:name])
             return [_measurementUnits objectAtIndex:i];
-    
+
     return nil;
 }
 
@@ -122,7 +127,7 @@ var _measurementUnits;
 {
     if (!_measurementUnits)
         _measurementUnits = [];
-    
+
     [self registerUnit:[_CPMeasurementUnit inchesMeasurementUnit]];
     [self registerUnit:[_CPMeasurementUnit centimetersMeasurementUnit]];
     [self registerUnit:[_CPMeasurementUnit pointsMeasurementUnit]];
@@ -141,7 +146,7 @@ var _measurementUnits;
     _pointsPerUnit = points;
     _stepUpCycle = upCycle;
     _stepDownCycle = downCycle;
-    
+
     return self;
 }
 
@@ -152,7 +157,7 @@ var _measurementUnits;
     CPScrollView       _scrollView @accessors(property=scrollView);
     CPView             _clientView @accessors(property=clientView);
     CPView             _accessoryView @accessors(property=accessoryView);
-    CPMutableArray     _markers @accessors(property=markers);
+    CPArray            _markers @accessors(property=markers);
     _CPMeasurementUnit  _measurementUnit @accessors(property=measurementUnit);
     CPMutableArray     _rulerlineLocations;
 
@@ -180,29 +185,29 @@ var _measurementUnits;
     var frame = CPMakeRect(0, 0, 1, 1);
     if (scrollView)
         frame = [scrollView frame];
-    
+
     if (orientation == CPHorizontalRuler)
         frame.size.height = DEFAULT_RULE_THICKNESS;
     else
         frame.size.width = DEFAULT_RULE_THICKNESS;
-    
+
     [super initWithFrame:frame];
-    
+
     _scrollView = scrollView;
     _orientation = orientation;
-        
+
     _measurementUnit = [_CPMeasurementUnit measurementUnitNamed:@"Inches"];
-    
+
     // Don't invoke the setters - they trigger tiling which can cause recursion if
     // the scrollview is creating the ruler
     _ruleThickness = DEFAULT_RULE_THICKNESS;
     _thicknessForMarkers = DEFAULT_MARKER_THICKNESS;
     _thicknessForAccessoryView = 0.0;
-    
+
     _markers = [];
-    
+
     _rulerlineLocations = [];
-    
+
     [self invalidateHashMarks];
 
     return self;
@@ -213,12 +218,12 @@ var _measurementUnits;
     if (!_thicknessForMarkers)
     {
         var i, count = [_markers count];
-        
+
         for (i = 0; i < count; ++i)
             if ([[_markers objectAtIndex:i] thicknessRequiredInRuler] > _thicknessForMarkers)
                 _thicknessForMarkers = [[_markers objectAtIndex:i] thicknessRequiredInRuler];
     }
-    
+
     return _thicknessForMarkers;
 }
 
@@ -232,13 +237,13 @@ var _measurementUnits;
 - (float)requiredThickness
 {
     var result = [self ruleThickness];
-    
+
     if ([_markers count] > 0)
         result += [self reservedThicknessForMarkers];
-    
+
     if (_accessoryView)
         result += [self reservedThicknessForAccessoryView];
-    
+
     return result;
 }
 
@@ -254,7 +259,7 @@ var _measurementUnits;
     [_clientView rulerView:self willSetClientView:view];
     [_markers removeAllObjects];
     _clientView = view;
-    
+
     [self invalidateHashMarks];
     [[self enclosingScrollView] tile];
 }
@@ -276,14 +281,14 @@ var _measurementUnits;
 - (void)addMarker:(CPRulerMarker)marker
 {
     [_markers addObject:marker];
-    
+
     [[self enclosingScrollView] tile];
 }
 
 - (void)removeMarker:(CPRulerMarker)marker
 {
     [_markers removeObject:marker];
-    
+
     [[self enclosingScrollView] tile];
 }
 
@@ -298,7 +303,7 @@ var _measurementUnits;
 - (void)setRuleThickness:(float)value
 {
     _ruleThickness = value;
-    
+
     [[self enclosingScrollView] tile];
 }
 
@@ -319,20 +324,20 @@ var _measurementUnits;
 - (void)setOriginOffset:(float)value
 {
     _originOffset = value;
-    
+
     [self invalidateHashMarks];
 }
 
 - (BOOL)trackMarker:(CPRulerMarker)marker withMouseEvent:(CPEvent)event
 {
     var point = [self convertPoint:[event locationInWindow] fromView:nil];
-    
+
     if(CPPointInRect(point, [self bounds]))
     {
         [marker trackMouse:event adding:YES];
         [self setNeedsDisplay:YES];
-    }        
-    
+    }
+
     return NO;
 }
 
@@ -341,11 +346,11 @@ var _measurementUnits;
     var point = [self convertPoint:[event locationInWindow] fromView:nil],
         i, count = [_markers count],
         location;
-    
+
     for (i = 0; i < count; ++i)
     {
         var marker = [_markers objectAtIndex:i];
-        
+
         if (CPPointInRect(point, [marker imageRectInRuler]))
         {
             [marker trackMouse:event adding:NO];
@@ -359,16 +364,16 @@ var _measurementUnits;
 }
 
 - (void)moveRulerlineFromLocation:(float)fromLocation toLocation:(float)toLocation
-{    
+{
     var old = [CPNumber numberWithFloat:fromLocation],
-        new = [CPNumber numberWithFloat:toLocation];
-    
+        newLoc = [CPNumber numberWithFloat:toLocation];
+
     if ([_rulerlineLocations containsObject:old])
         [_rulerlineLocations removeObject:old];
 
-    if ([_rulerlineLocations containsObject:new] == NO)
-        [_rulerlineLocations addObject:new];
-    
+    if ([_rulerlineLocations containsObject:newLoc] == NO)
+        [_rulerlineLocations addObject:newLoc];
+
     [self setNeedsDisplay:YES];
 }
 
@@ -380,11 +385,11 @@ var _measurementUnits;
 - (CPDictionary)attributesForLabel
 {
     var style = [[CPParagraphStyle defaultParagraphStyle] mutableCopy];
-    
+
     [style setLineBreakMode:CPLineBreakByClipping];
     [style setAlignment:CPLeftTextAlignment];
-    
-    return @{NSFontAttributeName: [NSFont systemFontOfSize:10.0], NSParagraphStyleAttributeName; style};
+
+    return @{CPFontAttributeName: [CPFont systemFontOfSize:10.0], CPParagraphStyleAttributeName: style};
 }
 
 - (void)drawHashMarksAndLabelsInRect:(CPRect)dirtyRect
@@ -393,7 +398,7 @@ var _measurementUnits;
         scale = [self _drawingScale],
         offset = [self _drawingOrigin];
 
-    // Adjust originalFrame so it matches the ruler origin 
+    // Adjust originalFrame so it matches the ruler origin
     if (_orientation == CPHorizontalRuler)
     {
         originalFrame.origin.x += offset;
@@ -420,7 +425,7 @@ var _measurementUnits;
     var frame = originalFrame,
         pointsPerUnit = [_measurementUnit pointsPerUnit],
         length = (_orientation == CPHorizontalRuler ? frame.size.width : frame.size.height),
-        i, count = ceil(length / (pointsPerUnit * scale)),
+        i, count = Math.ceil(length / (pointsPerUnit * scale)),
         cycles = [[_measurementUnit stepDownCycle] mutableCopy],
         extraThickness = 0,
         scrollViewHasOtherRuler = (_orientation == CPHorizontalRuler ? [[self enclosingScrollView] hasVerticalRuler] : [[self enclosingScrollView] hasHorizontalRuler]);
@@ -430,7 +435,7 @@ var _measurementUnits;
 
     if (_accessoryView)
         extraThickness += [self reservedThicknessForAccessoryView];
-    
+
     if (_orientation == CPHorizontalRuler)
     {
         originalFrame.size.width = HASH_MARK_WIDTH;
@@ -443,26 +448,26 @@ var _measurementUnits;
         originalFrame.size.height = HASH_MARK_WIDTH;
         originalFrame.origin.x += extraThickness;
     }
-    
+
     // Draw major hash marks with labels.
     frame = CGRectCreateCopy(originalFrame);
     [[CPColor controlShadowColor] setStroke];
     for (i = 0; i < count; ++i)
     {
-        if (_orientation == NSHorizontalRuler)
+        if (_orientation == CPHorizontalRuler)
         {
-            if (frame.origin.x > NSMaxX(dirtyRect))
+            if (frame.origin.x > CGRectGetMaxX(dirtyRect))
                 break;
         }
         else
         {
-            if (frame.origin.y > NSMaxY(dirtyRect))
+            if (frame.origin.y > CGRectGetMaxY(dirtyRect))
                 break;
         }
 
         var label = [CPString stringWithFormat:@"%d", i],
             textOrigin = frame.origin;
-        
+
         textOrigin.x += LABEL_TEXT_CORRECTION;
         if (_orientation == CPHorizontalRuler)
         {
@@ -476,44 +481,44 @@ var _measurementUnits;
         }
         [label drawAtPoint:textOrigin withAttributes:[self attributesForLabel]]; //FIXME<!>
 
-        if (_orientation == NSHorizontalRuler) {
+        if (_orientation == CPHorizontalRuler) {
             frame.origin.x += pointsPerUnit * scale;
         } else
         {
             frame.origin.y += pointsPerUnit * scale;
         }
     }
-    
+
     // Start minor hash mark processing. size.width still contains the width of major marks.
     while ([cycles count] >= 0)
     {
         var thisCycle = [[cycles objectAtIndex:0] floatValue],
             pointsPerMark = pointsPerUnit * thisCycle;
-        
+
         frame.origin = originalFrame.origin;
 
         if (_orientation == CPHorizontalRuler)
             frame.size.height *= thisCycle;
         else
-            frame.size.width *= thisCycle;        
-                
+            frame.size.width *= thisCycle;
+
         frame.size.height = Math.floor(frame.size.height);
-        
+
         if (HASH_MARK_REQUIRED_WIDTH < pointsPerMark * scale)
         {
             count = length / (pointsPerMark * scale);
-            
+
             for (i = 0; i < count; ++i) {
                 if (_orientation == CPHorizontalRuler) {
-                    if (frame.origin.x > NSMaxX(dirtyRect))
+                    if (frame.origin.x > CGRectGetMaxX(dirtyRect))
                         break;
                 } else
                 {
-                    if (frame.origin.y > NSMaxY(dirtyRect))
+                    if (frame.origin.y > CGRectGetMaxY(dirtyRect))
                         break;
                 }
 
-                if (_orientation == NSHorizontalRuler)
+                if (_orientation == CPHorizontalRuler)
                     frame.origin.x += pointsPerMark * scale;
                 else
                     frame.origin.y += pointsPerMark * scale;
@@ -523,44 +528,44 @@ var _measurementUnits;
     }
 }
 
-- (void)drawMarkersInRect:(NSRect)dirtyRect
+- (void)drawMarkersInRect:(CPRect)dirtyRect
 {
-    int count = [_markers count];
+    var count = [_markers count];
 
-    for (var i = 0; i < count, i++)
+    for (var i = 0; i < count; i++)
     {
         [[_markers objectAtIndex:i] drawRect:dirtyRect];
     }
 }
 
-- (void)drawRulerlineLocationsInRect:(NSRect)rect
+- (void)drawRulerlineLocationsInRect:(CPRect)rect
 {
     var i, count = [_rulerlineLocations count],
            rect = CGRectCreateCopy(_bounds);
-    
+
     if (_orientation == CPHorizontalRuler)
         rect.size.width = 1;
     else
         rect.size.height = 1;
-    
+
     [[CPColor controlShadowColor] setStroke];
     for (i = 0; i < count; ++i)
     {
         if (_orientation == CPHorizontalRuler)
         {
             rect.origin.x = [[_rulerlineLocations objectAtIndex:i] floatValue] + 0.5;
-            [CPBezierPath strokeLineFromPoint: NSMakePoint(CPRectGetMinX(rect), CPRectGetMinY(rect))
-                                      toPoint: NSMakePoint(CPRectGetMinX(rect), CPRectGetMaxY(rect))];
+            [CPBezierPath strokeLineFromPoint: CPMakePoint(CPRectGetMinX(rect), CPRectGetMinY(rect))
+                                      toPoint: CPMakePoint(CPRectGetMinX(rect), CPRectGetMaxY(rect))];
         }
         else {
             rect.origin.y = [[_rulerlineLocations objectAtIndex:i] floatValue] + 0.5;
-            [CPBezierPath strokeLineFromPoint: NSMakePoint(CPRectGetMinX(rect), CPRectGetMinY(rect))
-                                      toPoint: NSMakePoint(CPRectGetMaxX(rect), CPRectGetMinY(rect))];
+            [CPBezierPath strokeLineFromPoint: CPMakePoint(CPRectGetMinX(rect), CPRectGetMinY(rect))
+                                      toPoint: CPMakePoint(CPRectGetMaxX(rect), CPRectGetMinY(rect))];
         }
     }
 }
 
-- (void)drawRect:(NSRect)dirtyRect
+- (void)drawRect:(CPRect)dirtyRect
 {
     var rect = CGRectCreateCopy(_bounds),
         context = [[CPGraphicsContext currentContext] graphicsPort];
@@ -580,14 +585,16 @@ var _measurementUnits;
     {
         rect.origin.x += rect.size.width - 1;
         rect.size.width = 1;
-    }    
-    CPFrameRect(rect);
-    
+    }
+
+    // Fixme: Draw rect frame...
+    //NSFrameRect(rect);
+
     [self drawHashMarksAndLabelsInRect:dirtyRect];
-    
+
     if ([_markers count] > 0)
         [self drawMarkersInRect:dirtyRect];
-    
+
     if ([_rulerlineLocations count] > 0)
         [self drawRulerlineLocationsInRect:dirtyRect];
 }
@@ -596,7 +603,7 @@ var _measurementUnits;
 {
     if (_orientation == CPHorizontalRuler)
         return YES;
-    
+
     return [[_scrollView documentView] isFlipped];
 }
 
@@ -613,7 +620,7 @@ var _measurementUnits;
         trackedView = _scrollView.documentView;
 
     var viewOrigin = [self convertPoint:CGPointMake(0, 0) fromView:trackedView];
-    if (self.orientation == NSHorizontalRuler)
+    if (_orientation == CPHorizontalRuler)
         origin += viewOrigin.x;
     else
         origin += viewOrigin.y;
@@ -629,9 +636,9 @@ var _measurementUnits;
 
     if (documentView)
     {
-        var curDocFrameSize = CGSizeCreateCopy(_documentView.frame.size),
-            curDocBoundsSize = CGSizeCreateCopy(_documentView.bounds.size);
-        
+        var curDocFrameSize = CGSizeCreateCopy(documentView.frame.size),
+            curDocBoundsSize = CGSizeCreateCopy(documentView.bounds.size);
+
         if ([self orientation] == CPHorizontalRuler)
             scale = curDocFrameSize.width / curDocBoundsSize.width;
         else
@@ -639,4 +646,5 @@ var _measurementUnits;
     }
     return scale;
 }
+
 @end
