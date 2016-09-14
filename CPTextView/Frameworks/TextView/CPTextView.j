@@ -71,6 +71,10 @@ _regexMatchesStringAtIndex=function(regex, string, index)
 _CPwalkTheDOM = function(node, func)
 {
     func(node);
+
+    if (!node)
+        return;
+
     node = node.firstChild;
     while (node)
     {
@@ -827,15 +831,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
                 withAttributedString:[_textStorage attributedSubstringFromRange:CPMakeRangeCopy(aRange)]];
 
     [_textStorage replaceCharactersInRange:aRange withAttributedString:aString];
-    [self _fixupReplaceForRange:CPMakeRange(CPMaxRange(aRange), 0)];
-}
-- (void)_replaceCharactersInRange:(CPRange)aRange withString:(CPString)aString
-{
-    [[[[self window] undoManager] prepareWithInvocationTarget:self]
-                _replaceCharactersInRange:CPMakeRange(aRange.location, [aString length])
-                withString:[[self string] substringWithRange:CPMakeRangeCopy(aRange)]];
-
-    [_textStorage replaceCharactersInRange:CPMakeRangeCopy(aRange) withString:aString];
     [self _fixupReplaceForRange:CPMakeRange(CPMaxRange(aRange), 0)];
 }
 
@@ -2537,8 +2532,8 @@ var _CPCopyPlaceholder = '-';
 
                     var fontname = style.getPropertyValue('font-family'),
                         fontsize = parseInt(style.getPropertyValue('font-size'), 10),
-                        isBold = node.firstChild && node.firstChild.nodeName === 'B' || node.firstChild.firstChild && node.firstChild.firstChild.nodeName === 'B',
-                        isItalic = node.firstChild && node.firstChild.nodeName === 'I' || node.firstChild.firstChild && node.firstChild.firstChild.nodeName === 'I';
+                        isBold = node.firstChild && node.firstChild.nodeName === 'B' || node.firstChild && node.firstChild.firstChild && node.firstChild.firstChild.nodeName === 'B',
+                        isItalic = node.firstChild && node.firstChild.nodeName === 'I' || node.firstChild && node.firstChild.firstChild && node.firstChild.firstChild.nodeName === 'I';
 
                     if (fontname && fontsize)
                         [styleAttributes setObject:isBold? [CPFont boldFontWithName:fontname size:fontsize italic:isItalic] :
