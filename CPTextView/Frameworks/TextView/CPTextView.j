@@ -1317,15 +1317,17 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-       [self _moveSelectionIntoDirection:+1 granularity:CPSelectByParagraph];
+       if (!_isNewlineCharacter([[_textStorage string] characterAtIndex:_selectionRange.location]))
+          [self _moveSelectionIntoDirection:+1 granularity:CPSelectByParagraph];
+
+       if (_isNewlineCharacter([[_textStorage string] characterAtIndex:MAX(0, _selectionRange.location - 1)]))
+          [self moveLeft:sender];
     }
 }
 - (void)moveToEndOfParagraphAndModifySelection:(id)sender
 {
     if (_isSelectable)
-    {
        [self _extendSelectionIntoDirection:+1 granularity:CPSelectByParagraph];
-    }
 }
 - (void)moveParagraphForwardAndModifySelection:(id)sender
 {
@@ -1399,7 +1401,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 {
     if (_isSelectable)
     {
-        [self _moveSelectionIntoDirection:-1 granularity:CPSelectByParagraph]
+       if (!_isNewlineCharacter([[_textStorage string] characterAtIndex:MAX(0, _selectionRange.location - 1)]))
+           [self _moveSelectionIntoDirection:-1 granularity:CPSelectByParagraph]
     }
 }
 - (void)moveToBeginningOfParagraphAndModifySelection:(id)sender
@@ -1502,7 +1505,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     [self moveToLeftEndOfLine:sender byExtending:YES];
 }
 - (void)moveToRightEndOfLine:(id)sender byExtending:(BOOL)flag
-{    if (_isSelectable)
+{   if (_isSelectable)
     {
         var fragment = [_layoutManager _lastLineFragmentForLineFromLocation:_selectionRange.location];
         if (fragment)
