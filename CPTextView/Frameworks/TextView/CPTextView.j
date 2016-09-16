@@ -2710,7 +2710,7 @@ var _CPCopyPlaceholder = '-';
 
 @implementation CPAttributedString(_MinimalHTMLParser)
 
--(CPAttributedString) _setRegularExpression:(JSObject)re toFontTrait:(CPFontTrait)aTrait
+-(void) _setRegularExpression:(JSObject)re toFontTrait:(CPFontTrait)aTrait
 {
     while (match = re.exec(_string))
     {
@@ -2719,16 +2719,12 @@ var _CPCopyPlaceholder = '-';
         [attribs setObject:[[CPFontManager sharedFontManager] convertFont:font toHaveTrait:aTrait] forKey:CPFontAttributeName]
         [self setAttributes:attribs range:CPMakeRange(match.index, match[0].length)];
     }
-
-    return self;
 }
 
--(CPAttributedString) _replaceEveryOccurenceOfRegularExpression:(JSObject)re withString:(CPString)aString
+-(void) _replaceEveryOccurenceOfRegularExpression:(JSObject)re withString:(CPString)aString
 {
     while (match = re.exec(_string))
         [self replaceCharactersInRange:CPMakeRange(match.index, match[0].length) withString:aString];
-
-    return self;
 }
 
 
