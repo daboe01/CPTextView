@@ -2455,6 +2455,7 @@ var _CPCopyPlaceholder = '-';
         // webkit-browsers: keypressed is omitted for deadkeys (and unfortunately also for cursor keys)
         if (!_CPNativeInputFieldActive && _CPNativeInputFieldKeyPressedCalled == NO && _CPNativeInputField.innerHTML.length && _CPNativeInputField.innerHTML != _CPCopyPlaceholder && _CPNativeInputField.innerHTML.length < 3)
         {
+
             _CPNativeInputFieldActive = YES;
             [currentFirstResponder _activateNativeInputElement:_CPNativeInputField];
         } else
@@ -2466,6 +2467,8 @@ var _CPCopyPlaceholder = '-';
             if (_CPNativeInputFieldKeyPressedCalled)
                _CPNativeInputField.innerHTML = '';
         }
+
+        _CPNativeInputFieldKeyDownCalled = NO;
 
         return false; // prevent the default behaviour
     }, true);
@@ -2501,6 +2504,7 @@ var _CPCopyPlaceholder = '-';
                 else if (!_CPNativeInputFieldActive)
                     [self hideInputElement];
             }, 200);
+
         return false;
     }, true); // capture mode
 
