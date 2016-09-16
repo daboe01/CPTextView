@@ -2478,6 +2478,7 @@ var _CPCopyPlaceholder = '-';
         _CPNativeInputFieldKeyDownCalled = YES;
         _CPNativeInputFieldKeyUpCalled = NO;
         _CPNativeInputFieldKeyPressedCalled = NO;
+
         var currentFirstResponder = [[CPApp keyWindow] firstResponder];
 
         // webkit-browsers: cursor keys do not emit keypressed and would otherwise activate deadkey mode
