@@ -2472,7 +2472,7 @@ var _CPCopyPlaceholder = '-';
 
     _CPNativeInputField.addEventListener("keydown", function(e)
     {
-        if (CPBrowserIsEngine(CPGeckoBrowserEngine) && _CPNativeInputFieldKeyDownCalled)
+        if (_CPNativeInputFieldKeyDownCalled)
             return true;
 
         _CPNativeInputFieldKeyDownCalled = YES;
