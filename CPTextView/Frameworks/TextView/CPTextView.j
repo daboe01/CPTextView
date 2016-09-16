@@ -2520,7 +2520,7 @@ var _CPCopyPlaceholder = '-';
             {
                 if (node.nodeType === 1 && node.nodeName === 'SPAN')
                 {
-                    var text = node.innerText,
+                    var text = node.innerHTML,
                         style = window.getComputedStyle(node),
                         styleAttributes = @{};
 
@@ -2534,16 +2534,12 @@ var _CPCopyPlaceholder = '-';
                     // extract font from the DOM
 
                     var fontname = style.getPropertyValue('font-family'),
-                        fontsize = parseInt(style.getPropertyValue('font-size'), 10),
-                        isBold = node.firstChild && node.firstChild.nodeName === 'B' || node.firstChild && node.firstChild.firstChild && node.firstChild.firstChild.nodeName === 'B',
-                        isItalic = node.firstChild && node.firstChild.nodeName === 'I' || node.firstChild && node.firstChild.firstChild && node.firstChild.firstChild.nodeName === 'I';
+                        fontsize = parseInt(style.getPropertyValue('font-size'), 10);
 
                     if (fontname && fontsize)
-                        [styleAttributes setObject:isBold? [CPFont boldFontWithName:fontname size:fontsize italic:isItalic] :
-                                                           [CPFont fontWithName:fontname size:fontsize italic:isItalic]
-                                            forKey:CPFontAttributeName];
+                        [styleAttributes setObject:[CPFont fontWithName:fontname size:fontsize italic:NO] forKey:CPFontAttributeName];
 
-                    [rtfdata appendAttributedString:[[CPAttributedString alloc] initWithString:text attributes:styleAttributes]];
+                    [rtfdata appendAttributedString:[[[CPAttributedString alloc] initWithString:text attributes:styleAttributes] _stringByParsingHTMLEntities]];
                 }
             };
 
@@ -2710,4 +2706,42 @@ var _CPCopyPlaceholder = '-';
     _CPNativeInputField.style.top="-10000px";
     _CPNativeInputField.style.left="-10000px";
 }
+@end
+
+@implementation CPAttributedString(_MinimalHTMLParser)
+
+-(CPAttributedString) _setRegularExpression:(JSObject)re toFontTrait:(CPFontTrait)aTrait
+{
+    while (match = re.exec(_string))
+    {
+        var attribs = [[self attributesAtIndex:match.index effectiveRange:nil] copy],
+            font = [attribs objectForKey:CPFontAttributeName];
+        [attribs setObject:[[CPFontManager sharedFontManager] convertFont:font toHaveTrait:aTrait] forKey:CPFontAttributeName]
+        [self setAttributes:attribs range:CPMakeRange(match.index, match[0].length)];
+    }
+
+    return self;
+}
+
+-(CPAttributedString) _replaceEveryOccurenceOfRegularExpression:(JSObject)re withString:(CPString)aString
+{
+    while (match = re.exec(_string))
+        [self replaceCharactersInRange:CPMakeRange(match.index, match[0].length) withString:aString];
+
+    return self;
+}
+
+
+-(CPAttributedString) _stringByParsingHTMLEntities
+{
+    [self _setRegularExpression:/<b>(.+?)<\/b>/gi toFontTrait:CPFontBoldTrait];
+    [self _setRegularExpression:/<i>(.+?)<\/i>/gi toFontTrait:CPFontItalicTrait];
+    [self _replaceEveryOccurenceOfRegularExpression:/<[^>]+>/i withString:''];
+    [self _replaceEveryOccurenceOfRegularExpression:/&lt;/i withString:'<'];
+    [self _replaceEveryOccurenceOfRegularExpression:/&gt;/i withString:'>'];
+    [self _replaceEveryOccurenceOfRegularExpression:/&amp;/i withString:'&'];
+
+    return self;
+}
+
 @end
