@@ -359,6 +359,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     CPView          _observedClipView;
     CGRect          _exposedRect;
     CPTimer         _scrollingTimer;
+    BOOL			_movingSelection;
 }
 
 - (id)initWithFrame:(CGRect)aFrame textContainer:(CPTextContainer)aContainer
@@ -1058,25 +1059,37 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
                           }, 500);
 }
 
-- (void)mouseDown:(CPEvent)event
+- (CGPoint)_characterIndexFromEvent:(CPEvent)event
 {
-    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
-
     var fraction = [],
         point = [self convertPoint:[event locationInWindow] fromView:nil];
-
-    [_caret setVisibility:NO];
-
+    
     // convert to container coordinate
     point.x -= _textContainerOrigin.x;
     point.y -= _textContainerOrigin.y;
 
-    _startTrackingLocation = [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
+    var index = [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
 
-    if (_startTrackingLocation === CPNotFound)
-        _startTrackingLocation = [_layoutManager numberOfCharacters];
+    if (index === CPNotFound)
+        index = [_layoutManager numberOfCharacters];
     else if (fraction[0] > 0.5)
-        _startTrackingLocation++;
+        index++;
+
+    return index;
+}
+
+- (void)mouseDown:(CPEvent)event
+{
+    [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
+
+    [_caret setVisibility:NO];
+
+    _startTrackingLocation = [self _characterIndexFromEvent:event];
+
+    if (CPLocationInRange(_startTrackingLocation, _selectionRange))
+    {	_movingSelection = YES;
+        return;
+    }
 
     var granularities = [CPNotFound, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
     [self setSelectionGranularity:granularities[[event clickCount]]];
@@ -1099,22 +1112,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)mouseDragged:(CPEvent)event
 {
-    var fraction = [],
-        point = [self convertPoint:[event locationInWindow] fromView:nil];
-
-    // convert to container coordinate
-    point.x -= _textContainerOrigin.x;
-    point.y -= _textContainerOrigin.y;
+    if (_movingSelection)
+        return;
 
     var oldRange = [self selectedRange],
-        index = [_layoutManager glyphIndexForPoint:point
-                                inTextContainer:_textContainer
-                                fractionOfDistanceThroughGlyph:fraction];
-
-    if (index == CPNotFound)
-        index = _scrollingDownward ? CPMaxRange(oldRange) : oldRange.location;
-    else if (fraction[0] > 0.5)
-        index++;
+        index = [self _characterIndexFromEvent:event];
 
     if (index > oldRange.location)
         _scrollingDownward = YES;
@@ -1133,6 +1135,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)mouseUp:(CPEvent)event
 {
+   	_movingSelection = NO;
+
     /* will post CPTextViewDidChangeSelectionNotification */
     _previousSelectionGranularity = [self selectionGranularity];
 
