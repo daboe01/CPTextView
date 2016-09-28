@@ -359,7 +359,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     CPView          _observedClipView;
     CGRect          _exposedRect;
     CPTimer         _scrollingTimer;
-    BOOL			_movingSelection;
+    CPRange			_movingSelection;
 }
 
 - (id)initWithFrame:(CGRect)aFrame textContainer:(CPTextContainer)aContainer
@@ -408,7 +408,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self setBackgroundColor:[CPColor whiteColor]];
     }
 
-    [self registerForDraggedTypes:[CPColorDragType]];
+    [self registerForDraggedTypes:[CPColorDragType, CPRTFPboardType]];
 
     return self;
 }
@@ -1059,52 +1059,76 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
                           }, 500);
 }
 
-- (CGPoint)_characterIndexFromEvent:(CPEvent)event
+- (CGPoint)_characterIndexFromRawPoint:(CGPoint)point
 {
     var fraction = [],
-        point = [self convertPoint:[event locationInWindow] fromView:nil];
+		point = [self convertPoint:point fromView:nil];
     
     // convert to container coordinate
     point.x -= _textContainerOrigin.x;
     point.y -= _textContainerOrigin.y;
-
+    
     var index = [_layoutManager glyphIndexForPoint:point inTextContainer:_textContainer fractionOfDistanceThroughGlyph:fraction];
-
+    
     if (index === CPNotFound)
         index = [_layoutManager numberOfCharacters];
     else if (fraction[0] > 0.5)
         index++;
-
+    
     return index;
+}
+- (CGPoint)_characterIndexFromEvent:(CPEvent)event
+{
+    return [self _characterIndexFromRawPoint:[event locationInWindow]];
 }
 
 - (void)mouseDown:(CPEvent)event
 {
     [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
-
+    
     [_caret setVisibility:NO];
-
+    
     _startTrackingLocation = [self _characterIndexFromEvent:event];
-
-    if (CPLocationInRange(_startTrackingLocation, _selectionRange))
-    {	_movingSelection = YES;
-        return;
-    }
-
+    
     var granularities = [CPNotFound, CPSelectByCharacter, CPSelectByWord, CPSelectByParagraph];
     [self setSelectionGranularity:granularities[[event clickCount]]];
+    
+    if ([self selectionGranularity] == CPSelectByCharacter && CPLocationInRange(_startTrackingLocation, _selectionRange))
+    {
+        _movingSelection = CPMaxRange(_startTrackingLocation, 0);
+        var dragPlaceholder = [CPTextField new],
+			originPoint = [_layoutManager locationForGlyphAtIndex:[self selectedRange].location];
+        
+        [dragPlaceholder setStringValue:[[self stringValue] substringWithRange:_selectionRange]];
+        [dragPlaceholder sizeToFit];
+        
+        var stringForPasting = [_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)],
+			richData = [_CPRTFProducer produceRTF:stringForPasting documentAttributes:@{}],
+			draggingPasteboard = [CPPasteboard pasteboardWithName:CPDragPboard];
+        [draggingPasteboard declareTypes:[CPRTFPboardType] owner:nil];
+        [draggingPasteboard setString:richData forType:CPRTFPboardType];
 
+        [self dragView:dragPlaceholder
+                    at:originPoint
+                offset:nil
+                 event:event
+            pasteboard:draggingPasteboard
+                source:self
+             slideBack:YES];
+        
+        return;
+    }
+    
     var setRange = CPMakeRange(_startTrackingLocation, 0);
-
+    
     if ([event modifierFlags] & CPShiftKeyMask)
-        setRange = _MakeRangeFromAbs(_startTrackingLocation < _MidRange(_selectionRange)?
-                                     CPMaxRange(_selectionRange) : _selectionRange.location,
-                                     _startTrackingLocation);
+        setRange = _MakeRangeFromAbs(_startTrackingLocation < _MidRange(_selectionRange) ? CPMaxRange(_selectionRange) : _selectionRange.location, _startTrackingLocation);
     else
-        _scrollingTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(_supportScrolling:) userInfo:nil repeats:YES];
-
+        _scrollingTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(_supportScrolling:) userInfo:nil repeats:YES];  // fixme: only start if we are in the scrolling areas
+    
     [self setSelectedRange:setRange affinity:0 stillSelecting:YES];
 }
+
 - (void)_supportScrolling:(CPTimer)aTimer
 {
     [self mouseDragged:[CPApp currentEvent]];
@@ -1135,7 +1159,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)mouseUp:(CPEvent)event
 {
-   	_movingSelection = NO;
+   	_movingSelection = nil;
 
     /* will post CPTextViewDidChangeSelectionNotification */
     _previousSelectionGranularity = [self selectionGranularity];
@@ -2264,15 +2288,40 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [_caret startBlinking];
 }
 
+- (void)draggingUpdated:(CPDraggingInfo)info
+{
+    var point = [info draggingLocation],
+		location = [self _characterIndexFromRawPoint:point];
+
+    _movingSelection = CPMakeRange(location, 0);
+    [_caret _drawCaretAtLocation:_movingSelection.location];
+    [_caret setVisibility:YES];
+}
+                              
 - (void)performDragOperation:(CPDraggingInfo)aSender
 {
     var location = [self convertPoint:[aSender draggingLocation] fromView:nil],
         pasteboard = [aSender draggingPasteboard];
 
-    if (![pasteboard availableTypeFromArray:[CPColorDragType]])
-        return NO;
+    if ([pasteboard availableTypeFromArray:[CPRTFPboardType]])
+    {
+        [_caret setVisibility:NO];
 
-   [self setTextColor:[CPKeyedUnarchiver unarchiveObjectWithData:[pasteboard dataForType:CPColorDragType]] range:_selectionRange ];
+        if (CPLocationInRange(_movingSelection.location, _selectionRange))
+        {
+            [self setSelectedRange:_movingSelection];
+            return;
+        }
+
+        [self _deleteForRange:_selectionRange];
+        [self setSelectedRange:_movingSelection];
+
+        var dataForPasting = [pasteboard stringForType:CPRTFPboardType];
+		[self insertText:[[_CPRTFParser new] parseRTF:dataForPasting]];
+    }
+    
+    if ([pasteboard availableTypeFromArray:[CPColorDragType]])
+		[self setTextColor:[CPKeyedUnarchiver unarchiveObjectWithData:[pasteboard dataForType:CPColorDragType]] range:_selectionRange];
 }
 
 @end
@@ -2367,6 +2416,12 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     }
 }
 
+- (void)_drawCaretAtLocation:(int)aLoc
+{
+	var rect = [_textView._layoutManager boundingRectForGlyphRange:CPMakeRange(aLoc, 1) inTextContainer:_textView._textContainer];
+    [self setRect:rect];
+}
+                              
 @end
 
 var _CPNativeInputField,
@@ -2721,6 +2776,7 @@ var _CPCopyPlaceholder = '-';
 
 -(void) _setRegularExpression:(JSObject)re toFontTrait:(CPFontTrait)aTrait
 {
+    var match;
     while (match = re.exec(_string))
     {
         var attribs = [[self attributesAtIndex:match.index effectiveRange:nil] copy],
@@ -2732,6 +2788,7 @@ var _CPCopyPlaceholder = '-';
 
 -(void) _replaceEveryOccurenceOfRegularExpression:(JSObject)re withString:(CPString)aString
 {
+    var match;
     while (match = re.exec(_string))
         [self replaceCharactersInRange:CPMakeRange(match.index, match[0].length) withString:aString];
 }
