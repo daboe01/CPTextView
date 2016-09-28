@@ -1085,7 +1085,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)mouseDown:(CPEvent)event
 {
     [_CPNativeInputManager cancelCurrentInputSessionIfNeeded];
-    
     [_caret setVisibility:NO];
     
     _startTrackingLocation = [self _characterIndexFromEvent:event];
@@ -1102,7 +1101,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         originPoint.x += _textContainerOrigin.x;
         originPoint.y += _textContainerOrigin.y;
 
-        dragPlaceholder._DOMElement.style.opacity = '0.5';
+        dragPlaceholder._DOMElement.style.opacity = '0.4';
         var attributes = [_textStorage attributesAtIndex:_selectionRange.location effectiveRange:nil];
         [dragPlaceholder setFont:[attributes objectForKey:CPFontAttributeName]];
         [dragPlaceholder setTextColor:[attributes objectForKey:CPForegroundColorAttributeName]];
@@ -2334,8 +2333,6 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self setSelectedRange:_movingSelection];
 
         var dataForPasting = [pasteboard stringForType:CPRTFPboardType];
-        //var a=[[_CPRTFParser new] parseRTF:dataForPasting]._string;
-        //debugger
         [self insertText:[[_CPRTFParser new] parseRTF:dataForPasting]];
     }
     

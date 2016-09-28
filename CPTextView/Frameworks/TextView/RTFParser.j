@@ -470,6 +470,8 @@ var kRgsymRtf = {
                 }
                 return [self _applyPropChange:sym parameter:param];
             case kRTFParserType_char:
+                if((param+'').length)
+                    _currentParseIndex -= (param+'').length;
                 return [self _checkChar:sym parameter:param];
             case kRTFParserType_dest:
                 return [self _changeDest:sym];

@@ -175,6 +175,7 @@ var _objectsInRange = function(aList, aRange)
     else if (CPFeatureIsCompatible(CPJavaScriptTextContentFeature))
         span.textContent = aString;
 
+    //<!> FIXME aString.replace(/&/g,'&amp;')
     return span;
 }
 
