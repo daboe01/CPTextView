@@ -359,7 +359,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     CPView          _observedClipView;
     CGRect          _exposedRect;
     CPTimer         _scrollingTimer;
-    CPRange			_movingSelection;
+    CPRange         _movingSelection;
 }
 
 - (id)initWithFrame:(CGRect)aFrame textContainer:(CPTextContainer)aContainer
@@ -1062,7 +1062,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (CGPoint)_characterIndexFromRawPoint:(CGPoint)point
 {
     var fraction = [],
-		point = [self convertPoint:point fromView:nil];
+        point = [self convertPoint:point fromView:nil];
     
     // convert to container coordinate
     point.x -= _textContainerOrigin.x;
@@ -1095,9 +1095,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     
     if ([self selectionGranularity] == CPSelectByCharacter && CPLocationInRange(_startTrackingLocation, _selectionRange))
     {
-        _movingSelection = CPMaxRange(_startTrackingLocation, 0);
+        _movingSelection = CPMakeRange(_startTrackingLocation, 0);
         var dragPlaceholder = [CPTextField new],
-			originPoint = [_layoutManager locationForGlyphAtIndex:[self selectedRange].location];
+            originPoint = [_layoutManager locationForGlyphAtIndex:[self selectedRange].location];
 
         originPoint.y -= [_layoutManager _descentAtLocation:_selectionRange.location];
         originPoint.x += _textContainerOrigin.x;
@@ -1107,8 +1107,8 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [dragPlaceholder sizeToFit];
         
         var stringForPasting = [_textStorage attributedSubstringFromRange:CPMakeRangeCopy(_selectionRange)],
-			richData = [_CPRTFProducer produceRTF:stringForPasting documentAttributes:@{}],
-			draggingPasteboard = [CPPasteboard pasteboardWithName:CPDragPboard];
+            richData = [_CPRTFProducer produceRTF:stringForPasting documentAttributes:@{}],
+            draggingPasteboard = [CPPasteboard pasteboardWithName:CPDragPboard];
         [draggingPasteboard declareTypes:[CPRTFPboardType] owner:nil];
         [draggingPasteboard setString:richData forType:CPRTFPboardType];
 
@@ -1163,9 +1163,9 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)mouseUp:(CPEvent)event
 {
-   	_movingSelection = nil;
+    _movingSelection = nil;
 
-    /* will post CPTextViewDidChangeSelectionNotification */
+    // will post CPTextViewDidChangeSelectionNotification
     _previousSelectionGranularity = [self selectionGranularity];
 
     [self setSelectionGranularity:CPSelectByCharacter];
@@ -1654,7 +1654,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
     var selectedRange = [self selectedRange];
 
     if (selectedRange.length < 1)
-            return;
+        return;
 
     [self copy:sender];
     [self deleteBackward:sender ignoreSmart:NO];
@@ -2295,7 +2295,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 - (void)draggingUpdated:(CPDraggingInfo)info
 {
     var point = [info draggingLocation],
-		location = [self _characterIndexFromRawPoint:point];
+        location = [self _characterIndexFromRawPoint:point];
 
     _movingSelection = CPMakeRange(location, 0);
     [_caret _drawCaretAtLocation:_movingSelection.location];
@@ -2321,11 +2321,11 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
         [self setSelectedRange:_movingSelection];
 
         var dataForPasting = [pasteboard stringForType:CPRTFPboardType];
-		[self insertText:[[_CPRTFParser new] parseRTF:dataForPasting]];
+        [self insertText:[[_CPRTFParser new] parseRTF:dataForPasting]];
     }
     
     if ([pasteboard availableTypeFromArray:[CPColorDragType]])
-		[self setTextColor:[CPKeyedUnarchiver unarchiveObjectWithData:[pasteboard dataForType:CPColorDragType]] range:_selectionRange];
+        [self setTextColor:[CPKeyedUnarchiver unarchiveObjectWithData:[pasteboard dataForType:CPColorDragType]] range:_selectionRange];
 }
 
 @end
@@ -2422,7 +2422,7 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 
 - (void)_drawCaretAtLocation:(int)aLoc
 {
-	var rect = [_textView._layoutManager boundingRectForGlyphRange:CPMakeRange(aLoc, 1) inTextContainer:_textView._textContainer];
+    var rect = [_textView._layoutManager boundingRectForGlyphRange:CPMakeRange(aLoc, 1) inTextContainer:_textView._textContainer];
     [self setRect:rect];
 }
                               
