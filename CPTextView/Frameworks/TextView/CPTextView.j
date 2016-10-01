@@ -1101,14 +1101,13 @@ var kDelegateRespondsTo_textShouldBeginEditing                                  
 			rangeToHide = CPMakeRange(0, _selectionRange.location - lineBeginningIndex),
 			dragPlaceholder;
 
-		// hide the left part of the first line of the selection that is not included 
+		// hide the left part of the first line of the selection that is not included
         [placeholderString addAttribute:CPForegroundColorAttributeName
                                   value:[CPColor colorWithRed:1 green:1 blue:1 alpha:0]
                                   range:rangeToHide];
 
         _movingSelection = CPMakeRange(_startTrackingLocation, 0);
 
-        placeholderFrame.size.width += 2; // prevent wrapping
         dragPlaceholder = [[CPTextView alloc] initWithFrame:placeholderFrame];
         [dragPlaceholder insertText:placeholderString];
         [dragPlaceholder setBackgroundColor:[CPColor colorWithRed:1 green:1 blue:1 alpha:0]];
